@@ -108,14 +108,26 @@ def _git_commit() -> str:
         return "unknown"
 
 
-def run(cfg: ExperimentConfig, golden_path: Path | None = None) -> dict:
+def _display_path(p: Path) -> str:
+    try:
+        return str(p.resolve().relative_to(REPO_ROOT))
+    except ValueError:
+        return str(p)
+
+
+def run(
+    cfg: ExperimentConfig,
+    golden_path: Path | None = None,
+    data_dir: Path | None = None,
+    results_dir: Path | None = None,
+) -> dict:
     from plexus.baseline.naive import NaiveRAG
     from plexus.index.build import index_dir
     from plexus.index.dense import DenseIndex, Embedder
     from plexus.ingest.process import iter_docs
 
-    settings = Settings.load()
-    data = settings.data_dir
+    data = data_dir or Settings.load().data_dir
+    golden_path = golden_path or data / "golden" / "golden.jsonl"
     queries = load_golden(golden_path)
     doc_texts = {m["doc_id"]: d.text for m, d in iter_docs(data / "processed", cfg.snapshot)}
     embedder = Embedder(cfg.embedder, cache_path=data / "cache" / "embeddings.sqlite")
@@ -132,7 +144,7 @@ def run(cfg: ExperimentConfig, golden_path: Path | None = None) -> dict:
         "corpus_checksum": build_info.get("corpus_checksum"),
         "index": build_info,
         "golden": {
-            "file": str((golden_path or data / "golden" / "golden.jsonl").relative_to(REPO_ROOT)),
+            "file": _display_path(golden_path),
             "verified_queries": len(queries),
             "scored_queries": len(rows),
             "label_errors": label_errors,
@@ -140,8 +152,9 @@ def run(cfg: ExperimentConfig, golden_path: Path | None = None) -> dict:
         "retrieval": aggregate(rows, seed=cfg.seed) if rows else {},
         "per_query": rows,
     }
-    out = REPO_ROOT / "results" / f"{cfg.name}.json"
-    out.write_text(json.dumps(result, indent=2) + "\n")
+    out_dir = results_dir or REPO_ROOT / "results"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / f"{cfg.name}.json").write_text(json.dumps(result, indent=2) + "\n")
     return result
 
 
