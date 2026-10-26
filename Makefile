@@ -3,7 +3,7 @@
 PY ?= python
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest index extract eval serve ui
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement extract serve ui
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -35,14 +35,32 @@ test-all: ## All tests except network
 ingest: ## Download the frozen EDGAR snapshot (resumable, cached)
 	$(PY) -m plexus.ingest.edgar --config configs/corpus.yaml
 
-index: ## Parse, chunk and index the snapshot for $(CONFIG)
+process: ## Parse the snapshot into sections + write the parse report
+	$(PY) -m plexus.ingest.process --snapshot $${SNAPSHOT:-semis-2025}
+
+index: ## Chunk, embed and index the parsed snapshot for $(CONFIG)
 	$(PY) -m plexus.index.build --config $(CONFIG)
+
+candidates: ## Generate ~200 golden-set candidates into data/golden/review.csv (LLM, cached)
+	$(PY) -m plexus.eval.candidates --config configs/golden_candidates.yaml
+
+golden: ## Build data/golden/golden.jsonl from your reviewed review.csv (+ noise rate)
+	$(PY) -m plexus.eval.golden build
 
 extract: ## Graph extraction (Phase 3)
 	@echo "extract: not implemented yet (Phase 3)"; exit 1
 
-eval: ## Score $(CONFIG) on the verified golden set
+eval: ## Retrieval metrics for $(CONFIG) on the verified golden set (no LLM calls)
 	$(PY) -m plexus.eval.run --config $(CONFIG)
+
+eval-full: ## Retrieval + generation + judge metrics for $(CONFIG) (LLM calls, cached)
+	$(PY) -m plexus.eval.run --config $(CONFIG) --judge
+
+judge-export: ## Export answers from results/$${NAME:-a0_naive}.json for blind human labelling
+	$(PY) -m plexus.eval.judge export --results results/$${NAME:-a0_naive}.json
+
+judge-agreement: ## Cohen's kappa between the judge and your labels
+	$(PY) -m plexus.eval.judge agreement
 
 serve: ## FastAPI server (Phase 6)
 	@echo "serve: not implemented yet (Phase 6)"; exit 1
