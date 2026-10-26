@@ -15,7 +15,7 @@
 
 ## Resume here
 
-**State:** branch `phase1-harness` (checked out). `main` holds Phase 0. 70 tests pass (`make test-all`). No real data yet: every number so far comes from synthetic test fixtures.
+**State:** branch `phase1-harness` (checked out). `main` holds Phase 0. 92 tests pass (`make test-all`). A reviewer subagent checked the branch; all 9 confirmed bugs are fixed with regression tests (see `docs/ai_review_log.md`). No real data yet: every number so far comes from synthetic test fixtures.
 
 **Your steps, in order** (each one unblocks the next; run `make doctor PHASE=1` after each):
 
@@ -65,3 +65,5 @@
 - Phase 0 committed on `main`. Phase 1 committed in small steps on `phase1-harness` (see `git log`).
 - Environment incidents (both logged in `docs/ai_review_log.md`, both fixed): broken `packaging` metadata after a pin; transformers 5.x needs torch ≥ 2.6, so it is pinned to <5.
 - 2026-10-27 00:00: free tiers checked (ADR 0005): `gemini-2.0-flash` is shut down, so configs moved to `gemini-3.8-flash` and `qwen3.5:4b`.
+- 2026-10-27 00:05–00:12: reviewer subagent pass on the Phase 1 branch. 9 confirmed bugs fixed: partial-evidence recall inflation, greedy matching, TOC sections, heading regex, section gaps, judge agreement, golden build crashes, BOM CSVs, repeated quotes. Plus EDGAR robustness and a versioned index key.
+- Known limits, not fixed: chunks longer than bge's 512 tokens are truncated (now counted in `build_info.json`); the parser is validated on synthetic HTML only.
