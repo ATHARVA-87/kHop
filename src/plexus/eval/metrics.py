@@ -73,22 +73,28 @@ def is_hit(retrieved: Span, gold: Span, min_cover: float = 0.5) -> bool:
     return overlap >= min_cover * len(gold) or overlap >= min_cover * len(retrieved)
 
 
-def first_hits(retrieved: Sequence[Span], gold: Sequence[Span]) -> list[int | None]:
+def first_hits(
+    retrieved: Sequence[Span], gold: Sequence[Span], min_cover: float = 0.5
+) -> list[int | None]:
     """For each retrieved rank, the index of the NEW gold item it finds (or None)."""
     found: set[int] = set()
     out: list[int | None] = []
     for r in retrieved:
-        new = next((g for g, gs in enumerate(gold) if g not in found and is_hit(r, gs)), None)
+        new = next(
+            (g for g, gs in enumerate(gold) if g not in found and is_hit(r, gs, min_cover)), None
+        )
         if new is not None:
             found.add(new)
         out.append(new)
     return out
 
 
-def recall_at_k(retrieved: Sequence[Span], gold: Sequence[Span], k: int) -> float:
+def recall_at_k(
+    retrieved: Sequence[Span], gold: Sequence[Span], k: int, min_cover: float = 0.5
+) -> float:
     if not gold:
         raise ValueError("recall is undefined without gold evidence")
-    hits = first_hits(retrieved[:k], gold)
+    hits = first_hits(retrieved[:k], gold, min_cover)
     return sum(h is not None for h in hits) / len(gold)
 
 
@@ -117,3 +123,13 @@ def retrieval_metrics(
     out["ndcg@10"] = ndcg_at_k(retrieved, gold, 10)
     out["mrr"] = mrr(retrieved, gold)
     return out
+
+
+SENSITIVITY_COVERS = (0.3, 0.7)
+
+
+def threshold_sensitivity(
+    retrieved: Sequence[Span], gold: Sequence[Span], k: int = 10
+) -> dict[str, float]:
+    """recall@k under stricter/looser hit thresholds (ADR 0004 sensitivity check)."""
+    return {f"recall@{k}@cover{c}": recall_at_k(retrieved, gold, k, c) for c in SENSITIVITY_COVERS}

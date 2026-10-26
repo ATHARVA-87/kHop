@@ -23,7 +23,7 @@ import numpy as np
 from plexus.config import ExperimentConfig
 from plexus.eval.bootstrap import bootstrap_ci
 from plexus.eval.golden import GoldenQuery, load_golden
-from plexus.eval.metrics import Span, locate_quote, retrieval_metrics
+from plexus.eval.metrics import Span, locate_quote, retrieval_metrics, threshold_sensitivity
 from plexus.settings import REPO_ROOT, Settings
 
 
@@ -72,12 +72,16 @@ def score_retrieval(
                 "qtype": q.qtype,
                 "retrieval_ms": ms,
                 **retrieval_metrics(retrieved, gold),
+                **threshold_sensitivity(retrieved, gold),
             }
         )
     return rows, label_errors
 
 
-METRICS = ["recall@1", "recall@5", "recall@10", "recall@20", "ndcg@10", "mrr"]
+METRICS = [
+    "recall@1", "recall@5", "recall@10", "recall@20", "ndcg@10", "mrr",
+    "recall@10@cover0.3", "recall@10@cover0.7",
+]  # fmt: skip
 
 
 def aggregate(rows: list[dict], seed: int = 0) -> dict:

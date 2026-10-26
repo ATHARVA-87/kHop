@@ -102,3 +102,12 @@ def test_paired_bootstrap_detects_a_real_improvement():
     assert same.diff.mean == 0 and same.p_not_better == 1
     with pytest.raises(ValueError):
         paired_bootstrap([1, 2], [1])
+
+
+def test_threshold_sensitivity_orders_strict_below_loose():
+    from plexus.eval.metrics import threshold_sensitivity
+
+    gold = [Span("D", 100, 200)]
+    retrieved = [Span("D", 140, 400)]  # covers 60% of the evidence
+    s = threshold_sensitivity(retrieved, gold)
+    assert s == {"recall@10@cover0.3": 1.0, "recall@10@cover0.7": 0.0}
