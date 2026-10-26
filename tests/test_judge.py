@@ -47,27 +47,33 @@ def test_correctness_verdict(tmp_path):
     assert j.correctness("q", "ref", "ans") == "partially_correct"
 
 
-def test_export_is_blind_and_agreement_reads_labels(tmp_path):
+def test_export_is_blind_random_and_agreement_joins_judge_verdicts(tmp_path):
+    # review finding #2: agreement used to need a judge column nobody filled
     results = {"per_query": [
-        {"qid": "q1", "question": "Q1?", "reference": "R1", "answer": "A1"},
-        {"qid": "q2", "question": "Q2?", "reference": "R2", "answer": "A2"},
-        {"qid": "q3", "question": "Q3?", "reference": "R3"},  # no answer -> skipped
-    ]}  # fmt: skip
+        {"qid": f"q{i}", "question": f"Q{i}?", "reference": "R", "answer": f"A{i}",
+         "judge_verdict": "correct" if i % 2 else "incorrect"} for i in range(10)
+    ] + [{"qid": "noans", "question": "?", "reference": "R"}]}  # fmt: skip
     out = tmp_path / "labels.csv"
-    assert export_for_labelling(results, out) == 2
+    assert export_for_labelling(results, out, limit=4) == 4
     with open(out, newline="") as fh:
         rows = list(csv.DictReader(fh))
-    assert all(r["judge_verdict"] == "" and r["human_verdict"] == "" for r in rows)
-
-    rows[0].update(human_verdict="correct", judge_verdict="correct")
-    rows[1].update(human_verdict="incorrect", judge_verdict="correct")
+    assert "judge_verdict" not in rows[0]  # blind
+    assert [r["qid"] for r in rows] != ["q0", "q1", "q2", "q3"]  # a sample, not the head
+    for r in rows:
+        r["human_verdict"] = "correct"
+    rows[0]["human_verdict"] = ""  # unlabelled rows are ignored
     with open(out, "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0]))
         w.writeheader()
         w.writerows(rows)
-    res = agreement(out)
-    assert res["n"] == 2 and res["raw_agreement"] == 0.5
-    assert res["confusion"] == {
-        "human=correct judge=correct": 1,
-        "human=incorrect judge=correct": 1,
-    }
+    res = agreement(out, results)
+    assert res["n"] == 3
+    expected = sum(int(r["qid"][1:]) % 2 == 1 for r in rows[1:]) / 3
+    assert res["raw_agreement"] == round(expected, 4)
+
+
+def test_agreement_without_any_pairs_is_a_clear_error(tmp_path):
+    out = tmp_path / "labels.csv"
+    export_for_labelling({"per_query": [{"qid": "q1", "answer": "a"}]}, out)
+    with pytest.raises(ValueError, match="no labelled answers"):
+        agreement(out, {"per_query": []})

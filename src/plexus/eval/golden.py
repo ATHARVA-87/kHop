@@ -84,16 +84,18 @@ def to_review_row(q: GoldenQuery) -> dict[str, str]:
     return row
 
 
-def write_review_csv(queries: list[GoldenQuery], path: Path) -> None:
-    """Write candidates for review. Refuses to overwrite rows that already have a verdict."""
+def write_review_csv(queries: list[GoldenQuery], path: Path, skip_reviewed: bool = False) -> None:
+    """Write candidates for review. Rows that already have a verdict are never overwritten:
+    a clashing qid raises, or with skip_reviewed=True the new candidate is dropped."""
     existing = read_review_csv(path) if path.exists() else []
     reviewed = {r["qid"] for r in existing if r.get("verdict", "").strip()}
     clash = reviewed & {q.qid for q in queries}
-    if clash:
+    if clash and not skip_reviewed:
         raise ValueError(f"refusing to overwrite reviewed rows: {sorted(clash)[:5]}...")
+    queries = [q for q in queries if q.qid not in reviewed]
     keep = [r for r in existing if r["qid"] in reviewed]
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", newline="") as fh:
+    with open(path, "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=REVIEW_COLUMNS)
         w.writeheader()
         for r in keep:
@@ -103,15 +105,21 @@ def write_review_csv(queries: list[GoldenQuery], path: Path) -> None:
 
 
 def read_review_csv(path: Path) -> list[dict[str, str]]:
-    with open(path, newline="") as fh:
+    # utf-8-sig: Excel/LibreOffice may add a byte-order mark when saving
+    with open(path, newline="", encoding="utf-8-sig") as fh:
         return list(csv.DictReader(fh))
+
+
+def _verdict(row: dict[str, str]) -> str:
+    v = (row.get("verdict") or "").strip().lower()
+    if v not in ("accept", "edit", "reject", ""):
+        raise ValueError(f"{row.get('qid')}: verdict must be accept/edit/reject, got {v!r}")
+    return v
 
 
 def row_to_query(row: dict[str, str]) -> GoldenQuery:
     """Apply the reviewer's corrections (if any) on top of the candidate."""
-    verdict = row.get("verdict", "").strip().lower()
-    if verdict not in ("accept", "edit", "reject", ""):
-        raise ValueError(f"{row['qid']}: verdict must be accept/edit/reject, got {verdict!r}")
+    verdict = _verdict(row)
 
     def pick(field: str) -> str:
         return (row.get(f"corrected_{field}") or "").strip() or row.get(field, "")
@@ -134,10 +142,12 @@ def row_to_query(row: dict[str, str]) -> GoldenQuery:
 
 def build_golden(review_csv: Path, out_jsonl: Path, stats_json: Path) -> dict:
     rows = read_review_csv(review_csv)
-    queries = [row_to_query(r) for r in rows]
-    counts = Counter(q.verdict or "unreviewed" for q in queries)
+    # Count verdicts on raw rows; only accept/edit rows are parsed and validated, so a
+    # rejected or unreviewed row with blank or broken fields cannot abort the build.
+    counts = Counter(_verdict(r) or "unreviewed" for r in rows)
     reviewed = counts["accept"] + counts["edit"] + counts["reject"]
-    verified = [q for q in queries if q.verified]
+    verified = [row_to_query(r) for r in rows if _verdict(r) in ("accept", "edit")]
+    queries = rows
     out_jsonl.write_text("".join(q.model_dump_json() + "\n" for q in verified))
     stats = {
         "candidates": len(queries),

@@ -60,7 +60,7 @@ judge-export: ## Export answers from results/$${NAME:-a0_naive}.json for blind h
 	$(PY) -m plexus.eval.judge export --results results/$${NAME:-a0_naive}.json
 
 judge-agreement: ## Cohen's kappa between the judge and your labels
-	$(PY) -m plexus.eval.judge agreement
+	$(PY) -m plexus.eval.judge agreement --results results/$${NAME:-a0_naive}.json
 
 serve: ## FastAPI server (Phase 6)
 	@echo "serve: not implemented yet (Phase 6)"; exit 1

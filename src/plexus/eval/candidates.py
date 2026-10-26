@@ -17,6 +17,7 @@ filter's rejection rate is reported, because it is a cheap first measure of LLM 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import random
 import re
@@ -30,7 +31,7 @@ import yaml
 from pydantic import BaseModel, Field
 
 from plexus.eval.golden import GOLDEN_DIR, Evidence, GoldenQuery, write_review_csv
-from plexus.eval.metrics import locate_quote
+from plexus.eval.metrics import locate_quote_all
 from plexus.ingest.chunk import fixed_chunks
 from plexus.ingest.parse import ParsedDoc, Section
 from plexus.ingest.process import iter_docs
@@ -255,7 +256,15 @@ def _request(cfg: CandidateConfig, prompt: str) -> LLMRequest:
 
 
 def _check(doc_texts: dict[str, str], doc_id: str, quote: str) -> bool:
-    return 4 <= len(quote.split()) <= 60 and locate_quote(doc_texts[doc_id], quote) is not None
+    """Quote is 8-60 words and occurs EXACTLY once in its filing, so the gold span is
+    unambiguous (boilerplate repeated across the filing is rejected)."""
+    return 8 <= len(quote.split()) <= 60 and len(locate_quote_all(doc_texts[doc_id], quote)) == 1
+
+
+def _qid(prefix: str, *parts: str) -> str:
+    """Content-derived id: reruns give the same id for the same candidate, so already
+    reviewed rows are recognised and kept instead of clashing with new positional ids."""
+    return f"{prefix}-" + hashlib.sha1("\x00".join(parts).encode()).hexdigest()[:10]
 
 
 def generate(
@@ -270,7 +279,7 @@ def generate(
     def record(qtype: str, status: str, detail: str = "") -> None:
         log.append({"qtype": qtype, "status": status, "detail": detail[:200]})
 
-    for i, p in enumerate(sample_local(passages, cfg, rng, cfg.counts.get("local", 0))):
+    for p in sample_local(passages, cfg, rng, cfg.counts.get("local", 0)):
         try:
             out = llm.complete_json(_request(cfg, local_prompt(p)), LocalOut)
         except StructuredOutputError as exc:
@@ -279,13 +288,11 @@ def generate(
         if not _check(doc_texts, p.doc_id, out.quote):
             record("local", "quote_not_found", out.quote)
             continue
-        kept.append(GoldenQuery(qid=f"L{i:03d}", qtype="local", question=out.question, answer=out.answer,
+        kept.append(GoldenQuery(qid=_qid("L", p.doc_id, out.question), qtype="local", question=out.question, answer=out.answer,
                                 evidence=[Evidence(doc_id=p.doc_id, quote=out.quote)], source=source))  # fmt: skip
         record("local", "kept")
 
-    for i, (a, b, ent) in enumerate(
-        sample_multi_hop(passages, cfg, rng, cfg.counts.get("multi_hop", 0))
-    ):
+    for a, b, ent in sample_multi_hop(passages, cfg, rng, cfg.counts.get("multi_hop", 0)):
         try:
             out = llm.complete_json(_request(cfg, multi_hop_prompt(a, b, ent)), MultiHopOut)
         except StructuredOutputError as exc:
@@ -296,13 +303,13 @@ def generate(
         ):
             record("multi_hop", "quote_not_found", f"{out.quote_a} || {out.quote_b}")
             continue
-        kept.append(GoldenQuery(qid=f"M{i:03d}", qtype="multi_hop", question=out.question, answer=out.answer,
+        kept.append(GoldenQuery(qid=_qid("M", a.doc_id, b.doc_id, out.question), qtype="multi_hop", question=out.question, answer=out.answer,
                                 evidence=[Evidence(doc_id=a.doc_id, quote=out.quote_a),
                                           Evidence(doc_id=b.doc_id, quote=out.quote_b)],
                                 sub_questions=out.sub_questions, source=f"{source} entity={ent}"))  # fmt: skip
         record("multi_hop", "kept")
 
-    for i, (ps, theme) in enumerate(sample_global(passages, cfg, rng, cfg.counts.get("global", 0))):
+    for ps, theme in sample_global(passages, cfg, rng, cfg.counts.get("global", 0)):
         try:
             out = llm.complete_json(_request(cfg, global_prompt(ps, theme)), GlobalOut)
         except StructuredOutputError as exc:
@@ -317,7 +324,7 @@ def generate(
         if len({e.doc_id for e in evidence}) < 3:  # a "global" answer needs breadth
             record("global", "too_few_valid_quotes", f"{len(evidence)} valid of {len(out.quotes)}")
             continue
-        kept.append(GoldenQuery(qid=f"G{i:03d}", qtype="global", question=out.question, answer=out.answer,
+        kept.append(GoldenQuery(qid=_qid("G", theme, out.question), qtype="global", question=out.question, answer=out.answer,
                                 evidence=evidence, source=f"{source} theme={theme}"))  # fmt: skip
         record("global", "kept")
 
@@ -354,7 +361,7 @@ def main(argv: list[str] | None = None) -> int:
     settings = Settings.load()
     llm = LLMClient.from_settings(settings)
     queries, log = generate(cfg, llm, settings.data_dir)
-    write_review_csv(queries, args.out)
+    write_review_csv(queries, args.out, skip_reviewed=True)
     summary = summarise(log)
     (args.out.parent / "candidates_log.json").write_text(
         json.dumps(

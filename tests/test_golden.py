@@ -28,7 +28,7 @@ def _set_verdicts(path, verdicts: dict[str, dict]):
     rows = read_review_csv(path)
     for r in rows:
         r.update(verdicts.get(r["qid"], {}))
-    with open(path, "w", newline="") as fh:
+    with open(path, "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0]))
         w.writeheader()
         w.writerows(rows)
@@ -82,3 +82,40 @@ def test_bad_verdict_and_mismatched_evidence_are_errors(tmp_path):
     _set_verdicts(review, {"q1": {"verdict": "edit", "corrected_evidence_quotes": "a ||| b"}})
     with pytest.raises(ValueError, match="quotes"):
         build_golden(review, tmp_path / "g.jsonl", tmp_path / "s.json")
+
+
+def test_rejected_or_unreviewed_rows_with_broken_fields_do_not_abort_build(tmp_path):
+    # review finding #6
+    review = tmp_path / "review.csv"
+    write_review_csv([_q("q1"), _q("q2"), _q("q3")], review)
+    _set_verdicts(
+        review,
+        {
+            "q1": {"verdict": "accept"},
+            "q2": {"verdict": "reject", "answer": "", "corrected_evidence_quotes": "a ||| b"},
+            "q3": {"qtype": "nonsense"},  # unreviewed
+        },
+    )
+    stats = build_golden(review, tmp_path / "g.jsonl", tmp_path / "s.json")
+    assert stats["verdicts"] == {"accept": 1, "reject": 1, "unreviewed": 1}
+    assert [q.qid for q in load_golden(tmp_path / "g.jsonl")] == ["q1"]
+
+
+def test_excel_bom_csv_is_read(tmp_path):
+    # review finding #7: Excel saves UTF-8 with a byte-order mark
+    review = tmp_path / "review.csv"
+    write_review_csv([_q("q1")], review)
+    _set_verdicts(review, {"q1": {"verdict": "Accept", "corrected_answer": "Uses TSMC’s N4 node."}})
+    raw = review.read_text(encoding="utf-8")
+    review.write_bytes(b"\xef\xbb\xbf" + raw.encode("utf-8"))
+    build_golden(review, tmp_path / "g.jsonl", tmp_path / "s.json")
+    assert load_golden(tmp_path / "g.jsonl")[0].answer == "Uses TSMC’s N4 node."
+
+
+def test_skip_reviewed_keeps_existing_review(tmp_path):
+    review = tmp_path / "review.csv"
+    write_review_csv([_q("q1"), _q("q2")], review)
+    _set_verdicts(review, {"q1": {"verdict": "accept", "reviewer_notes": "checked"}})
+    write_review_csv([_q("q1"), _q("q3")], review, skip_reviewed=True)
+    rows = read_review_csv(review)
+    assert [r["qid"] for r in rows] == ["q1", "q3"] and rows[0]["reviewer_notes"] == "checked"

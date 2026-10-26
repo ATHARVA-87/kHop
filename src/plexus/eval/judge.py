@@ -6,7 +6,7 @@
   The judge is only trusted for reporting once kappa is reported next to its numbers.
 
     python -m plexus.eval.judge export --results results/a0_naive.json   # CSV for you to label
-    python -m plexus.eval.judge agreement --labels data/golden/judge_labels.csv
+    python -m plexus.eval.judge agreement --results results/a0_naive.json
 """
 
 from __future__ import annotations
@@ -114,50 +114,52 @@ def cohen_kappa(a: Sequence[str], b: Sequence[str]) -> float:
     return (p_obs - p_exp) / (1 - p_exp)
 
 
-LABEL_COLUMNS = [
-    "qid",
-    "question",
-    "reference_answer",
-    "system_answer",
-    "human_verdict",
-    "judge_verdict",
-]
+LABEL_COLUMNS = ["qid", "question", "reference_answer", "system_answer", "human_verdict"]
 
 
-def export_for_labelling(results: dict, out: Path, limit: int = 60) -> int:
-    """Write answers for the human to label. The judge column is left blank on purpose,
-    so the human labels blind."""
-    rows = [r for r in results.get("per_query", []) if r.get("answer")][:limit]
-    with open(out, "w", newline="") as fh:
+def export_for_labelling(results: dict, out: Path, limit: int = 60, seed: int = 0) -> int:
+    """Write a seeded random sample of answers for the human to label. The judge's verdict is
+    NOT in the file, so the labelling is blind; `agreement` joins it back by qid."""
+    import random
+
+    rows = [r for r in results.get("per_query", []) if r.get("answer")]
+    rows = random.Random(seed).sample(rows, min(limit, len(rows)))  # not just the first N
+    with open(out, "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=LABEL_COLUMNS)
         w.writeheader()
         for r in rows:
             w.writerow({"qid": r["qid"], "question": r.get("question", ""), "reference_answer": r.get("reference", ""),
-                        "system_answer": r["answer"], "human_verdict": "", "judge_verdict": ""})  # fmt: skip
+                        "system_answer": r["answer"], "human_verdict": ""})  # fmt: skip
     return len(rows)
 
 
-def agreement(labels_csv: Path) -> dict:
-    with open(labels_csv, newline="") as fh:
-        rows = [
-            r
-            for r in csv.DictReader(fh)
-            if r["human_verdict"].strip() and r["judge_verdict"].strip()
-        ]
-    human = [r["human_verdict"].strip() for r in rows]
-    judge = [r["judge_verdict"].strip() for r in rows]
+def agreement(labels_csv: Path, results: dict) -> dict:
+    """Cohen's kappa between the human's labels and the judge verdicts stored in results."""
+    judge_by_qid = {
+        r["qid"]: r["judge_verdict"] for r in results.get("per_query", []) if r.get("judge_verdict")
+    }
+    with open(labels_csv, newline="", encoding="utf-8-sig") as fh:
+        labelled = [r for r in csv.DictReader(fh) if (r.get("human_verdict") or "").strip()]
+    pairs = [
+        (r["human_verdict"].strip().lower(), judge_by_qid[r["qid"]])
+        for r in labelled
+        if r["qid"] in judge_by_qid
+    ]
+    if not pairs:
+        raise ValueError(
+            "no labelled answers with a judge verdict: fill human_verdict in the CSV and run "
+            "`make eval-full` for the same results file first"
+        )
+    human, judge = [h for h, _ in pairs], [j for _, j in pairs]
     bad = {v for v in human + judge if v not in VERDICT_SCORE}
     if bad:
         raise ValueError(f"unknown verdict labels: {sorted(bad)}")
     return {
-        "n": len(rows),
-        "raw_agreement": round(
-            sum(h == j for h, j in zip(human, judge, strict=True)) / len(rows), 4
-        ),
+        "n": len(pairs),
+        "labelled_without_judge_verdict": len(labelled) - len(pairs),
+        "raw_agreement": round(sum(h == j for h, j in pairs) / len(pairs), 4),
         "cohen_kappa": round(cohen_kappa(human, judge), 4),
-        "confusion": dict(
-            Counter(f"human={h} judge={j}" for h, j in zip(human, judge, strict=True))
-        ),
+        "confusion": dict(Counter(f"human={h} judge={j}" for h, j in pairs)),
     }
 
 
@@ -169,6 +171,7 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--out", type=Path, default=Path("data/golden/judge_labels.csv"))
     a = sub.add_parser("agreement")
     a.add_argument("--labels", type=Path, default=Path("data/golden/judge_labels.csv"))
+    a.add_argument("--results", type=Path, required=True)
     args = ap.parse_args(argv)
     if args.cmd == "export":
         n = export_for_labelling(json.loads(args.results.read_text()), args.out)
@@ -176,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
             f"wrote {n} answers to {args.out}: fill human_verdict (correct/partially_correct/incorrect)"
         )
     else:
-        print(json.dumps(agreement(args.labels), indent=2))
+        print(json.dumps(agreement(args.labels, json.loads(args.results.read_text())), indent=2))
     return 0
 
 
