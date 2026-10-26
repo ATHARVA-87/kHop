@@ -95,6 +95,75 @@ def aggregate(rows: list[dict], seed: int = 0) -> dict:
     return out
 
 
+def score_generation(
+    queries: Sequence[GoldenQuery],
+    rows: list[dict],
+    pipeline,
+    doc_texts: dict[str, str],
+    judge=None,
+) -> None:
+    """Add answer-level fields to each scored row (in place).
+
+    citation_gold_precision is deterministic: the share of cited excerpts that hit gold
+    evidence. It is a lower bound on citation quality (a cited excerpt can support a
+    claim without being the labelled evidence). faithfulness/correctness need the judge.
+    """
+    from plexus.baseline.naive import NOT_ENOUGH
+    from plexus.eval.judge import VERDICT_SCORE
+    from plexus.eval.metrics import is_hit
+
+    by_qid = {q.qid: q for q in queries}
+    for row in rows:
+        q = by_qid[row["qid"]]
+        gold, _ = gold_spans(q, doc_texts)
+        ans = pipeline.answer(q.question)
+        cited = [h for h in ans.hits if h.chunk_id in set(ans.cited_chunk_ids)]
+        hits_gold = [any(is_hit(Span(h.doc_id, h.start, h.end), g) for g in gold) for h in cited]
+        row.update(
+            question=q.question,
+            reference=q.answer,
+            answer=ans.text,
+            refused=NOT_ENOUGH.lower() in ans.text.lower(),
+            n_citations=len(cited),
+            citation_gold_precision=(sum(hits_gold) / len(cited)) if cited else None,
+            generation_ms=ans.generation_ms,
+            generation_cached=ans.cached,
+        )
+        if judge is not None:
+            row["faithfulness"] = judge.faithfulness(
+                q.question, ans.text, [h.text for h in ans.hits]
+            )
+            verdict = judge.correctness(q.question, q.answer, ans.text)
+            row["judge_verdict"] = verdict
+            row["correctness"] = VERDICT_SCORE[verdict]
+
+
+GEN_METRICS = ["citation_gold_precision", "faithfulness", "correctness"]
+
+
+def aggregate_generation(rows: list[dict], seed: int = 0) -> dict:
+    groups: dict[str, list[dict]] = {"all": rows}
+    for r in rows:
+        groups.setdefault(r["qtype"], []).append(r)
+    out = {}
+    for name, rs in groups.items():
+        g: dict = {"refusal_rate": round(sum(r["refused"] for r in rs) / len(rs), 4)}
+        for m in GEN_METRICS:
+            vals = [r[m] for r in rs if r.get(m) is not None]
+            g[m] = bootstrap_ci(vals, seed=seed).to_dict() if vals else None
+        uncached = [r["generation_ms"] for r in rs if not r["generation_cached"]]
+        g["generation_ms_uncached"] = (
+            {
+                "p50": round(float(np.percentile(uncached, 50)), 1),
+                "p95": round(float(np.percentile(uncached, 95)), 1),
+            }
+            if uncached
+            else None  # all served from cache: latency would be meaningless
+        )
+        out[name] = g
+    return out
+
+
 def _git_commit() -> str:
     try:
         sha = subprocess.run(
@@ -120,11 +189,16 @@ def run(
     golden_path: Path | None = None,
     data_dir: Path | None = None,
     results_dir: Path | None = None,
+    generate: bool = False,
+    use_judge: bool = False,
+    llm=None,
 ) -> dict:
     from plexus.baseline.naive import NaiveRAG
+    from plexus.eval.judge import Judge
     from plexus.index.build import index_dir
     from plexus.index.dense import DenseIndex, Embedder
     from plexus.ingest.process import iter_docs
+    from plexus.llm import LLMClient
 
     data = data_dir or Settings.load().data_dir
     golden_path = golden_path or data / "golden" / "golden.jsonl"
@@ -133,8 +207,23 @@ def run(
     embedder = Embedder(cfg.embedder, cache_path=data / "cache" / "embeddings.sqlite")
     idx_path = index_dir(data, cfg)
     index = DenseIndex(idx_path / "qdrant", "chunks", embedder.dim)
-    pipeline = NaiveRAG(cfg, embedder, index)
+    if (generate or use_judge) and llm is None:
+        llm = LLMClient.from_settings()
+    pipeline = NaiveRAG(cfg, embedder, index, llm)
     rows, label_errors = score_retrieval(queries, pipeline, doc_texts, cfg.retrieval.top_k)
+    generation = {}
+    if generate or use_judge:
+        judge = Judge(llm, cfg.judge.provider, cfg.judge.model, cfg.seed) if use_judge else None
+        score_generation(queries, rows, pipeline, doc_texts, judge)
+        generation = aggregate_generation(rows, seed=cfg.seed) if rows else {}
+        generation["llm_usage"] = {
+            "calls": llm.stats.calls,
+            "cache_hits": llm.stats.cache_hits,
+            "cache_hit_rate": round(llm.stats.cache_hit_rate, 4),
+            "prompt_tokens_uncached": llm.stats.prompt_tokens,
+            "completion_tokens_uncached": llm.stats.completion_tokens,
+            "by_provider": llm.stats.by_provider,
+        }
     index.close()
 
     build_info = json.loads((idx_path / "build_info.json").read_text())
@@ -150,6 +239,7 @@ def run(
             "label_errors": label_errors,
         },
         "retrieval": aggregate(rows, seed=cfg.seed) if rows else {},
+        "generation": generation,
         "per_query": rows,
     }
     out_dir = results_dir or REPO_ROOT / "results"
@@ -162,8 +252,17 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
     ap.add_argument("--golden", type=Path, default=None)
+    ap.add_argument(
+        "--generate", action="store_true", help="also generate answers (LLM calls, cached)"
+    )
+    ap.add_argument("--judge", action="store_true", help="also judge answers (implies --generate)")
     args = ap.parse_args(argv)
-    res = run(ExperimentConfig.load(args.config), args.golden)
+    res = run(
+        ExperimentConfig.load(args.config),
+        args.golden,
+        generate=args.generate,
+        use_judge=args.judge,
+    )
     print(
         f"{res['config']['name']}: {res['golden']['scored_queries']} queries scored, "
         f"{len(res['golden']['label_errors'])} label errors"

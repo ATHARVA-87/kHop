@@ -42,6 +42,11 @@ class GenerationConfig(_Strict):
     context_chunks: int = 5
 
 
+class JudgeConfig(_Strict):
+    provider: str = "gemini"
+    model: str = "gemini-2.0-flash"  # CHECK at setup: free-tier model names change
+
+
 class ExperimentConfig(_Strict):
     name: str
     description: str = ""
@@ -51,6 +56,7 @@ class ExperimentConfig(_Strict):
     embedder: EmbedderConfig = EmbedderConfig()
     retrieval: RetrievalConfig = RetrievalConfig()
     generation: GenerationConfig = GenerationConfig()
+    judge: JudgeConfig = JudgeConfig()
 
     @classmethod
     def load(cls, path: Path | str) -> ExperimentConfig:

@@ -102,3 +102,28 @@ def test_a0_end_to_end(tmp_path):
     per_q = {r["qid"]: r for r in res["per_query"]}
     assert per_q["q1"]["recall@5"] == 1.0 and per_q["q2"]["recall@5"] == 1.0
     assert res["retrieval"]["all"]["recall@20"]["mean"] == 1.0
+
+    # --- generation + judge, with fake LLMs (no network) ---
+    from plexus.llm import FakeProvider, LLMCache, LLMClient
+
+    def judge_reply(req):
+        if "atomic factual claims" in req.messages[-1].content:
+            return '{"claims": [{"claim": "c", "cited": [1], "supported": true}]}'
+        return '{"verdict": "correct", "rationale": "ok"}'
+
+    llm = LLMClient(
+        LLMCache(tmp_path / "llm.sqlite"),
+        {
+            "ollama": FakeProvider(lambda r: "The answer is here [1]."),
+            "gemini": FakeProvider(judge_reply),
+        },
+    )
+    res = run(
+        cfg, data_dir=data, results_dir=tmp_path / "results", generate=True, use_judge=True, llm=llm
+    )
+    gen = res["generation"]["all"]
+    assert gen["faithfulness"]["mean"] == 1.0 and gen["correctness"]["mean"] == 1.0
+    assert gen["refusal_rate"] == 0.0
+    assert gen["citation_gold_precision"]["mean"] == 1.0  # top-1 chunk holds the evidence
+    assert res["generation"]["llm_usage"]["calls"] == 2 * 3  # answer + 2 judge calls per query
+    assert {r["judge_verdict"] for r in res["per_query"]} == {"correct"}

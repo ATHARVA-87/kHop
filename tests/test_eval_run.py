@@ -81,3 +81,33 @@ def test_configs_load_and_typos_fail(tmp_path):
     bad.write_text("name: x\nretreival:\n  top_k: 5\n")
     with pytest.raises(ValidationError):
         ExperimentConfig.load(bad)
+
+
+def test_score_generation_citation_precision_and_refusals():
+    from plexus.baseline.naive import NOT_ENOUGH, Answer
+    from plexus.eval.run import aggregate_generation, score_generation
+
+    good = _hit("NVDA_10K", "We depend on TSMC to manufacture our GPUs.")
+    off = _hit("NVDA_10K", "Export controls limit China sales.")
+    off = Hit("NVDA_10K#y", off.doc_id, off.start, off.end, off.section, off.score)
+
+    class Pipe:
+        def answer(self, question):
+            if question == "local1?":
+                return Answer(question, "TSMC [1]. China [2].", [good, off], ["NVDA_10K#x", "NVDA_10K#y"],
+                              generation_ms=5.0)  # fmt: skip
+            return Answer(question, NOT_ENOUGH, [good], [], cached=True)
+
+    queries = [
+        _q("local1", "local", [("NVDA_10K", "depend on TSMC to manufacture")]),
+        _q("local2", "local", [("AMD_10K", "leading-edge wafers")]),
+    ]
+    rows = [{"qid": "local1", "qtype": "local"}, {"qid": "local2", "qtype": "local"}]
+    score_generation(queries, rows, Pipe(), DOCS)
+    assert rows[0]["citation_gold_precision"] == 0.5 and rows[0]["n_citations"] == 2
+    assert rows[1]["refused"] and rows[1]["citation_gold_precision"] is None
+    agg = aggregate_generation(rows)["all"]
+    assert agg["refusal_rate"] == 0.5
+    assert agg["citation_gold_precision"]["n"] == 1  # refusal has no citations to score
+    assert agg["faithfulness"] is None  # no judge was run
+    assert agg["generation_ms_uncached"]["p50"] == 5.0  # cached answers excluded
