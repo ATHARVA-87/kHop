@@ -1,0 +1,38 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# data (rebuilt by scripts; golden set is committed)
+data/raw/
+data/processed/
+data/cache/
+data/index/
+!data/golden/
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# node / ui
+node_modules/
+ui/.next/
+ui/out/
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store
+
+# experiment outputs (results/*.json are committed; logs are not)
+logs/
+*.log

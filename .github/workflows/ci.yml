@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    env:
+      # CI must never call a paid or rate-limited LLM: cache-only mode.
+      PLEXUS_LLM_OFFLINE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install core + dev deps from the lockfile
+        run: uv sync --frozen --extra dev
+      - name: Lint
+        run: |
+          uv run ruff check src tests
+          uv run ruff format --check src tests
+      - name: Tests (no ML models, no network)
+        run: uv run pytest -m "not ml and not network"
+      - name: Doctor (phase 0, informational)
+        run: uv run python -m plexus.doctor || true
