@@ -181,6 +181,51 @@ def check_free_tier_keys() -> Result:
     return Result(True, "set: " + ", ".join(have))
 
 
+def check_snapshot(name: str = "semis-2025") -> Callable[[], Result]:
+    def _check() -> Result:
+        import json
+
+        summary = REPO_ROOT / "data" / "snapshots" / f"{name}.summary.json"
+        if not summary.exists():
+            return Result(False, f"{name} not downloaded", "make ingest  (needs SEC_USER_AGENT)")
+        s = json.loads(summary.read_text())
+        miss = f", missing {s['missing_tickers']}" if s.get("missing_tickers") else ""
+        return Result(True, f"{s['documents']} docs from {s['companies']} companies{miss}")
+
+    return _check
+
+
+def check_processed(name: str = "semis-2025") -> Result:
+    if not (REPO_ROOT / "data" / "processed" / name / "docs.jsonl").exists():
+        return Result(
+            False, "not parsed", "make process  (then read data/snapshots/*.parse_report.json)"
+        )
+    return Result(True, "parsed")
+
+
+def check_golden(min_verified: int = 100) -> Result:
+    import json
+
+    stats = REPO_ROOT / "data" / "golden" / "review_stats.json"
+    if not (REPO_ROOT / "data" / "golden" / "review.csv").exists():
+        return Result(False, "no candidates yet", "make candidates  (needs an LLM provider)")
+    if not stats.exists():
+        return Result(
+            False,
+            "candidates not reviewed",
+            "Review data/golden/review.csv (docs/golden_review_guide.md), then make golden",
+        )
+    s = json.loads(stats.read_text())
+    n = sum(s.get("verified_by_type", {}).values())
+    if n < min_verified:
+        return Result(
+            False,
+            f"{n} verified (< {min_verified})",
+            "Review more rows in data/golden/review.csv, then make golden",
+        )
+    return Result(True, f"{n} verified, label noise {s.get('label_noise_rate')}")
+
+
 CHECKS: list[Check] = [
     Check("Python >= 3.11", 0, check_python),
     Check("ANTHROPIC_API_KEY unset", 0, check_anthropic_key_unset),
@@ -212,8 +257,12 @@ CHECKS: list[Check] = [
         ),
     ),
     Check("torch / GPU", 1, check_torch_cuda),
+    Check("EDGAR snapshot", 1, check_snapshot()),
+    Check("Parsed snapshot", 1, check_processed),
+    Check("Golden set (>=100 verified)", 1, check_golden),
     Check("Ollama", 3, check_ollama),
-    Check("Gemini or Groq key", 3, check_free_tier_keys),
+    # Needed in Phase 1 already: golden-set candidates and the judge use Gemini (ADR 0005).
+    Check("Gemini or Groq key", 1, check_free_tier_keys),
 ]
 
 
