@@ -36,7 +36,7 @@ class RetrievalConfig(_Strict):
 
 class GenerationConfig(_Strict):
     provider: str = "ollama"
-    model: str = "qwen2.5:3b-instruct"
+    model: str = "qwen3.5:4b"
     temperature: float = 0.0
     max_tokens: int = 512
     context_chunks: int = 5
@@ -44,7 +44,7 @@ class GenerationConfig(_Strict):
 
 class JudgeConfig(_Strict):
     provider: str = "gemini"
-    model: str = "gemini-2.0-flash"  # CHECK at setup: free-tier model names change
+    model: str = "gemini-3.8-flash"  # checked 2026-10-27, ADR 0005
 
 
 class ExperimentConfig(_Strict):

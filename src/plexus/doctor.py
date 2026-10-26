@@ -155,7 +155,7 @@ def check_ollama() -> Result:
         return Result(
             False,
             "not installed",
-            "curl -fsSL https://ollama.com/install.sh | sh  (then `ollama pull` the model named in configs)",
+            "curl -fsSL https://ollama.com/install.sh | sh  (needs sudo; then `ollama pull qwen3.5:4b`)",
         )
     import httpx
 
