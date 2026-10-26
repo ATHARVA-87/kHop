@@ -76,6 +76,7 @@ def build(cfg: ExperimentConfig, data_dir: Path) -> dict:
         "embedder": cfg.embedder.model,
         "embedding_dim": embedder.dim,
         "embed_seconds": round(embed_s, 1),
+        "chunks_truncated_by_embedder": embedder.count_truncated([c.text for c in chunks]),
     }
     (out / "build_info.json").write_text(json.dumps(info, indent=2) + "\n")
     return info

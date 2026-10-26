@@ -137,3 +137,26 @@ def test_corpus_config_loads():
     assert 30 <= len(cfg.tickers) <= 50
     assert len(set(cfg.tickers)) == len(cfg.tickers)
     assert cfg.max_requests_per_second <= 10
+
+
+def test_missing_document_is_recorded_not_fatal_and_duplicate_ids_are_split(tmp_path):
+    subs = _submissions([("10-Q", "2025-05-28"), ("10-Q", "2025-05-28"), ("10-K", "2025-02-26")])
+
+    def handler(request):
+        url = str(request.url)
+        if url == edgar.TICKERS_URL:
+            return httpx.Response(200, json={"0": TICKERS["0"]})
+        if url == edgar.SUBMISSIONS_URL.format(cik=1045810):
+            return httpx.Response(200, json=subs)
+        if url.endswith("doc2.htm"):
+            return httpx.Response(404)
+        return httpx.Response(200, content=url.encode())
+
+    cfg = edgar.SnapshotConfig("s", ["NVDA"], ["10-K", "10-Q"], "2025-01-01", "2025-12-31")
+    summary = edgar.build_snapshot(
+        cfg, _client(tmp_path, handler), tmp_path / "raw", tmp_path / "m"
+    )
+    rows = [json.loads(x) for x in (tmp_path / "m/s.manifest.jsonl").read_text().splitlines()]
+    ids = sorted(r["doc_id"] for r in rows)
+    assert len(ids) == 2 and len(set(ids)) == 2 and ids[0].startswith("NVDA_10Q_2025-05-28")
+    assert [d["doc_id"] for d in summary["failed_documents"]] == ["NVDA_10K_2025-02-26"]

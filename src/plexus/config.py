@@ -70,4 +70,7 @@ class ExperimentConfig(_Strict):
         """Configs that share chunker + embedder share an index."""
         c, e = self.chunker, self.embedder
         model = e.model.replace("/", "_")
-        return f"{self.snapshot}__{c.type}-{c.size_words}-{c.overlap_words}__{model}"
+        from plexus.ingest.parse import VERSION as PARSER_VERSION
+
+        # parser version included: a parser fix must not silently reuse an old index
+        return f"{self.snapshot}__p{PARSER_VERSION}__{c.type}-{c.size_words}-{c.overlap_words}__{model}"

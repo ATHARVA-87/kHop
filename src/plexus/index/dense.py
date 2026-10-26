@@ -71,6 +71,12 @@ class Embedder:
                 found[keys[i]] = v
         return np.stack([found[k] for k in keys]) if keys else np.zeros((0, self.dim), np.float32)
 
+    def count_truncated(self, texts: Sequence[str]) -> int:
+        """How many passages exceed the model's max sequence length (silently truncated)."""
+        limit = self.model.get_max_seq_length() or 512
+        tok = self.model.tokenizer
+        return sum(len(tok(t, add_special_tokens=True)["input_ids"]) > limit for t in texts)
+
     def embed_query(self, text: str) -> np.ndarray:
         return self._encode([self.cfg.query_prefix + text])[0]
 

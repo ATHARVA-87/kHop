@@ -38,10 +38,12 @@ def bootstrap_ci(
 @dataclass(frozen=True)
 class PairedDiff:
     diff: CI  # mean of (b - a) with CI
-    p_not_better: float  # share of resamples where b - a <= 0 (one-sided)
+    frac_not_better: (
+        float  # share of resamples with b - a <= 0; a rough one-sided signal, NOT a p-value
+    )
 
     def to_dict(self) -> dict:
-        return {"diff": self.diff.to_dict(), "p_not_better": round(self.p_not_better, 4)}
+        return {"diff": self.diff.to_dict(), "frac_not_better": round(self.frac_not_better, 4)}
 
 
 def paired_bootstrap(

@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import hashlib
 import json
 import logging
@@ -76,7 +77,9 @@ class Filing:
 def _retryable(exc: BaseException) -> bool:
     if isinstance(exc, httpx.TransportError):
         return True
+    # SEC answers rate-limit violations with 403 (and sometimes 429)
     return isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code in {
+        403,
         429,
         500,
         502,
@@ -207,6 +210,8 @@ def build_snapshot(
     out_dir.mkdir(parents=True, exist_ok=True)
     ciks = resolve_ciks(client, cfg.tickers)
     rows: list[dict] = []
+    seen_ids: set[str] = set()
+    failed_docs: list[dict] = []
     missing = [t for t in cfg.tickers if t.upper() not in ciks]
     for ticker, (cik, company) in ciks.items():
         try:
@@ -218,11 +223,19 @@ def build_snapshot(
         if not filings:
             log.warning("%s: no %s filings in window", ticker, cfg.forms)
         for f in filings:
-            body = client.get(f.url)
+            if f.doc_id in seen_ids:  # two filings of one form on the same day
+                f = dataclasses.replace(f, doc_id=f"{f.doc_id}_{f.accession[-6:]}")
+            seen_ids.add(f.doc_id)
+            try:
+                body = client.get(f.url)
+            except httpx.HTTPError as exc:  # one bad document must not abort the snapshot
+                log.error("%s: download failed: %s", f.doc_id, exc)
+                failed_docs.append({"doc_id": f.doc_id, "url": f.url, "error": str(exc)[:200]})
+                continue
             dest = out_dir / ticker / f"{f.doc_id}.htm"
             dest.parent.mkdir(parents=True, exist_ok=True)
-            if not dest.exists():
-                dest.write_bytes(body)
+            # always write: the file on disk must match the sha256 in the manifest
+            dest.write_bytes(body)
             rows.append(
                 {
                     **asdict(f),
@@ -242,6 +255,7 @@ def build_snapshot(
         "documents": len(rows),
         "companies": len({r["ticker"] for r in rows}),
         "missing_tickers": sorted(set(missing)),
+        "failed_documents": failed_docs,
         "by_form": {f: sum(r["form"] == f for r in rows) for f in cfg.forms},
         "total_bytes": sum(r["bytes"] for r in rows),
         "corpus_checksum": corpus_checksum(rows),

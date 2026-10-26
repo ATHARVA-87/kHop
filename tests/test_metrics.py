@@ -97,9 +97,9 @@ def test_paired_bootstrap_detects_a_real_improvement():
     a = [0.2, 0.4, 0.3, 0.5, 0.1] * 10
     better = [x + 0.1 for x in a]
     res = paired_bootstrap(a, better)
-    assert res.diff.mean == pytest.approx(0.1) and res.diff.low > 0 and res.p_not_better == 0
+    assert res.diff.mean == pytest.approx(0.1) and res.diff.low > 0 and res.frac_not_better == 0
     same = paired_bootstrap(a, a)
-    assert same.diff.mean == 0 and same.p_not_better == 1
+    assert same.diff.mean == 0 and same.frac_not_better == 1
     with pytest.raises(ValueError):
         paired_bootstrap([1, 2], [1])
 
