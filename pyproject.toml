@@ -57,3 +57,7 @@ markers = [
 [tool.uv]
 # torch is pinned to the version already in the developer's conda env.
 # CPU wheels are enough for CI; the lock only needs to be consistent.
+
+[tool.ruff.lint.per-file-ignores]
+# SEC headings use en/em dashes ("Item 1A — Risk Factors"); the parser must match them.
+"src/plexus/ingest/parse.py" = ["RUF001"]
