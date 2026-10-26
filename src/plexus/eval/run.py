@@ -23,7 +23,13 @@ import numpy as np
 from plexus.config import ExperimentConfig
 from plexus.eval.bootstrap import bootstrap_ci
 from plexus.eval.golden import GoldenQuery, load_golden
-from plexus.eval.metrics import Span, locate_quote, retrieval_metrics, threshold_sensitivity
+from plexus.eval.metrics import (
+    GoldItem,
+    Span,
+    locate_quote_all,
+    retrieval_metrics,
+    threshold_sensitivity,
+)
 from plexus.settings import REPO_ROOT, Settings
 
 
@@ -37,30 +43,35 @@ class Retriever(Protocol):
     def retrieve(self, question: str, k: int | None = None) -> Sequence[SpanLike]: ...
 
 
-def gold_spans(q: GoldenQuery, doc_texts: dict[str, str]) -> tuple[list[Span], list[dict]]:
-    """Locate each evidence quote. Unlocatable evidence is returned separately (label errors)."""
-    spans, missing = [], []
+def gold_spans(q: GoldenQuery, doc_texts: dict[str, str]) -> tuple[list[GoldItem], list[dict]]:
+    """Locate each evidence quote -> one gold item per evidence (alternatives if the quote
+    occurs several times). Unlocatable evidence is returned separately as label errors."""
+    items: list[GoldItem] = []
+    missing = []
     for ev in q.evidence:
         text = doc_texts.get(ev.doc_id)
-        loc = locate_quote(text, ev.quote) if text is not None else None
-        if loc is None:
+        locs = locate_quote_all(text, ev.quote) if text is not None else []
+        if not locs:
             reason = "unknown doc_id" if text is None else "quote not found"
             missing.append(
                 {"qid": q.qid, "doc_id": ev.doc_id, "reason": reason, "quote": ev.quote[:120]}
             )
         else:
-            spans.append(Span(ev.doc_id, *loc))
-    return spans, missing
+            items.append(tuple(Span(ev.doc_id, s, e) for s, e in locs))
+    return items, missing
 
 
 def score_retrieval(
     queries: Sequence[GoldenQuery], retriever: Retriever, doc_texts: dict[str, str], k: int
 ) -> tuple[list[dict], list[dict]]:
+    """Queries with ANY unlocatable evidence are skipped (and reported), never scored on the
+    remaining evidence, which would inflate recall."""
+    ks = [x for x in RECALL_KS if x <= k]
     rows, label_errors = [], []
     for q in queries:
         gold, missing = gold_spans(q, doc_texts)
-        label_errors.extend(missing)
-        if not gold:  # cannot score retrieval without any locatable evidence
+        if missing:
+            label_errors.extend(missing)
             continue
         t0 = time.perf_counter()
         hits = retriever.retrieve(q.question, k)
@@ -71,13 +82,14 @@ def score_retrieval(
                 "qid": q.qid,
                 "qtype": q.qtype,
                 "retrieval_ms": ms,
-                **retrieval_metrics(retrieved, gold),
+                **retrieval_metrics(retrieved, gold, ks),
                 **threshold_sensitivity(retrieved, gold),
             }
         )
     return rows, label_errors
 
 
+RECALL_KS = (1, 5, 10, 20)
 METRICS = [
     "recall@1", "recall@5", "recall@10", "recall@20", "ndcg@10", "mrr",
     "recall@10@cover0.3", "recall@10@cover0.7",
@@ -90,7 +102,8 @@ def aggregate(rows: list[dict], seed: int = 0) -> dict:
         groups.setdefault(r["qtype"], []).append(r)
     out = {}
     for name, rs in groups.items():
-        out[name] = {m: bootstrap_ci([r[m] for r in rs], seed=seed).to_dict() for m in METRICS}
+        present = [m for m in METRICS if m in rs[0]]
+        out[name] = {m: bootstrap_ci([r[m] for r in rs], seed=seed).to_dict() for m in present}
         lat = np.array([r["retrieval_ms"] for r in rs])
         out[name]["retrieval_ms"] = {
             "p50": round(float(np.percentile(lat, 50)), 2),
@@ -112,7 +125,7 @@ def score_generation(
     evidence. It is a lower bound on citation quality (a cited excerpt can support a
     claim without being the labelled evidence). faithfulness/correctness need the judge.
     """
-    from plexus.baseline.naive import NOT_ENOUGH
+    from plexus.baseline.naive import is_refusal
     from plexus.eval.judge import VERDICT_SCORE
     from plexus.eval.metrics import is_hit
 
@@ -127,7 +140,7 @@ def score_generation(
             question=q.question,
             reference=q.answer,
             answer=ans.text,
-            refused=NOT_ENOUGH.lower() in ans.text.lower(),
+            refused=is_refusal(ans.text),
             n_citations=len(cited),
             citation_gold_precision=(sum(hits_gold) / len(cited)) if cited else None,
             generation_ms=ans.generation_ms,

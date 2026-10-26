@@ -111,3 +111,27 @@ def test_threshold_sensitivity_orders_strict_below_loose():
     retrieved = [Span("D", 140, 400)]  # covers 60% of the evidence
     s = threshold_sensitivity(retrieved, gold)
     assert s == {"recall@10@cover0.3": 1.0, "recall@10@cover0.7": 0.0}
+
+
+def test_matching_is_optimal_not_greedy():
+    # review finding #8: greedy credited [300,700) to the big span and then missed the small one
+    gold = [Span("D", 0, 1000), Span("D", 400, 500)]
+    retrieved = [Span("D", 300, 700), Span("D", 0, 300)]
+    assert recall_at_k(retrieved, gold, 2) == 1.0
+    assert recall_at_k(retrieved, gold, 1) == 0.5
+
+
+def test_one_chunk_cannot_cover_two_gold_items():
+    gold = [Span("D", 0, 100), Span("D", 50, 150)]
+    assert recall_at_k([Span("D", 0, 150)], gold, 5) == 0.5
+
+
+def test_repeated_quote_counts_any_occurrence():
+    # review finding #9: boilerplate repeated in a filing
+    from plexus.eval.metrics import locate_quote_all
+
+    doc = "Risk: supply is tight. Other text here. Risk: supply is tight."
+    locs = locate_quote_all(doc, "risk: supply is tight")
+    assert locs == [(0, 21), (40, 61)]
+    gold = [tuple(Span("D", s, e) for s, e in locs)]
+    assert recall_at_k([Span("D", 40, 61)], gold, 1) == 1.0

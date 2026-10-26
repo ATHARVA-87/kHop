@@ -70,7 +70,8 @@ def test_score_retrieval_end_to_end_with_label_errors():
 
 def test_gold_spans_locate_quotes():
     spans, missing = gold_spans(_q("x", "local", [("AMD_10K", "LEADING-EDGE  wafers")]), DOCS)
-    assert not missing and DOCS["AMD_10K"][spans[0].start : spans[0].end] == "leading-edge wafers"
+    [(g,)] = spans  # one evidence item, one occurrence
+    assert not missing and DOCS["AMD_10K"][g.start : g.end] == "leading-edge wafers"
 
 
 def test_configs_load_and_typos_fail(tmp_path):
@@ -111,3 +112,23 @@ def test_score_generation_citation_precision_and_refusals():
     assert agg["citation_gold_precision"]["n"] == 1  # refusal has no citations to score
     assert agg["faithfulness"] is None  # no judge was run
     assert agg["generation_ms_uncached"]["p50"] == 5.0  # cached answers excluded
+
+
+def test_query_with_partly_missing_evidence_is_not_scored():
+    # review finding #1: dropping the missing quote inflated recall from 0.5 to 1.0
+    q = _q(
+        "hop",
+        "multi_hop",
+        [("NVDA_10K", "depend on TSMC"), ("AMD_10K", "a paraphrase not in the doc")],
+    )
+    retr = FakeRetriever({"hop?": [_hit("NVDA_10K", "We depend on TSMC to manufacture our GPUs.")]})
+    rows, errors = score_retrieval([q], retr, DOCS, k=10)
+    assert rows == [] and errors[0]["qid"] == "hop"
+
+
+def test_recall_beyond_top_k_is_not_reported():
+    q = _q("l", "local", [("NVDA_10K", "depend on TSMC")])
+    retr = FakeRetriever({"l?": [_hit("NVDA_10K", "We depend on TSMC to manufacture our GPUs.")]})
+    rows, _ = score_retrieval([q], retr, DOCS, k=5)
+    assert "recall@5" in rows[0] and "recall@10" not in rows[0] and "recall@20" not in rows[0]
+    assert "recall@10" not in aggregate(rows)["all"]

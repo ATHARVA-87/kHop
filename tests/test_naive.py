@@ -56,3 +56,14 @@ def test_second_identical_question_is_cached(tmp_path):
     rag = _rag(tmp_path, lambda r: "x [1]")
     assert not rag.answer("same?").cached
     assert rag.answer("same?").cached
+
+
+def test_thinking_block_is_stripped_and_refusal_detected(tmp_path):
+    from plexus.baseline.naive import is_refusal
+
+    rag = _rag(tmp_path, lambda r: "<think>maybe [3]?</think>\nTSMC [1].")
+    ans = rag.answer("q?")
+    assert ans.text == "TSMC [1]." and ans.cited_chunk_ids == ["D#c0"]
+    assert is_refusal("<think>hmm</think> Not enough evidence in the filings to answer this")
+    assert is_refusal("NOT ENOUGH EVIDENCE in the filings to answer this.")
+    assert not is_refusal("TSMC makes them [1].")

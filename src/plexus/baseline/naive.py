@@ -30,6 +30,21 @@ def format_context(hits: list[Hit]) -> str:
 
 
 _CITE = re.compile(r"\[(\d+)\]")
+_THINK = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGNORECASE)
+
+
+def strip_thinking(text: str) -> str:
+    """Drop a reasoning block some local models (qwen3.5) emit before the answer."""
+    return _THINK.sub("", text).strip()
+
+
+def _norm(text: str) -> str:
+    return re.sub(r"[^a-z ]", "", re.sub(r"\s+", " ", text.lower())).strip()
+
+
+def is_refusal(text: str) -> bool:
+    """The answer declines for lack of evidence (tolerant of punctuation/case)."""
+    return _norm(NOT_ENOUGH) in _norm(strip_thinking(text))
 
 
 @dataclass
@@ -83,10 +98,11 @@ class NaiveRAG:
         context = hits[: self.cfg.generation.context_chunks]
         resp = self.llm.complete(self.build_request(question, context))
         t2 = time.perf_counter()
-        cited = sorted({int(n) for n in _CITE.findall(resp.text)})
+        text = strip_thinking(resp.text)
+        cited = sorted({int(n) for n in _CITE.findall(text)})
         return Answer(
             question=question,
-            text=resp.text,
+            text=text,
             hits=context,
             cited_chunk_ids=[context[n - 1].chunk_id for n in cited if 1 <= n <= len(context)],
             retrieval_ms=(t1 - t0) * 1000,
