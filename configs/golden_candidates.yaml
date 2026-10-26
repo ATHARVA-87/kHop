@@ -1,0 +1,57 @@
+# Golden-set candidate generation (Phase 1). Output: data/golden/review.csv for human review.
+snapshot: semis-2025
+seed: 0
+provider: gemini              # any provider LLMClient knows; needs its key/server
+model: gemini-2.0-flash      # CHECK at setup: free-tier model names change; record in docs/adr
+counts:                       # ~200 candidates -> ~150 verified after review
+  local: 80
+  multi_hop: 70
+  global: 50
+passage_words: 180            # differs from A0's 300-word chunks on purpose (no chunker bias)
+local_sections: [risk_factors, mdna, business]
+
+# Counterparties that many filers mention. Two filers mentioning the same one give a
+# multi-hop seed. (Phase 3 replaces this list with extracted graph entities.)
+counterparties:
+  - TSMC
+  - Taiwan Semiconductor
+  - Samsung
+  - SK hynix
+  - GlobalFoundries
+  - UMC
+  - SMIC
+  - ASML
+  - Tokyo Electron
+  - Apple
+  - Microsoft
+  - Amazon
+  - Alphabet
+  - Google
+  - Meta
+  - Dell
+  - Foxconn
+  - Hon Hai
+  - Huawei
+  - Arm
+  - Synopsys
+  - Cadence
+  - Intel
+  - NVIDIA
+  - Qualcomm
+  - Broadcom
+  - Tesla
+
+# Themes for corpus-level ("global") questions: keyword -> theme label.
+themes:
+  export control: U.S. export controls
+  China: exposure to China
+  Taiwan: dependence on Taiwan / cross-strait risk
+  tariff: tariffs and trade policy
+  customer concentration: customer concentration
+  single source: single-source or limited suppliers
+  cyclical: industry cyclicality
+  inventory: inventory and supply-demand imbalance
+  cybersecurity: cybersecurity incidents
+  artificial intelligence: dependence on AI demand
+  interest rate: interest rate and financing risk
+  climate: climate and environmental regulation
