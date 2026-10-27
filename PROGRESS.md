@@ -4,7 +4,7 @@
 
 | Phase | Work | Gate | Status |
 | --- | --- | --- | --- |
-| 0. Setup | Toolchain, repo, CLAUDE.md, PROGRESS.md, Makefile, `make doctor`, CI skeleton, LLM wrapper + cache | `make doctor` and CI pass | **Done locally.** CI simulated locally from `uv.lock` (passes); real GitHub run waits on step 2 |
+| 0. Setup | Toolchain, repo, CLAUDE.md, PROGRESS.md, Makefile, `make doctor`, CI skeleton, LLM wrapper + cache | `make doctor` and CI pass | **Passed 2026-10-27.** Doctor phase 0 all OK; GitHub CI green (run 40440596122) |
 | 1. Harness | EDGAR snapshot, golden-set candidates, human verification, metrics, A0 | A0 scored with CIs | **Code complete on branch `phase1-harness`** (not merged; needs your review). Waits on your steps below |
 | 2. Retrieval + CI gate | A1–A3, retrieval gate on PRs | A1–A3 recorded; gate blocks a planted regression | Not started (gate rule) |
 | 3. Graph | Extraction, resolution, Kuzu, Leiden, summaries, A4, A5 | Extraction P/R; A4, A5 recorded | — |
@@ -19,8 +19,7 @@
 
 **Your steps, in order** (each one unblocks the next; run `make doctor PHASE=1` after each):
 
-1. **GitHub repo** (step 2): create an empty public repo `plexus`, then
-   `git remote add origin <url> && git push -u origin main phase1-harness`. Then open a PR from `phase1-harness` → `main` and check CI is green. That closes the Phase 0 gate.
+1. ~~**GitHub repo**~~ Done 2026-10-27: https://github.com/ATHARVA-87/plexus, PR #1 open (phase1-harness → main). **Review PR #1** (metrics and golden-set code) before merging.
 2. **SEC User-Agent** (step 3): `cp .env.example .env`, set `SEC_USER_AGENT="Your Name your@email"`.
 3. **Download + parse** (you run these, about 5 minutes):
    `conda activate torch && make ingest && make process`. Then read `data/snapshots/semis-2025.parse_report.json`. Section coverage below ~90% for `risk_factors` or `mdna` means the parser needs fixing on real filings. Tell me which doc IDs fail.
@@ -34,7 +33,9 @@
 ## Gate evidence
 
 ### Phase 0 (2026-10-26)
-- `make doctor`: all phase-0 checks pass except **GitHub remote** (your step 2).
+- `make doctor`: all phase-0 checks pass, GitHub remote included (2026-10-27).
+- GitHub CI run 40440596122 on `phase1-harness`: 77 packages from `uv.lock` (no torch), ruff clean, 89 passed / 3 ml deselected.
+- Note: GitHub did not fire the push and pull_request events for the first pushes to the new repo. `ci.yml` now also has `workflow_dispatch`. If PR #1 shows no checks, run `gh workflow run ci --ref phase1-harness`.
 - `make test`: passes. `make lint`: clean.
 - CI dry run: fresh venv from `uv.lock` (core + dev, no torch), ruff clean, 66 passed / 3 ml deselected. Done 2026-10-26 23:54, environment deleted afterwards.
 
