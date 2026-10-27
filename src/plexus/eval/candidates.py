@@ -120,9 +120,11 @@ def multi_hop_prompt(a: Passage, b: Passage, entity: str) -> str:
         f"Both passages mention {entity}.\n"
         f"Passage A, from {_describe(a)}:\n<passage>\n{a.text}\n</passage>\n\n"
         f"Passage B, from {_describe(b)}:\n<passage>\n{b.text}\n</passage>\n\n"
-        "Write one question that can only be answered by combining facts from BOTH passages "
-        "(for example comparing how the two companies depend on or describe "
-        f"{entity}). Give 2 sub-questions (one per passage), the answer, and one quote from "
+        "Write one question that can only be answered by combining facts from BOTH passages, "
+        f"about each company's BUSINESS RELATIONSHIP with {entity}: supplier, foundry, customer, "
+        "competitor, partner or licensor. Good: 'Which manufacturing services does each company "
+        f"rely on {entity} for?'. Bad: questions about how or where {entity} is merely mentioned. "
+        "Give 2 sub-questions (one per passage), the answer, and one quote from "
         'each passage. JSON keys: "question", "sub_questions", "answer", "quote_a", "quote_b".'
     )
 
@@ -175,6 +177,9 @@ def load_passages(data_dir: Path, cfg: CandidateConfig) -> tuple[list[Passage], 
     return passages, doc_texts
 
 
+MULTI_HOP_SECTIONS = {"business", "risk_factors", "mdna"}
+
+
 def _mentions(text: str, name: str) -> bool:
     return re.search(rf"\b{re.escape(name)}\b", text) is not None
 
@@ -201,7 +206,9 @@ def sample_multi_hop(
     passages: list[Passage], cfg: CandidateConfig, rng: random.Random, n: int
 ) -> list[tuple[Passage, Passage, str]]:
     by_entity: dict[str, dict[str, list[Passage]]] = defaultdict(lambda: defaultdict(list))
-    for p in passages:
+    # Only substantive prose: exhibit lists and statement notes give incidental mentions
+    # ("Exhibit 10.11 Patent Cross License with NVIDIA"), not business relationships.
+    for p in (p for p in passages if p.section in MULTI_HOP_SECTIONS):
         for e in cfg.counterparties:
             # a company mentioning itself is not a cross-company link
             if _mentions(p.text, e) and e.lower() not in p.company.lower():
