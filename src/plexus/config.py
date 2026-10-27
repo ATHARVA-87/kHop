@@ -47,13 +47,16 @@ class RerankConfig(_Strict):
 
 
 class RetrievalConfig(_Strict):
-    type: Literal["dense", "bm25", "hybrid"] = "dense"
+    type: Literal["dense", "bm25", "hybrid", "graph_hybrid"] = "dense"
     top_k: int = 20
     candidates: int = 100  # hybrid: hits taken from each retriever before fusion
     rrf_k: int = 60  # reciprocal rank fusion constant (the paper's default)
     bm25_k1: float = 1.2
     bm25_b: float = 0.75
     rerank: RerankConfig | None = None  # A3
+    # A4 graph_hybrid: graph traversal hits fused with the hybrid list
+    graph_dir: str | None = None  # default data/graph/<snapshot>
+    graph_max_edges: int = 12
 
 
 class GenerationConfig(_Strict):

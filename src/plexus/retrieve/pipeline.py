@@ -96,6 +96,26 @@ class HybridRetriever:
                 r.close()
 
 
+def _graph_hybrid(cfg: ExperimentConfig, data_dir: Path, index_path: Path, base: Retriever):
+    from plexus.extract.resolve import load_resolver
+    from plexus.index.graph import LadybugGraph
+    from plexus.retrieve.graph_search import (
+        EntityLinker,
+        GraphHybridRetriever,
+        GraphRetriever,
+        load_entities,
+    )
+
+    r = cfg.retrieval
+    gdir = Path(r.graph_dir) if r.graph_dir else data_dir / "graph" / cfg.snapshot
+    if not (gdir / "graph.lbug").exists():
+        raise FileNotFoundError(f"no graph at {gdir}: run `make graph` first")
+    linker = EntityLinker(load_resolver(data_dir, cfg.snapshot), load_entities(gdir))
+    graph = GraphRetriever(LadybugGraph(gdir / "graph.lbug"), linker, load_chunks(index_path),
+                           r.graph_max_edges)  # fmt: skip
+    return GraphHybridRetriever(graph, base, r.rrf_k)
+
+
 def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:
     from plexus.index.build import index_dir
 
@@ -118,6 +138,8 @@ def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:
     else:
         bm25 = BM25Retriever.from_index_dir(path, r.bm25_k1, r.bm25_b)
         base = bm25 if r.type == "bm25" else HybridRetriever([dense(), bm25], r.candidates, r.rrf_k)
+    if r.type == "graph_hybrid":
+        base = _graph_hybrid(cfg, data_dir, path, base)
     if r.rerank is None:
         return base
     from plexus.retrieve.rerank import CrossEncoderScorer, RerankingRetriever

@@ -3,7 +3,7 @@
 PY ?= python
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates extract serve ui
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph extract serve ui
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -49,6 +49,10 @@ golden: ## Build data/golden/golden.jsonl from your reviewed review.csv (+ noise
 
 extract: ## Graph extraction over 10-K passages with local qwen3.5:4b (~4.5 h, resumable)
 	$(PY) -m plexus.extract.extract
+
+graph: ## Resolve entities and build the LadybugDB graph from data/graph/<snapshot>/extractions.jsonl
+	$(PY) -m plexus.extract.resolve
+	$(PY) -m plexus.index.graph build
 
 golden-test: ## Build data/golden/golden_test.jsonl from your reviewed review_test.csv
 	$(PY) -m plexus.eval.golden build --split test
