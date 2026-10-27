@@ -86,14 +86,19 @@ def theme_of(q: GoldenQuery, label_to_keyword: dict[str, str]) -> str | None:
     return label_to_keyword.get(m.group(1).strip()) if m else None
 
 
+def _on_theme(keyword: str, text: str) -> bool:
+    from plexus.eval.global_themes import theme_regex
+
+    return theme_regex(keyword).search(text) is not None
+
+
 def company_coverage(hits: Sequence, relevant: set[str], keyword: str, k: int) -> float:
     """Share of relevant companies with >=1 on-theme chunk (contains the theme keyword) in
     the top k. Chunker-independent and needs no quote labels (design review finding #2)."""
     covered = {
         _company(h.doc_id)
         for h in hits[:k]
-        if _company(h.doc_id) in relevant
-        and keyword.lower() in (getattr(h, "text", "") or "").lower()
+        if _company(h.doc_id) in relevant and _on_theme(keyword, getattr(h, "text", "") or "")
     }
     return len(covered) / len(relevant)
 

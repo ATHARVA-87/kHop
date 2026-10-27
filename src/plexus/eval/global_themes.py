@@ -54,9 +54,16 @@ def load_themes(path: Path | None = None) -> dict[str, str]:
     return cfg["themes"]  # keyword -> label
 
 
+def theme_regex(keyword: str, path: Path | None = None) -> re.Pattern:
+    """Regex for a theme: its synonym patterns from the config, else the literal keyword."""
+    cfg = yaml.safe_load((path or REPO_ROOT / "configs/golden_candidates.yaml").read_text())
+    pats = (cfg.get("theme_patterns") or {}).get(keyword) or [re.escape(keyword)]
+    return re.compile("|".join(f"(?:{p})" for p in pats), re.IGNORECASE)
+
+
 def keyword_snippets(text: str, keyword: str, width: int = 300, limit: int = 3) -> list[str]:
     out = []
-    for m in re.finditer(re.escape(keyword), text, re.IGNORECASE):
+    for m in theme_regex(keyword).finditer(text):
         out.append(text[max(0, m.start() - width) : m.end() + width].replace("\n", " "))
         if len(out) >= limit:
             break
@@ -105,7 +112,7 @@ def build(
         # prefer the 10-K's text first in the snippets (10-Qs mostly repeat it)
         texts = sorted(sub_text[ticker], key=lambda t: "_10K_" not in t[0])
         snippets = {kw: [s for _, t in texts for s in keyword_snippets(t, kw)][:3] for kw in themes}
-        hits = {kw: sum(len(re.findall(re.escape(kw), t, re.I)) for _, t in texts) for kw in themes}
+        hits = {kw: sum(len(theme_regex(kw).findall(t)) for _, t in texts) for kw in themes}
 
         verdicts, used_model = {}, ""
         for model in models:

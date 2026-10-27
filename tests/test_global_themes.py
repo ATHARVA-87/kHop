@@ -107,3 +107,15 @@ def test_cluster_bootstrap_is_wider_than_naive_for_correlated_clusters():
     clusters = ["a"] * 10 + ["b"] * 10
     naive, clus = bootstrap_ci(vals), bootstrap_ci(vals, clusters=clusters)
     assert (clus.high - clus.low) > (naive.high - naive.low)
+
+
+def test_theme_synonyms_catch_usual_wording_and_skip_false_friends():
+    from plexus.eval.global_themes import theme_regex
+
+    assert theme_regex("customer concentration").search("a small number of customers account for")
+    assert theme_regex("single source").search("certain components are sole-source")
+    assert theme_regex("artificial intelligence").search("demand for AI accelerators")
+    assert not theme_regex("artificial intelligence").search("the said fee was paid")
+    assert not theme_regex("climate").search("the current business climate")
+    hits = [_hit("MU_10K_x", "We rely on a limited number of customers for most revenue.")]
+    assert company_coverage(hits, {"MU"}, "customer concentration", 10) == 1.0

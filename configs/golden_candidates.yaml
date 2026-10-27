@@ -56,3 +56,20 @@ themes:
   artificial intelligence: dependence on AI demand
   interest rate: interest rate and financing risk
   climate: climate and environmental regulation
+
+# Synonym regexes per theme keyword, used to pre-filter the theme table and to decide if a
+# retrieved chunk is "on theme" (company_coverage). A literal keyword alone missed 13 of 16
+# zero-hit rows in the AI spot-check (e.g. "limited number of customers").
+theme_patterns:
+  export control: ['export control', 'entity list', 'export restriction', 'export licens']
+  China: ['china', 'chinese', '\bprc\b']
+  Taiwan: ['taiwan', 'cross-strait']
+  tariff: ['tariff']
+  customer concentration: ['customer concentration', '(small|limited) number of (our )?(significant |large |key )?customers', 'largest customers?', 'significant customers?', 'portion of (our )?(net )?(revenue|sales) from']
+  single source: ['single[- ]source', 'sole[- ]source', 'sole supplier', 'single supplier', 'limited number of (suppliers|vendors|sources|foundries)']
+  cyclical: ['cyclical', 'cyclicality', 'industry downturn']
+  inventory: ['inventor']
+  cybersecurity: ['cyber', 'security breach', 'ransomware']
+  artificial intelligence: ['artificial intelligence', '(?-i:\bAI\b)', 'generative']
+  interest rate: ['interest rate']
+  climate: ['climate change', 'climate-related', 'greenhouse', 'emissions', 'environmental (laws|regulation)']
