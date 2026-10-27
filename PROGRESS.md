@@ -62,6 +62,21 @@
 
 - Phase 2 (your idea, 2026-10-27): add a **BM25-only baseline** alongside dense-only and hybrid (BM25 + dense + RRF), and a **token-budget curve**: recall@k and answer quality vs number of chunks sent to the Writer (3/5/10), reporting tokens per query. Goal: show that hybrid retrieval reaches the same quality with fewer context tokens (less LLM usage).
 
+## Design review (researcher subagent, 2026-10-27): decisions
+Fixed now (Phase 1):
+- #1 Same-company verbatim copies of a gold quote count as hits; `strict_recall@10` kept (10-Qs repeat 10-K risk factors, ~75% of spans).
+- #2 Global questions are scored at company level: `global_themes.csv` (39 companies × 12 themes, Gemini pre-fill with verified quotes, ~20% human spot-check), `company_coverage@k`, bootstrap resampled by theme.
+- #4 21 bridge multi-hop questions with the linking company hidden (`review_bridge.csv`); multi-hop is tagged bridge vs comparison and reported separately.
+
+Planned (by phase):
+- #5 Statistical power: with ~40–60 questions per type only gains of about 12–15 recall points are detectable at 80% power. Report pooled results first (per-type exploratory), paired diffs + counts of improved/worse queries, and state the minimum detectable effect in the README. Optionally grow local questions toward 100.
+- #6 Self-preference: use a Groq (gpt-oss) judge whenever the Writer is Gemini. Add ~25 human-paraphrased, analyst-style questions as a separate subset (you write them). Add a "metadata filter by company" rung (likely the biggest cheap win).
+- #3 Phase 3: community summaries store provenance (source chunk spans). A4/A5 judged mainly by company coverage + answer quality, and "provenance recall" is reported separately.
+- #7 Phase 3: extract entities/relations only from 10-K Business/Risk Factors/MD&A (≈1.5M tokens, not the full ≈6.9M). Local qwen for entities, Gemini only for organisation-pair relations. Measure P/R on ~100 edges.
+- #8 Phase 5: A9 vs A7 at the same Writer model, tools, top-k and context-token budget. Add an "A7 + single-call decomposition" rung. Measure the Verifier's miss and false-alarm rates. Expect p50 ≈ 20–40 s with a local 4B model (serial on one GPU).
+- #9 Scope and pitch: no numeric/table questions (state it). Fiscal years differ (10-Ks filed Jan–Dec 2025). Pitch novelty as controlled ablations under free and small-model constraints with honest negative results (HybridRAG, GraphRAG and GraphRAG-Bench already exist).
+- Ladder change: A8 (semantic cache) becomes a systems metric, not a quality rung.
+
 ## Open questions for you
 1. Sign off or amend ADRs 0001–0005. 0003 (the ticker list) and 0004 (definition of a retrieval hit) matter most.
 2. The brief puts the LLM key and Ollama in Phase 3, but Phase 1 needs an LLM for candidates and the judge. I pulled the Gemini key forward. Is that OK?
@@ -75,4 +90,4 @@
 - 2026-10-27 00:05–00:12: reviewer subagent pass on the Phase 1 branch. 9 confirmed bugs fixed: partial-evidence recall inflation, greedy matching, TOC sections, heading regex, section gaps, judge agreement, golden build crashes, BOM CSVs, repeated quotes. Plus EDGAR robustness and a versioned index key.
 - Known limits, not fixed: chunks longer than bge's 512 tokens are truncated (now counted in `build_info.json`); the parser is validated on synthetic HTML only.
 - 2026-10-27 09:20–09:40: `make ingest` (156 filings, 39 cos; QRVO missing after the Skyworks merger; YAML `ON` ticker bug fixed). `make process`: parser v4, 152/156 fully sectioned. `make index` for A0: 20,360 chunks, 156 s on GPU, **1,031 chunks (5.1%) exceed bge's 512 tokens** (table-heavy), a known A0 weakness for A1 to address with token-based sizing.
-- User chose to keep the brief's phase order (multi-agent = Phase 5). **Next: user adds GEMINI_API_KEY to .env → `make candidates`.**
+- User chose to keep the brief's phase order (multi-agent = Phase 5). Gemini + Groq keys added. `make candidates` done: 180 candidates (10% auto-rejected) + 21 bridge questions. **Next: you review `review.csv` (local + multi-hop first) and `review_bridge.csv`; spot-check `global_themes.csv`; then `make golden` and `make eval`.**
