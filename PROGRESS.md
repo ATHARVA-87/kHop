@@ -5,7 +5,7 @@
 | Phase | Work | Gate | Status |
 | --- | --- | --- | --- |
 | 0. Setup | Toolchain, repo, CLAUDE.md, PROGRESS.md, Makefile, `make doctor`, CI skeleton, LLM wrapper + cache | `make doctor` and CI pass | **Passed 2026-10-27.** Doctor phase 0 all OK; GitHub CI green (run 40440596122) |
-| 1. Harness | EDGAR snapshot, golden-set candidates, human verification, metrics, A0 | A0 scored with CIs | **Gate met 2026-10-27** (134 verified queries; A0 recall@10 0.216). Branch `phase1-harness`, PR #1 needs your review |
+| 1. Harness | EDGAR snapshot, golden-set candidates, human verification, metrics, A0 | A0 scored with CIs | **Gate met 2026-10-27** (134 verified queries; A0 recall@10 0.276). Branch `phase1-harness`, PR #1 needs your review |
 | 2. Retrieval + CI gate | A1–A3, retrieval gate on PRs | A1–A3 recorded; gate blocks a planted regression | Not started (gate rule) |
 | 3. Graph | Extraction, resolution, Kuzu, Leiden, summaries, A4, A5 | Extraction P/R; A4, A5 recorded | — |
 | 4. Single-graph agent | Router, grade-and-rewrite, A6, A7 | Router vs always-local/global | — |
@@ -42,13 +42,13 @@
 ### Phase 1: gate met 2026-10-27 (retrieval). `results/a0_naive.json`, 134 queries, 0 label errors, 95% bootstrap CIs
 | slice | n | recall@10 | nDCG@10 | MRR |
 | --- | --- | --- | --- | --- |
-| all | 134 | 0.216 (0.153–0.281) | 0.142 | 0.144 |
-| local | 65 | 0.346 (0.231–0.462) | 0.217 | 0.185 |
-| multi_hop | 57 | 0.105 (0.053–0.167) | 0.077 | 0.103 |
+| all | 134 | 0.276 (0.208–0.343) | 0.211 | 0.238 |
+| local | 65 | 0.408 (0.292–0.523) | 0.286 | 0.259 |
+| multi_hop | 57 | 0.175 (0.114–0.246) | 0.160 | 0.240 |
 | global (company_coverage@10) | 12 | 0.508 (0.417–0.617) | | |
-- strict_recall@10 (exact source filing only) 0.154. Retrieval p50 31 ms.
+- strict_recall@10 (exact source filing only) 0.204. Retrieval p50 46.46 ms.
 - Generation metrics not run yet: they need Ollama (sudo install), so those are deferred and not part of the gate.
-- Global questions were reworded by you: "How do all semiconductor companies …" instead of "… in the corpus".
+- Global questions were reworded by you: "How do all semiconductor companies …" instead of "… in the corpus". All 122 local/multi-hop/bridge questions were then rephrased the way a user would type them (short company names, no filing dates unless the answer depends on the period; your request 2026-10-27). Same answers and evidence. A0 recall@10 rose from 0.216 to 0.276: the legal names and filing dates were noise for the dense embedder.
 
 ## What was built in Phase 1 (branch `phase1-harness`)
 | Module | What | Review needed |
