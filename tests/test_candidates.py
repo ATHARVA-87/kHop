@@ -186,3 +186,46 @@ def test_overloaded_main_model_falls_back_and_failures_are_not_fatal(tmp_path):
         cfg_dead, LLMClient(LLMCache(tmp_path / "d.sqlite"), {"fake": prov}), data
     )
     assert queries == [] and {r["status"] for r in log} == {"provider_error"}
+
+
+def _bridge_responder(leak: bool):
+    def responder_(req):
+        ps = _passages(req.messages[-1].content)
+
+        def q(text):
+            words = text.split()
+            i = next(n for n, w in enumerate(words) if "TSMC" in w)
+            return " ".join(words[max(0, i - 4) : i + 6])
+
+        question = "Which foundry is named by both NVIDIA and AMD?" + (
+            " Is it TSMC?" if leak else ""
+        )
+        return json.dumps({"question": question, "sub_questions": ["NVIDIA foundry?", "AMD foundry?"],
+                           "answer": "TSMC", "quote_a": q(ps[0]), "quote_b": q(ps[1])})  # fmt: skip
+
+    return responder_
+
+
+def test_bridge_questions_hide_the_linking_entity(tmp_path):
+    data = _corpus(tmp_path)
+    cfg = CFG.model_copy(update={"counts": {"bridge": 2}})
+    llm = LLMClient(
+        LLMCache(tmp_path / "a.sqlite"), {"fake": FakeProvider(_bridge_responder(leak=False))}
+    )
+    queries, _ = generate(cfg, llm, data)
+    assert queries and all(q.tags == ["bridge"] and q.qtype == "multi_hop" for q in queries)
+    assert all("tsmc" not in q.question.lower() and q.qid.startswith("B-") for q in queries)
+
+    llm = LLMClient(
+        LLMCache(tmp_path / "b.sqlite"), {"fake": FakeProvider(_bridge_responder(leak=True))}
+    )
+    queries, log = generate(cfg, llm, data)
+    assert queries == [] and {r["status"] for r in log} == {"names_linking_entity"}
+
+
+def test_old_multi_hop_rows_default_to_comparison_tag(tmp_path):
+    from plexus.eval.golden import row_to_query
+
+    row = {"qid": "M-1", "qtype": "multi_hop", "question": "q?", "answer": "a",
+           "evidence_doc_ids": "D", "evidence_quotes": "x", "verdict": "accept"}  # fmt: skip
+    assert row_to_query(row).tags == ["comparison"]

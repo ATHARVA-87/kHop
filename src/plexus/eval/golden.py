@@ -30,7 +30,7 @@ EVIDENCE_SEP = " ||| "
 
 REVIEW_COLUMNS = [
     "qid", "qtype", "question", "answer", "evidence_doc_ids", "evidence_quotes",
-    "sub_questions", "source",
+    "sub_questions", "source", "tags",
     # filled in by the human reviewer:
     "verdict", "corrected_question", "corrected_answer", "corrected_evidence_doc_ids",
     "corrected_evidence_quotes", "corrected_qtype", "reviewer_notes",
@@ -49,6 +49,8 @@ class GoldenQuery(BaseModel):
     answer: str
     evidence: list[Evidence] = Field(default_factory=list)
     sub_questions: list[str] = Field(default_factory=list)  # multi-hop decomposition
+    # e.g. "bridge" (linking entity hidden) vs "comparison" (both entities named)
+    tags: list[str] = Field(default_factory=list)
     source: str = ""  # e.g. "llm:gemini-2.0-flash" or "human"
     verdict: Verdict = ""
     reviewer_notes: str = ""
@@ -79,6 +81,7 @@ def to_review_row(q: GoldenQuery) -> dict[str, str]:
         evidence_doc_ids=EVIDENCE_SEP.join(e.doc_id for e in q.evidence),
         evidence_quotes=EVIDENCE_SEP.join(e.quote for e in q.evidence),
         sub_questions=EVIDENCE_SEP.join(q.sub_questions),
+        tags=",".join(q.tags),
         source=q.source,
     )
     return row
@@ -134,14 +137,22 @@ def row_to_query(row: dict[str, str]) -> GoldenQuery:
         answer=pick("answer"),
         evidence=[Evidence(doc_id=d, quote=q) for d, q in zip(doc_ids, quotes, strict=True)],
         sub_questions=_split(row.get("sub_questions", "")),
+        # candidates written before tags existed: multi-hop ones were all comparison-style
+        tags=[t.strip() for t in (row.get("tags") or "").split(",") if t.strip()]
+        or (["comparison"] if pick("qtype").strip() == "multi_hop" else []),
         source=row.get("source", ""),
         verdict=verdict,
         reviewer_notes=row.get("reviewer_notes", ""),
     )
 
 
-def build_golden(review_csv: Path, out_jsonl: Path, stats_json: Path) -> dict:
-    rows = read_review_csv(review_csv)
+def build_golden(review_csv: Path | list[Path], out_jsonl: Path, stats_json: Path) -> dict:
+    """Merge one or more review files (review.csv, review_bridge.csv, ...)."""
+    paths = review_csv if isinstance(review_csv, list) else [review_csv]
+    rows = [row for path in paths for row in read_review_csv(path)]
+    dup = [q for q, n in Counter(r["qid"] for r in rows).items() if n > 1]
+    if dup:
+        raise ValueError(f"duplicate qids across review files: {dup[:5]}")
     # Count verdicts on raw rows; only accept/edit rows are parsed and validated, so a
     # rejected or unreviewed row with blank or broken fields cannot abort the build.
     counts = Counter(_verdict(r) or "unreviewed" for r in rows)
@@ -159,6 +170,7 @@ def build_golden(review_csv: Path, out_jsonl: Path, stats_json: Path) -> dict:
         if reviewed
         else None,
         "verified_by_type": dict(Counter(q.qtype for q in verified)),
+        "verified_by_tag": dict(Counter(t for q in verified for t in q.tags)),
     }
     stats_json.write_text(json.dumps(stats, indent=2) + "\n")
     return stats
@@ -179,9 +191,12 @@ def load_golden(path: Path | None = None, qtypes: set[str] | None = None) -> lis
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("command", choices=["build"])
-    ap.add_argument("--review", type=Path, default=GOLDEN_DIR / "review.csv")
+    ap.add_argument(
+        "--review", type=Path, nargs="*", default=None, help="default: data/golden/review*.csv"
+    )
     args = ap.parse_args(argv)
-    stats = build_golden(args.review, GOLDEN_DIR / "golden.jsonl", GOLDEN_DIR / "review_stats.json")
+    files = args.review or sorted(GOLDEN_DIR.glob("review*.csv"))
+    stats = build_golden(list(files), GOLDEN_DIR / "golden.jsonl", GOLDEN_DIR / "review_stats.json")
     print(json.dumps(stats, indent=2))
     return 0
 

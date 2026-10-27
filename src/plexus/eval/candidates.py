@@ -46,7 +46,7 @@ class CandidateConfig(BaseModel):
     model: str
     # tried in order when the main model is overloaded (503) or returns unusable output
     fallback_models: list[str] = Field(default_factory=list)
-    counts: dict[Literal["local", "multi_hop", "global"], int]
+    counts: dict[Literal["local", "multi_hop", "global", "bridge"], int]
     passage_words: int = 180
     local_sections: list[str] = Field(default_factory=lambda: ["risk_factors", "mdna", "business"])
     counterparties: list[str] = Field(default_factory=list)
@@ -79,6 +79,14 @@ class MultiHopOut(BaseModel):
     answer: str
     quote_a: str = Field(description="verbatim from passage A")
     quote_b: str = Field(description="verbatim from passage B")
+
+
+class BridgeOut(BaseModel):
+    question: str
+    sub_questions: list[str] = Field(min_length=2, max_length=3)
+    answer: str
+    quote_a: str = Field(description="verbatim from passage A, mentioning the linking entity")
+    quote_b: str = Field(description="verbatim from passage B, mentioning the linking entity")
 
 
 class GlobalQuote(BaseModel):
@@ -126,6 +134,36 @@ def multi_hop_prompt(a: Passage, b: Passage, entity: str) -> str:
         f"rely on {entity} for?'. Bad: questions about how or where {entity} is merely mentioned. "
         "Give 2 sub-questions (one per passage), the answer, and one quote from "
         'each passage. JSON keys: "question", "sub_questions", "answer", "quote_a", "quote_b".'
+    )
+
+
+def bridge_prompt(a: Passage, b: Passage, entity: str) -> str:
+    return (
+        f"Both passages mention the same company: {entity}.\n"
+        f"Passage A, from {_describe(a)}:\n<passage>\n{a.text}\n</passage>\n\n"
+        f"Passage B, from {_describe(b)}:\n<passage>\n{b.text}\n</passage>\n\n"
+        f"Write a BRIDGE question whose answer is {entity}, WITHOUT naming {entity} in the "
+        "question. Describe its role instead, e.g. 'Which foundry is named as a manufacturing "
+        "supplier by both <company A> and <company B>?' or 'Which company does <A> list as a "
+        f"competitor and <B> as a partner?'. Give 2 sub-questions (one per passage, they may "
+        f"name the two filers but not {entity}), the answer, and one quote from each passage "
+        f'that mentions {entity}. JSON keys: "question", "sub_questions", "answer", '
+        '"quote_a", "quote_b".'
+    )
+
+
+# Names that must not appear in a bridge question for each linking entity.
+ALIASES = {
+    "TSMC": ["tsmc", "taiwan semiconductor"], "Taiwan Semiconductor": ["tsmc", "taiwan semiconductor"],
+    "Google": ["google", "alphabet"], "Alphabet": ["google", "alphabet"],
+    "Foxconn": ["foxconn", "hon hai"], "Hon Hai": ["foxconn", "hon hai"],
+}  # fmt: skip
+
+
+def names_entity(text: str, entity: str) -> bool:
+    low = text.lower()
+    return any(
+        re.search(rf"\b{re.escape(n)}\b", low) for n in ALIASES.get(entity, [entity.lower()])
     )
 
 
@@ -330,8 +368,33 @@ def generate(
         kept.append(GoldenQuery(qid=_qid("M", a.doc_id, b.doc_id, out.question), qtype="multi_hop", question=out.question, answer=out.answer,
                                 evidence=[Evidence(doc_id=a.doc_id, quote=out.quote_a),
                                           Evidence(doc_id=b.doc_id, quote=out.quote_b)],
-                                sub_questions=out.sub_questions, source=f"{source} entity={ent}"))  # fmt: skip
+                                sub_questions=out.sub_questions, tags=["comparison"], source=f"{source} entity={ent}"))  # fmt: skip
         record("multi_hop", "kept")
+
+    # separate seed: bridge pairs should not just repeat the comparison pairs
+    for a, b, ent in sample_multi_hop(
+        passages, cfg, random.Random(cfg.seed + 1), cfg.counts.get("bridge", 0)
+    ):
+        res = ask(bridge_prompt(a, b, ent), BridgeOut, "bridge")
+        if res is None:
+            continue
+        out, source = res
+        if names_entity(out.question, ent):
+            record("bridge", "names_linking_entity", out.question)
+            continue
+        if not (names_entity(out.quote_a, ent) and names_entity(out.quote_b, ent)):
+            record("bridge", "quote_misses_entity", f"{out.quote_a} || {out.quote_b}")
+            continue
+        if not (
+            _check(doc_texts, a.doc_id, out.quote_a) and _check(doc_texts, b.doc_id, out.quote_b)
+        ):
+            record("bridge", "quote_not_found", f"{out.quote_a} || {out.quote_b}")
+            continue
+        kept.append(GoldenQuery(qid=_qid("B", a.doc_id, b.doc_id, out.question), qtype="multi_hop", question=out.question,
+                                answer=out.answer, evidence=[Evidence(doc_id=a.doc_id, quote=out.quote_a),
+                                Evidence(doc_id=b.doc_id, quote=out.quote_b)], sub_questions=out.sub_questions,
+                                tags=["bridge"], source=f"{source} entity={ent}"))  # fmt: skip
+        record("bridge", "kept")
 
     for ps, theme in sample_global(passages, cfg, rng, cfg.counts.get("global", 0)):
         res = ask(global_prompt(ps, theme), GlobalOut, "global")
