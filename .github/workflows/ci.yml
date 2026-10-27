@@ -33,3 +33,24 @@ jobs:
         run: uv run pytest -m "not ml and not network"
       - name: Doctor (phase 0, informational)
         run: uv run python -m plexus.doctor || true
+
+  retrieval-gate:
+    # Re-runs the BM25 retrieval eval on the golden set and fails if any gated metric drops
+    # below the committed baseline in results/ (src/plexus/eval/gate.py). No torch, no LLMs.
+    runs-on: ubuntu-latest
+    env:
+      PLEXUS_LLM_OFFLINE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install core + dev deps from the lockfile
+        run: uv sync --frozen --extra dev
+      - name: Fetch processed filings (release asset, checksum-verified)
+        run: uv run python -m plexus.ingest.ci_data
+      - name: Retrieval gate (BM25 path)
+        run: make gate-ci PY="uv run python"
