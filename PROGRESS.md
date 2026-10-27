@@ -50,6 +50,20 @@
 - Generation metrics not run yet: they need Ollama (sudo install), so those are deferred and not part of the gate.
 - Global questions were reworded by you: "How do all semiconductor companies …" instead of "… in the corpus". All 122 local/multi-hop/bridge questions were then rephrased the way a user would type them (short company names, no filing dates unless the answer depends on the period; your request 2026-10-27). Same answers and evidence. A0 recall@10 rose from 0.216 to 0.276: the legal names and filing dates were noise for the dense embedder.
 
+### Phase 2 (in progress, branch `phase2-retrieval`)
+Step 1, 2026-10-27: BM25 keyword retriever, reciprocal rank fusion and a retriever interface (`src/plexus/retrieve/`), `make compare` (paired bootstrap B − A). Tested on A0's chunks, so only the retriever changes:
+
+| config | recall@10 (95% CI) | nDCG@10 | MRR | Δ recall@10 vs A0 (paired 95% CI) |
+| --- | --- | --- | --- | --- |
+| a0_naive (dense) | 0.276 (0.208–0.343) | 0.211 | 0.238 | |
+| a0_bm25 | 0.432 | 0.318 | 0.328 | +0.155 [+0.080, +0.231] |
+| a0_hybrid (RRF k=60, 100+100) | 0.374 | 0.290 | 0.318 | +0.098; vs bm25 −0.057 [−0.110, −0.007] |
+
+- BM25 alone beats dense bge-small clearly on local and multi-hop questions.
+- Negative result: equal-weight RRF is worse than BM25 alone, because the weaker dense list pulls good BM25 hits out of the top 10. Weighted fusion and a reranker (A3) are the next fixes.
+- Bias check: the golden questions were written from their passages, which favours keyword matching. On average 40% of a question's words appear in its gold quote. On the high-overlap half BM25 scores 0.60 vs dense 0.32; on the low-overlap half it still wins, 0.34 vs 0.28. So the BM25 advantage is partly an artefact of how the golden set was made, but not only that.
+- Global questions: no retriever reaches more than ~55% of the relevant companies in the top 10 (company_coverage@10). That is the job of A5 (community summaries).
+
 ## What was built in Phase 1 (branch `phase1-harness`)
 | Module | What | Review needed |
 | --- | --- | --- |

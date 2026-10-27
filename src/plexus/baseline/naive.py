@@ -7,8 +7,9 @@ import time
 from dataclasses import dataclass, field
 
 from plexus.config import ExperimentConfig
-from plexus.index.dense import DenseIndex, Embedder, Hit
+from plexus.index.dense import Hit
 from plexus.llm import LLMClient, LLMRequest, Message
+from plexus.retrieve.pipeline import Retriever
 
 NOT_ENOUGH = "Not enough evidence in the filings to answer this."
 
@@ -59,20 +60,13 @@ class Answer:
 
 
 class NaiveRAG:
-    def __init__(
-        self,
-        cfg: ExperimentConfig,
-        embedder: Embedder,
-        index: DenseIndex,
-        llm: LLMClient | None = None,
-    ):
+    def __init__(self, cfg: ExperimentConfig, retriever: Retriever, llm: LLMClient | None = None):
         self.cfg = cfg
-        self.embedder = embedder
-        self.index = index
+        self.retriever = retriever
         self.llm = llm
 
     def retrieve(self, question: str, k: int | None = None) -> list[Hit]:
-        return self.index.search(self.embedder.embed_query(question), k or self.cfg.retrieval.top_k)
+        return self.retriever.retrieve(question, k or self.cfg.retrieval.top_k)
 
     def build_request(self, question: str, hits: list[Hit]) -> LLMRequest:
         g = self.cfg.generation

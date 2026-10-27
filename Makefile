@@ -3,7 +3,7 @@
 PY ?= python
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement extract serve ui
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare extract serve ui
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -61,6 +61,9 @@ judge-export: ## Export answers from results/$${NAME:-a0_naive}.json for blind h
 
 judge-agreement: ## Cohen's kappa between the judge and your labels
 	$(PY) -m plexus.eval.judge agreement --results results/$${NAME:-a0_naive}.json
+
+compare: ## paired bootstrap of B vs A on the same queries: make compare A=a0_naive B=a0_bm25
+	$(PY) -m plexus.eval.compare results/$(A).json results/$(B).json
 
 serve: ## FastAPI server (Phase 6)
 	@echo "serve: not implemented yet (Phase 6)"; exit 1

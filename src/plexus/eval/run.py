@@ -283,7 +283,6 @@ def run(
     from plexus.baseline.naive import NaiveRAG
     from plexus.eval.judge import Judge
     from plexus.index.build import index_dir
-    from plexus.index.dense import DenseIndex, Embedder
     from plexus.ingest.process import iter_docs
     from plexus.llm import LLMClient
 
@@ -291,12 +290,13 @@ def run(
     golden_path = golden_path or data / "golden" / "golden.jsonl"
     queries = load_golden(golden_path)
     doc_texts = {m["doc_id"]: d.text for m, d in iter_docs(data / "processed", cfg.snapshot)}
-    embedder = Embedder(cfg.embedder, cache_path=data / "cache" / "embeddings.sqlite")
+    from plexus.retrieve.pipeline import make_retriever
+
     idx_path = index_dir(data, cfg)
-    index = DenseIndex(idx_path / "qdrant", "chunks", embedder.dim)
+    retriever = make_retriever(cfg, data)
     if (generate or use_judge) and llm is None:
         llm = LLMClient.from_settings()
-    pipeline = NaiveRAG(cfg, embedder, index, llm)
+    pipeline = NaiveRAG(cfg, retriever, llm)
     theme_labels, label_to_keyword = None, None
     themes_csv = data / "golden" / "global_themes.csv"
     if themes_csv.exists():
@@ -320,7 +320,8 @@ def run(
             "completion_tokens_uncached": llm.stats.completion_tokens,
             "by_provider": llm.stats.by_provider,
         }
-    index.close()
+    if hasattr(retriever, "close"):
+        retriever.close()
 
     build_info = json.loads((idx_path / "build_info.json").read_text())
     result = {

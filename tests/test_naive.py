@@ -4,6 +4,7 @@ from plexus.baseline.naive import NOT_ENOUGH, NaiveRAG
 from plexus.config import ExperimentConfig
 from plexus.index.dense import Hit
 from plexus.llm import FakeProvider, LLMCache, LLMClient
+from plexus.retrieve.pipeline import DenseRetriever
 
 
 class StubEmbedder:
@@ -28,7 +29,7 @@ HITS = [
 def _rag(tmp_path, responder):
     cfg = ExperimentConfig(name="t")
     llm = LLMClient(LLMCache(tmp_path / "c.sqlite"), {"ollama": FakeProvider(responder)})
-    return NaiveRAG(cfg, StubEmbedder(), StubIndex(HITS), llm)
+    return NaiveRAG(cfg, DenseRetriever(StubEmbedder(), StubIndex(HITS)), llm)
 
 
 def test_answer_maps_citations_to_chunk_ids(tmp_path):

@@ -30,8 +30,12 @@ class EmbedderConfig(_Strict):
 
 
 class RetrievalConfig(_Strict):
-    type: Literal["dense"] = "dense"
+    type: Literal["dense", "bm25", "hybrid"] = "dense"
     top_k: int = 20
+    candidates: int = 100  # hybrid: hits taken from each retriever before fusion
+    rrf_k: int = 60  # reciprocal rank fusion constant (the paper's default)
+    bm25_k1: float = 1.2
+    bm25_b: float = 0.75
 
 
 class GenerationConfig(_Strict):
