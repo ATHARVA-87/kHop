@@ -1,0 +1,22 @@
+name: a0_bm25
+description: >
+  Keyword-only baseline on A0's chunks: BM25 (k1=1.2, b=0.75), no embeddings at query time.
+  Same chunks and generation as A0, so only the retriever differs.
+snapshot: semis-2025
+seed: 0
+chunker:
+  type: fixed
+  size_words: 300
+  overlap_words: 50
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: bm25
+  top_k: 20
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 5
+judge:
+  provider: gemini
+  model: gemini-3.6-flash

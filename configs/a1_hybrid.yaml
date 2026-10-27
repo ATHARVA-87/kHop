@@ -1,0 +1,22 @@
+name: a1_hybrid
+description: >
+  A1 chunks with hybrid retrieval: top 100 dense + top 100 BM25, RRF k=60 (compare with a0_hybrid).
+snapshot: semis-2025
+seed: 0
+chunker:
+  type: structured
+  child_words: 200
+  child_chars: 1400
+  parent_words: 800
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: hybrid
+  top_k: 20
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 5
+judge:
+  provider: gemini
+  model: gemini-3.6-flash

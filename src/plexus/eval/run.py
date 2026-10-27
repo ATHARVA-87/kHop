@@ -10,6 +10,7 @@ README traces back to one file and one command.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -124,8 +125,9 @@ def score_retrieval(
             label_errors.extend(missing)
             continue
         t0 = time.perf_counter()
-        hits = retriever.retrieve(q.question, k)
+        deep = retriever.retrieve(q.question, max(k, BUDGET_DEPTH))
         ms = (time.perf_counter() - t0) * 1000
+        hits = deep[:k]  # every rank-based metric uses the top k, as before
         retrieved = [Span(h.doc_id, h.start, h.end) for h in hits]
         extra: dict = {}
         kw = theme_of(q, label_to_keyword or {}) if q.qtype == "global" else None
@@ -147,16 +149,40 @@ def score_retrieval(
                 **threshold_sensitivity(retrieved, gold),
                 # secondary: only the exact filing the question was written from counts
                 "strict_recall@10": recall_at_k(retrieved, strict, min(10, k)),
+                # cost side: words a writer would read if given the top 10 chunks
+                "context_words@10": float(sum(len((h.text or "").split()) for h in hits[:10])),
+                **budget_recall(deep, gold),
             }
         )
     return rows, label_errors
 
 
+def budget_recall(hits: Sequence, gold, budgets: Sequence[int] | None = None) -> dict[str, float]:
+    """Recall within the first `budget` words of the ranked list (at least one chunk).
+
+    Chunkers with different chunk sizes are only comparable at an equal reading budget:
+    ten 160-word chunks are not ten 300-word chunks.
+    """
+    out = {}
+    words = [len((h.text or "").split()) for h in hits]
+    spans = [Span(h.doc_id, h.start, h.end) for h in hits]
+    for b in budgets or WORD_BUDGETS:
+        n, total = 0, 0
+        while n < len(hits) and (n == 0 or total + words[n] <= b):
+            total += words[n]
+            n += 1
+        out[f"recall@{b}w"] = recall_at_k(spans[:n], gold, n) if n else 0.0
+    return out
+
+
 RECALL_KS = (1, 5, 10, 20)
+WORD_BUDGETS = (500, 1000, 2000, 3000, 5000)
+BUDGET_DEPTH = 60  # hits fetched so a 5,000-word budget fills even with ~160-word chunks
 METRICS = [
     "recall@1", "recall@5", "recall@10", "recall@20", "ndcg@10", "mrr",
     "recall@10@cover0.3", "recall@10@cover0.7", "strict_recall@10",
-    "company_coverage@10", "company_coverage@20",
+    "company_coverage@10", "company_coverage@20", "context_words@10",
+    *(f"recall@{b}w" for b in WORD_BUDGETS),
 ]  # fmt: skip
 
 
@@ -283,7 +309,6 @@ def run(
     from plexus.baseline.naive import NaiveRAG
     from plexus.eval.judge import Judge
     from plexus.index.build import index_dir
-    from plexus.index.dense import DenseIndex, Embedder
     from plexus.ingest.process import iter_docs
     from plexus.llm import LLMClient
 
@@ -291,12 +316,13 @@ def run(
     golden_path = golden_path or data / "golden" / "golden.jsonl"
     queries = load_golden(golden_path)
     doc_texts = {m["doc_id"]: d.text for m, d in iter_docs(data / "processed", cfg.snapshot)}
-    embedder = Embedder(cfg.embedder, cache_path=data / "cache" / "embeddings.sqlite")
+    from plexus.retrieve.pipeline import make_retriever
+
     idx_path = index_dir(data, cfg)
-    index = DenseIndex(idx_path / "qdrant", "chunks", embedder.dim)
+    retriever = make_retriever(cfg, data)
     if (generate or use_judge) and llm is None:
         llm = LLMClient.from_settings()
-    pipeline = NaiveRAG(cfg, embedder, index, llm)
+    pipeline = NaiveRAG(cfg, retriever, llm)
     theme_labels, label_to_keyword = None, None
     themes_csv = data / "golden" / "global_themes.csv"
     if themes_csv.exists():
@@ -320,7 +346,8 @@ def run(
             "completion_tokens_uncached": llm.stats.completion_tokens,
             "by_provider": llm.stats.by_provider,
         }
-    index.close()
+    if hasattr(retriever, "close"):
+        retriever.close()
 
     build_info = json.loads((idx_path / "build_info.json").read_text())
     result = {
@@ -330,6 +357,7 @@ def run(
         "index": build_info,
         "golden": {
             "file": _display_path(golden_path),
+            "sha256": hashlib.sha256(golden_path.read_bytes()).hexdigest(),
             "verified_queries": len(queries),
             "scored_queries": len(rows),
             "label_errors": label_errors,
