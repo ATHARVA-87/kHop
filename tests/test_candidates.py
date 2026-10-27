@@ -155,3 +155,34 @@ def test_hallucinated_quotes_are_all_rejected(tmp_path):
     s = summarise(log)
     assert s["auto_filter_rejection_rate"] == 1.0
     assert s["local"]["quote_not_found"] == 4 and s["global"]["too_few_valid_quotes"] == 1
+
+
+def test_overloaded_main_model_falls_back_and_failures_are_not_fatal(tmp_path):
+    from plexus.llm import ProviderError
+
+    data = _corpus(tmp_path)
+
+    class Overloaded:
+        name = "fake"
+        calls = 0
+
+        def complete(self, req):
+            self.calls += 1
+            if req.model == "m":
+                raise ProviderError("503 high demand")
+            if req.model == "dead":
+                raise ProviderError("still down")
+            return FakeProvider(responder).complete(req)
+
+    prov = Overloaded()
+    llm = LLMClient(LLMCache(tmp_path / "c.sqlite"), {"fake": prov})
+    llm._call_with_retry = lambda p, r: p.complete(r)  # no retry sleeps in tests
+    cfg = CFG.model_copy(update={"fallback_models": ["lite"]})
+    queries, log = generate(cfg, llm, data)
+    assert queries and all("fake/lite" in q.source for q in queries)
+
+    cfg_dead = CFG.model_copy(update={"fallback_models": ["dead"]})
+    queries, log = generate(
+        cfg_dead, LLMClient(LLMCache(tmp_path / "d.sqlite"), {"fake": prov}), data
+    )
+    assert queries == [] and {r["status"] for r in log} == {"provider_error"}

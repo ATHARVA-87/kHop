@@ -35,7 +35,7 @@ from plexus.eval.metrics import locate_quote_all
 from plexus.ingest.chunk import fixed_chunks
 from plexus.ingest.parse import ParsedDoc, Section
 from plexus.ingest.process import iter_docs
-from plexus.llm import LLMClient, LLMRequest, Message, StructuredOutputError
+from plexus.llm import LLMClient, LLMRequest, Message, ProviderError, StructuredOutputError
 from plexus.settings import Settings
 
 
@@ -44,6 +44,8 @@ class CandidateConfig(BaseModel):
     seed: int = 0
     provider: str
     model: str
+    # tried in order when the main model is overloaded (503) or returns unusable output
+    fallback_models: list[str] = Field(default_factory=list)
     counts: dict[Literal["local", "multi_hop", "global"], int]
     passage_words: int = 180
     local_sections: list[str] = Field(default_factory=lambda: ["risk_factors", "mdna", "business"])
@@ -244,10 +246,10 @@ def sample_global(
 # ---- generation ----------------------------------------------------------------------
 
 
-def _request(cfg: CandidateConfig, prompt: str) -> LLMRequest:
+def _request(cfg: CandidateConfig, prompt: str, model: str | None = None) -> LLMRequest:
     return LLMRequest(
         provider=cfg.provider,
-        model=cfg.model,
+        model=model or cfg.model,
         messages=(Message(role="system", content=SYSTEM), Message(role="user", content=prompt)),
         temperature=0.3,  # a little diversity across questions; cached, so still reproducible
         max_tokens=2048,  # Gemini 3 spends output tokens on hidden thinking
@@ -272,19 +274,35 @@ def generate(
 ) -> tuple[list[GoldenQuery], list[dict]]:
     rng = random.Random(cfg.seed)
     passages, doc_texts = load_passages(data_dir, cfg)
-    source = f"llm:{cfg.provider}/{cfg.model}"
     kept: list[GoldenQuery] = []
     log: list[dict] = []
 
     def record(qtype: str, status: str, detail: str = "") -> None:
         log.append({"qtype": qtype, "status": status, "detail": detail[:200]})
 
+    def ask(prompt: str, schema, qtype: str):
+        """Try the main model, then each fallback. Returns (output, source) or None.
+        A failure is recorded and skipped, never fatal: successes are cached, so a rerun
+        later only retries what failed."""
+        errors = []
+        for model in [cfg.model, *cfg.fallback_models]:
+            try:
+                return llm.complete_json(
+                    _request(cfg, prompt, model), schema
+                ), f"llm:{cfg.provider}/{model}"
+            except (ProviderError, StructuredOutputError) as exc:
+                errors.append(f"{model}: {type(exc).__name__}: {str(exc)[:80]}")
+        status = (
+            "bad_json" if all("StructuredOutputError" in e for e in errors) else "provider_error"
+        )
+        record(qtype, status, " | ".join(errors))
+        return None
+
     for p in sample_local(passages, cfg, rng, cfg.counts.get("local", 0)):
-        try:
-            out = llm.complete_json(_request(cfg, local_prompt(p)), LocalOut)
-        except StructuredOutputError as exc:
-            record("local", "bad_json", str(exc))
+        res = ask(local_prompt(p), LocalOut, "local")
+        if res is None:
             continue
+        out, source = res
         if not _check(doc_texts, p.doc_id, out.quote):
             record("local", "quote_not_found", out.quote)
             continue
@@ -293,11 +311,10 @@ def generate(
         record("local", "kept")
 
     for a, b, ent in sample_multi_hop(passages, cfg, rng, cfg.counts.get("multi_hop", 0)):
-        try:
-            out = llm.complete_json(_request(cfg, multi_hop_prompt(a, b, ent)), MultiHopOut)
-        except StructuredOutputError as exc:
-            record("multi_hop", "bad_json", str(exc))
+        res = ask(multi_hop_prompt(a, b, ent), MultiHopOut, "multi_hop")
+        if res is None:
             continue
+        out, source = res
         if not (
             _check(doc_texts, a.doc_id, out.quote_a) and _check(doc_texts, b.doc_id, out.quote_b)
         ):
@@ -310,11 +327,10 @@ def generate(
         record("multi_hop", "kept")
 
     for ps, theme in sample_global(passages, cfg, rng, cfg.counts.get("global", 0)):
-        try:
-            out = llm.complete_json(_request(cfg, global_prompt(ps, theme)), GlobalOut)
-        except StructuredOutputError as exc:
-            record("global", "bad_json", str(exc))
+        res = ask(global_prompt(ps, theme), GlobalOut, "global")
+        if res is None:
             continue
+        out, source = res
         evidence = []
         for gq in out.quotes:
             if 1 <= gq.passage <= len(ps) and _check(
