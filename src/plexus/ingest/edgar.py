@@ -52,6 +52,10 @@ class SnapshotConfig:
     @classmethod
     def from_yaml(cls, path: Path) -> SnapshotConfig:
         raw = yaml.safe_load(path.read_text())
+        # YAML 1.1 reads bare ON/OFF/YES/NO as booleans: ticker ON (onsemi) became True.
+        bad = [t for t in raw.get("tickers", []) if not isinstance(t, str)]
+        if bad:
+            raise ValueError(f"{path}: tickers must be strings; quote these: {bad}")
         return cls(**raw)
 
 

@@ -160,3 +160,12 @@ def test_missing_document_is_recorded_not_fatal_and_duplicate_ids_are_split(tmp_
     ids = sorted(r["doc_id"] for r in rows)
     assert len(ids) == 2 and len(set(ids)) == 2 and ids[0].startswith("NVDA_10Q_2025-05-28")
     assert [d["doc_id"] for d in summary["failed_documents"]] == ["NVDA_10K_2025-02-26"]
+
+
+def test_unquoted_yaml_boolean_ticker_is_rejected(tmp_path):
+    cfg = tmp_path / "c.yaml"
+    cfg.write_text(
+        "name: x\nforms: [10-K]\nfiled_from: '2025-01-01'\nfiled_to: '2025-12-31'\ntickers: [NVDA, ON]\n"
+    )
+    with pytest.raises(ValueError, match="quote these"):
+        edgar.SnapshotConfig.from_yaml(cfg)

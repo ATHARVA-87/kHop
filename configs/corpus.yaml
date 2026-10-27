@@ -34,7 +34,7 @@ tickers:
   - MU
   - ADI
   - NXPI
-  - ON
+  - "ON"              # quoted: bare ON is a YAML boolean
   - MCHP
   - SWKS
   - QRVO
