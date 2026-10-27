@@ -135,3 +135,24 @@ def test_repeated_quote_counts_any_occurrence():
     assert locs == [(0, 21), (40, 61)]
     gold = [tuple(Span("D", s, e) for s, e in locs)]
     assert recall_at_k([Span("D", 40, 61)], gold, 1) == 1.0
+
+
+def test_complete_at_k_needs_every_gold_item():
+    from plexus.eval.metrics import Span, retrieval_metrics
+
+    gold = [Span("A", 0, 10), Span("B", 0, 10)]
+    one = retrieval_metrics([Span("A", 0, 50)], gold, ks=(10,))
+    both = retrieval_metrics([Span("A", 0, 50), Span("B", 0, 50)], gold, ks=(10,))
+    assert one["recall@10"] == 0.5 and one["complete@10"] == 0.0
+    assert both["complete@10"] == 1.0
+
+
+def test_paired_bootstrap_clusters_widen_the_interval():
+    from plexus.eval.bootstrap import paired_bootstrap
+
+    a = [0.0] * 40
+    b = [1.0] * 10 + [0.0] * 30  # all gains come from one cluster of 10 related queries
+    plain = paired_bootstrap(a, b, seed=0)
+    clustered = paired_bootstrap(a, b, seed=0, clusters=["x"] * 10 + [f"q{i}" for i in range(30)])
+    assert plain.diff.mean == clustered.diff.mean
+    assert (clustered.diff.high - clustered.diff.low) > (plain.diff.high - plain.diff.low)

@@ -23,7 +23,7 @@ class Embedder:
         from sentence_transformers import SentenceTransformer  # heavy import
 
         self.cfg = cfg
-        self.model = SentenceTransformer(cfg.model, device=cfg.device)
+        self.model = SentenceTransformer(cfg.model, device=cfg.device, revision=cfg.revision)
         get_dim = (
             getattr(self.model, "get_embedding_dimension", None)
             or self.model.get_sentence_embedding_dimension

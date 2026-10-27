@@ -33,6 +33,7 @@ GATED = [
     ("all", "recall@3000w"),
     ("local", "recall@10"),
     ("multi_hop", "recall@10"),
+    ("multi_hop", "complete@10"),
 ]
 
 

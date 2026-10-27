@@ -30,6 +30,7 @@ class ChunkerConfig(_Strict):
 
 class EmbedderConfig(_Strict):
     model: str = "BAAI/bge-small-en-v1.5"
+    revision: str | None = "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a"  # HF commit, pinned
     # bge models expect this prefix on queries (not on passages)
     query_prefix: str = "Represent this sentence for searching relevant passages: "
     batch_size: int = 64
@@ -38,6 +39,7 @@ class EmbedderConfig(_Strict):
 
 class RerankConfig(_Strict):
     model: str = "BAAI/bge-reranker-base"
+    revision: str | None = "2cfc18c9415c912f9d8155881c133215df768a70"  # HF commit, pinned
     candidates: int = 50  # base hits the cross-encoder reorders
     max_length: int = 512
     batch_size: int = 32

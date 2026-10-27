@@ -155,6 +155,11 @@ def retrieval_metrics(
     retrieved: Sequence[Span], gold: Sequence[GoldItem], ks: Sequence[int] = (1, 5, 10, 20)
 ) -> dict[str, float]:
     out = {f"recall@{k}": recall_at_k(retrieved, gold, k) for k in ks}
+    # complete@k: every gold item hit. For a multi-hop question this is "both passages
+    # retrieved", which is what an answer needs; recall@k gives half credit for one.
+    for k in (10, 20):
+        if k in ks:
+            out[f"complete@{k}"] = float(out[f"recall@{k}"] >= 1.0 - 1e-9)
     out["ndcg@10"] = ndcg_at_k(retrieved, gold, 10)
     out["mrr"] = mrr(retrieved, gold)
     return out
