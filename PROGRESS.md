@@ -56,6 +56,10 @@
 | `eval/run.py` | Results JSON with CIs per query type, latency, label errors, git commit, checksum | **Yes** |
 | `index/dense.py`, `build.py`, `baseline/naive.py` | bge-small + Qdrant local; A0 pipeline with citations | — |
 
+## Planned extras (agreed with you)
+- Phase 5: **A9-claude-writer**, a personal local comparison run with the Writer on the optional `claude_sdk` provider vs the default Gemini Writer (same cache, same golden set). Report the quality gap and latency/cost. Never the default, never served to others (brief rule 3).
+- Agent model split (ADR 0005): Planner/Researcher/Verifier on local Ollama; Writer, judge and extraction on Gemini (Groq fallback). One account per provider; no multi-account quota stretching.
+
 ## Open questions for you
 1. Sign off or amend ADRs 0001–0005. 0003 (the ticker list) and 0004 (definition of a retrieval hit) matter most.
 2. The brief puts the LLM key and Ollama in Phase 3, but Phase 1 needs an LLM for candidates and the judge. I pulled the Gemini key forward. Is that OK?
