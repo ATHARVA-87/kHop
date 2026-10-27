@@ -60,6 +60,8 @@
 - Phase 5: **A9-claude-writer**, a personal local comparison run with the Writer on the optional `claude_sdk` provider vs the default Gemini Writer (same cache, same golden set). Report the quality gap and latency/cost. Never the default, never served to others (brief rule 3).
 - Agent model split (ADR 0005): Planner/Researcher/Verifier on local Ollama; Writer, judge and extraction on Gemini (Groq fallback). One account per provider; no multi-account quota stretching.
 
+- Phase 2 (your idea, 2026-10-27): add a **BM25-only baseline** alongside dense-only and hybrid (BM25 + dense + RRF), and a **token-budget curve**: recall@k and answer quality vs number of chunks sent to the Writer (3/5/10), reporting tokens per query. Goal: show that hybrid retrieval reaches the same quality with fewer context tokens (less LLM usage).
+
 ## Open questions for you
 1. Sign off or amend ADRs 0001–0005. 0003 (the ticker list) and 0004 (definition of a retrieval hit) matter most.
 2. The brief puts the LLM key and Ollama in Phase 3, but Phase 1 needs an LLM for candidates and the judge. I pulled the Gemini key forward. Is that OK?
