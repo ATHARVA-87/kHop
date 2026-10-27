@@ -37,3 +37,20 @@ make golden      # builds data/golden/golden.jsonl and review_stats.json (label-
 ```
 
 `review_stats.json` reports how many candidates the LLM got wrong (edit + reject over reviewed). That noise rate goes in the README.
+
+## Bridge questions (`data/golden/review_bridge.csv`)
+
+Same columns and verdicts as `review.csv`. These multi-hop questions hide the linking company ("Which foundry do both X and Y use?"). Extra checks:
+- The question must **not** name the answer company. Reject it if it does.
+- Both evidence quotes must be about the same company, and the question must need **both** filings.
+- Reject incidental links, e.g. "Amazon" as an operating-system name in one filing and a warrant holder in the other. Keep real business relationships (supplier, foundry, customer, competitor, partner).
+
+## Global themes table (`data/golden/global_themes.csv`)
+
+Global questions are scored at **company level**: for each theme (China exposure, export controls, …), which of the 39 companies' filings substantively discuss it. Gemini pre-filled `llm_discussed` with a supporting quote. Your job:
+1. Filter `spot_check = yes` (about 20% of rows).
+2. For each row, read the quote (or search that company's filing). Then set `human_discussed` to `yes` or `no`.
+   - `yes` means the company discusses the theme as a real business risk or factor. A passing word is not enough.
+3. Run `python -m plexus.eval.global_themes stats` to get your agreement with Gemini (and kappa). That number goes in the README.
+
+Your verdicts override Gemini's wherever you fill them in. For global **questions** in `review.csv`, judge whether the question is a good sector-level question. Their quotes no longer need to be complete, because scoring uses this table.
