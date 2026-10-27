@@ -25,7 +25,7 @@
    `conda activate torch && make ingest && make process`. Then read `data/snapshots/semis-2025.parse_report.json`. Section coverage below ~90% for `risk_factors` or `mdna` means the parser needs fixing on real filings. Tell me which doc IDs fail.
 4. **Gemini key** (step 5, pulled forward because candidates and the judge need it): create a free key at https://aistudio.google.com/apikey and paste it into `.env` as `GEMINI_API_KEY` yourself. Check your free-tier limits in AI Studio (ADR 0005).
 5. **Candidates:** `make candidates` writes about 200 rows to `data/golden/review.csv`. Then `make index CONFIG=configs/a0_naive.yaml`.
-6. **Review** (step 6, the core human task): follow `docs/golden_review_guide.md` and verify at least 100 rows. Then `make golden`.
+6. ~~**Review**~~ Done 2026-10-27: 134 verified questions (see "Golden-set review status"). Originally: follow `docs/golden_review_guide.md` and verify at least 100 rows. Then `make golden`.
 7. **A0:** `make eval CONFIG=configs/a0_naive.yaml` gives retrieval metrics with CIs, which is the Phase 1 gate. For generation metrics, install Ollama (step 4, needs sudo) and `ollama pull qwen3.5:4b`, then `make eval-full`, `make judge-export`, label about 50 answers, and `make judge-agreement`.
 
 **Next Claude task once data exists:** fix the parser on real filings using the parse report, then start Phase 2 (A1 structure-aware parent-child chunks).
@@ -78,7 +78,11 @@ Planned (by phase):
 - Ladder change: A8 (semantic cache) becomes a systems metric, not a quality rung.
 
 ## Golden-set review status (2026-10-27)
-- AI pre-review done (3 Claude reviewer agents); suggestions are in the `ai_*` columns. **Human verdicts pending.**
+- AI pre-review done (3 Claude reviewer agents); suggestions are in the `ai_*` columns.
+- **Human review done (2026-10-27).** You read the AI suggestions and agreed with all but one: L-d950b1c9df (Vishay capex), where you kept the original question (the AI edit was unnecessary). Verdicts were filled from `ai_verdict` and `ai_corrected_*`; `reviewer_notes` records which. Themes: 93 spot-check rows set from `ai_discussed`.
+- `make golden`: 201 reviewed → **134 verified** (65 local, 57 multi-hop [43 comparison + 14 bridge], 12 global). Verdicts: 84 accept / 50 edit / 67 reject → **candidate label-noise rate 58.2%** (Gemini candidates needing a fix or a reject).
+- Human vs AI reviewer: 99.5% exact (200/201), 100% keep-vs-reject. Theme table, human vs Gemini: 95.7% agreement, kappa 0.48 (low kappa because "yes" dominates: 3 Gemini-yes/human-no, 1 the other way).
+- Caveat for the README: the human review was AI-assisted (confirm-or-override), so the human/AI agreement number measures that process, not independent labelling.
 - Theme table rebuilt with synonyms: 434 yes / 34 no. Gemini vs AI reviewer agreement on 93 spot-check rows: 96% (was 83% with literal keywords). Gemini 3.6-flash was overloaded, so all labels come from 3.5-flash-lite.
 - `company_coverage@k` is normalised by min(k, relevant companies).
 
