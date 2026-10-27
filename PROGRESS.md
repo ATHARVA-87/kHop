@@ -5,7 +5,7 @@
 | Phase | Work | Gate | Status |
 | --- | --- | --- | --- |
 | 0. Setup | Toolchain, repo, CLAUDE.md, PROGRESS.md, Makefile, `make doctor`, CI skeleton, LLM wrapper + cache | `make doctor` and CI pass | **Passed 2026-10-27.** Doctor phase 0 all OK; GitHub CI green (run 40440596122) |
-| 1. Harness | EDGAR snapshot, golden-set candidates, human verification, metrics, A0 | A0 scored with CIs | **Code complete on branch `phase1-harness`** (not merged; needs your review). Waits on your steps below |
+| 1. Harness | EDGAR snapshot, golden-set candidates, human verification, metrics, A0 | A0 scored with CIs | **Gate met 2026-10-27** (134 verified queries; A0 recall@10 0.216). Branch `phase1-harness`, PR #1 needs your review |
 | 2. Retrieval + CI gate | A1–A3, retrieval gate on PRs | A1–A3 recorded; gate blocks a planted regression | Not started (gate rule) |
 | 3. Graph | Extraction, resolution, Kuzu, Leiden, summaries, A4, A5 | Extraction P/R; A4, A5 recorded | — |
 | 4. Single-graph agent | Router, grade-and-rewrite, A6, A7 | Router vs always-local/global | — |
@@ -39,9 +39,16 @@
 - `make test`: passes. `make lint`: clean.
 - CI dry run: fresh venv from `uv.lock` (core + dev, no torch), ruff clean, 66 passed / 3 ml deselected. Done 2026-10-26 23:54, environment deleted afterwards.
 
-### Phase 1 (in progress)
-- Code complete and tested on synthetic filings (`tests/test_pipeline_e2e.py` runs the whole A0 path with the real bge-small model).
-- Not yet run on real EDGAR data (needs your steps 2–3).
+### Phase 1: gate met 2026-10-27 (retrieval). `results/a0_naive.json`, 134 queries, 0 label errors, 95% bootstrap CIs
+| slice | n | recall@10 | nDCG@10 | MRR |
+| --- | --- | --- | --- | --- |
+| all | 134 | 0.216 (0.153–0.281) | 0.142 | 0.144 |
+| local | 65 | 0.346 (0.231–0.462) | 0.217 | 0.185 |
+| multi_hop | 57 | 0.105 (0.053–0.167) | 0.077 | 0.103 |
+| global (company_coverage@10) | 12 | 0.508 (0.417–0.617) | | |
+- strict_recall@10 (exact source filing only) 0.154. Retrieval p50 31 ms.
+- Generation metrics not run yet: they need Ollama (sudo install), so those are deferred and not part of the gate.
+- Global questions were reworded by you: "How do all semiconductor companies …" instead of "… in the corpus".
 
 ## What was built in Phase 1 (branch `phase1-harness`)
 | Module | What | Review needed |
