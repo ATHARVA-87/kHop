@@ -149,6 +149,12 @@ Planned (by phase):
 - Finding: the author email on the first 51 commits is a personal address, public in commit metadata. Future commits use the GitHub noreply address (repo-local git config). Rewriting history needs your decision.
 - New pre-commit hook `no-secrets` blocks API-key and token patterns and personal email addresses.
 
+## Held-out test set (2026-10-27)
+- Same procedure as dev: Gemini drafts (user-style phrasing, dev passages and company pairs excluded) -> 3 AI reviewer agents -> human. You approved the AI pre-review as a whole ("most edits not required, same meaning"), so human/AI agreement is 100% by construction. Report it that way.
+- 130 candidates -> **91 verified** (37 local, 23 multi-hop: 14 comparison + 9 bridge, 31 global ≈ 2–3 angles × 12 themes). `data/golden/golden_test.jsonl`, built with `make golden-test`.
+- Draft quality: 39/130 rejected (30%). Counting cosmetic edits as errors gives 88% (`review_test_stats.json`). The reviewers rejected executive-bio links, weak Ambarella–TSMC links, non-unique bridge answers and boilerplate.
+- **Rule: final configs only, scored once.** Every design decision uses the dev set (`golden.jsonl`).
+
 ## Open questions for you
 1. Sign off or amend ADRs 0001–0005. 0003 (the ticker list) and 0004 (definition of a retrieval hit) matter most.
 2. The brief puts the LLM key and Ollama in Phase 3, but Phase 1 needs an LLM for candidates and the judge. I pulled the Gemini key forward. Is that OK?
