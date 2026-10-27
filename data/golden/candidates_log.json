@@ -1,0 +1,36 @@
+{
+  "summary": {
+    "bridge": {
+      "kept": 21,
+      "quote_not_found": 5
+    },
+    "auto_filter_rejection_rate": 0.1923
+  },
+  "rejected": [
+    {
+      "qtype": "bridge",
+      "status": "quote_not_found",
+      "detail": "Taiwan Semiconductor Manufacturing Company (TSMC) and others. || our consolidated joint venture company with TSMC."
+    },
+    {
+      "qtype": "bridge",
+      "status": "quote_not_found",
+      "detail": "Taiwan Semiconductor Manufacturing Company Limited | Taiwan Semiconductor Manufacturing Company Limited | Taiwan Semiconductor Manufacturing Company Limited || Taiwan Semiconductor Manufacturing Compa"
+    },
+    {
+      "qtype": "bridge",
+      "status": "quote_not_found",
+      "detail": "We face intense competition in the semiconductor memory and storage markets from a number of companies, including Samsung Electronics Co., Ltd.; SK hynix Inc.; Kioxia Holdings Corporation; Sandisk Cor"
+    },
+    {
+      "qtype": "bridge",
+      "status": "quote_not_found",
+      "detail": "lobbied governments to allocate frequency spectrum and, along with Google, Intel and Smartrac, cofounded the RAIN Alliance. || In the automotive camera market, we compete against Allwinner Technology "
+    },
+    {
+      "qtype": "bridge",
+      "status": "quote_not_found",
+      "detail": "We partner with Microsoft on our HiWire Switch AEC and open-source implementation that helps realize Microsoft\u2019s vision for a highly reliable network-managed dual-Top-of-Rack || Zoom, Microsoft Teams,"
+    }
+  ]
+}

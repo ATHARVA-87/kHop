@@ -1,0 +1,20 @@
+{
+  "candidates": 201,
+  "reviewed": 201,
+  "reviewed_fraction": 1.0,
+  "verdicts": {
+    "accept": 84,
+    "reject": 67,
+    "edit": 50
+  },
+  "label_noise_rate": 0.5821,
+  "verified_by_type": {
+    "local": 65,
+    "multi_hop": 57,
+    "global": 12
+  },
+  "verified_by_tag": {
+    "comparison": 43,
+    "bridge": 14
+  }
+}

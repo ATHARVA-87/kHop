@@ -21,7 +21,9 @@ dependencies = [
 [project.optional-dependencies]
 ml = [
     "torch==2.5.1",
-    "sentence-transformers>=3.0",
+    # transformers 5.x needs torch>=2.6; we keep torch 2.5.1 (ADR 0002)
+    "transformers>=4.41,<5",
+    "sentence-transformers>=3,<6",
     "qdrant-client>=1.12",
 ]
 dev = [
@@ -44,7 +46,8 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
-ignore = ["E501"]
+# RUF001-003: SEC text is full of typographic quotes/dashes we must match on purpose.
+ignore = ["E501", "RUF001", "RUF002", "RUF003"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,22 @@
+name: a0_naive
+description: >
+  A0 naive RAG baseline. Structure-blind 300-word windows, dense bge-small embeddings,
+  top-k cosine retrieval, one generation call over the top 5 chunks.
+snapshot: semis-2025
+seed: 0
+chunker:
+  type: fixed
+  size_words: 300
+  overlap_words: 50
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: dense
+  top_k: 20
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 5
+judge:
+  provider: gemini
+  model: gemini-3.6-flash

@@ -1,0 +1,16 @@
+{
+  "snapshot": "semis-2025",
+  "documents": 156,
+  "companies": 39,
+  "missing_tickers": [
+    "QRVO"
+  ],
+  "failed_documents": [],
+  "by_form": {
+    "10-K": 39,
+    "10-Q": 117
+  },
+  "total_bytes": 309143285,
+  "corpus_checksum": "f202efae8bc8f8150105f323ebe7a55a29cbc946d0677791adadd72e5b5c9cd5",
+  "requests_made": 195
+}
