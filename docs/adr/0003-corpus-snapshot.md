@@ -9,6 +9,7 @@ The brief asks for one sector, 30–50 companies, frozen as a snapshot. Multi-ho
 ## Decision
 - **Sector:** semiconductors plus semiconductor equipment and materials (`configs/corpus.yaml`, 40 tickers). Designers, IDMs and equipment makers name each other, and the same foundries and suppliers (TSMC, Samsung, ASML, etc.), as customers, suppliers and competitors. That is good multi-hop material. Export controls, China exposure, cyclicality and supply concentration recur across risk factors, which is good corpus-level material.
 - **Only US domestic filers (10-K/10-Q).** Foreign private issuers (TSMC, ASML) file 20-F, which has a different structure. They appear as graph entities, not as documents.
+- **Snapshot result (2026-10-27):** 156 filings (39 10-K, 117 10-Q) from 39 companies; QRVO (Qorvo) is not in the SEC ticker table (Skyworks merger), so it was skipped. Corpus checksum in `data/snapshots/semis-2025.summary.json`.
 - **Window:** forms 10-K and 10-Q *filed* 2025-01-01 to 2025-12-31, with amendments excluded. Expect about one 10-K and three 10-Qs per company, roughly 160 documents.
 - **Snapshot identity:** the committed manifest `data/snapshots/semis-2025.manifest.jsonl` with per-document sha256, and a corpus checksum over it. The Phase 7 drift check uses a second snapshot (e.g. `semis-2026`).
 

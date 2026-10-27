@@ -80,6 +80,8 @@ def process_snapshot(data_dir: Path, snapshot: str) -> dict:
         "snapshot": snapshot,
         "documents": len(per_doc),
         "docs_missing_expected_sections": sum(bool(d["missing_expected"]) for d in per_doc),
+        # filings whose layout the parser does not recognise (whole text = one "unknown" section)
+        "unstructured_docs": [d["doc_id"] for d in per_doc if set(d["sections"]) == {"unknown"}],
         "coverage": {
             form: {
                 name: sum(

@@ -28,7 +28,7 @@ _ITEM_RE = re.compile(
 )
 # A TOC row ends with a page number cell ("Risk Factors | 12") or a bare trailing number.
 _TOC_ROW = re.compile(r"(\|\s*\d{1,3}|\s\d{1,3})\s*$")
-VERSION = "2"  # bump when parsing changes: it is part of the index key
+VERSION = "4"  # bump when parsing changes: it is part of the index key
 _PART_RE = re.compile(r"^\s*part\s+(iv|i{1,3})\b", re.IGNORECASE)
 _NOISE_LINE = re.compile(r"^(table of contents|index|\d{1,3}|page \d+)$", re.IGNORECASE)
 
@@ -161,6 +161,47 @@ def _drop_toc(
     return [c for c, d in zip(cands, drop, strict=True) if not d]
 
 
+# Some filers drop the "Item N." prefix on a heading (Credo's 10-Q MD&A). If a key section
+# is missing, look for a standalone line with its standard title.
+_FALLBACK_TITLES = {
+    "mdna": re.compile(r"^management.s discussion and analysis( of financial condition and results of operations)?\.?$", re.I),
+    "risk_factors": re.compile(r"^risk factors\.?$", re.I),
+}  # fmt: skip
+_FALLBACK_KEYS = {
+    "10-K": {"mdna": "7", "risk_factors": "1A"},
+    "10-Q": {"mdna": "I-2", "risk_factors": "II-1A"},
+}
+
+
+def _title_fallback(lines, offsets, chosen, form, text_len, min_chars=2000, max_occurrences=2):
+    """Add missing mdna/risk_factors sections found by title alone. Only when the title line
+    occurs at most `max_occurrences` times (TOC + body): a title repeated as a page header
+    (Intel) is ambiguous and is skipped rather than guessed."""
+    keys = _FALLBACK_KEYS["10-Q" if form.startswith("10-Q") else "10-K"]
+    have = {k for _, k, _ in chosen}
+    starts = sorted(s for s, _, _ in chosen)
+    for name, key in keys.items():
+        if key in have:
+            continue
+        hits = [
+            i
+            for i, line in enumerate(lines)
+            if len(line) <= 120 and _FALLBACK_TITLES[name].match(line)
+        ]
+        if not hits or len(hits) > max_occurrences:
+            continue
+        best = None
+        for i in hits:
+            start = offsets[i]
+            end = next((s for s in starts if s > start), text_len)
+            ok = min_chars <= end - start <= 0.5 * text_len  # a section, not the whole filing
+            if ok and (best is None or end - start > best[1] - best[0]):
+                best = (start, end, lines[i])
+        if best:
+            chosen.append((best[0], key, best[2]))
+    return sorted(chosen)
+
+
 def parse_filing(doc_id: str, html: str | bytes, form: str) -> ParsedDoc:
     text = html_to_text(html)
     lines = text.split("\n")
@@ -183,6 +224,7 @@ def parse_filing(doc_id: str, html: str | bytes, form: str) -> ParsedDoc:
 
     # Sections tile the text: each runs from its heading to the next CHOSEN heading.
     chosen = sorted(((start, key, title) for key, (start, _, title) in best.items()))
+    chosen = _title_fallback(lines, offsets, chosen, form, len(text))
     sections: list[Section] = []
     first = chosen[0][0] if chosen else len(text)
     if first > 0:
@@ -190,6 +232,11 @@ def parse_filing(doc_id: str, html: str | bytes, form: str) -> ParsedDoc:
     for n, (start, key, title) in enumerate(chosen):
         end = chosen[n + 1][0] if n + 1 < len(chosen) else len(text)
         sections.append(Section(key, names[key], title, start, end))
+    # Sanity check: one section covering most of a long filing means its layout was not
+    # recognised (Intel uses its own headings plus a cross-reference index). Mark the whole
+    # filing "unknown" rather than keep wrong labels; the parse report lists these.
+    if len(text) > 20_000 and any(sec.end - sec.start > 0.8 * len(text) for sec in sections):
+        sections = []
     if not sections:
-        sections.append(Section("cover", "unknown", "", 0, len(text)))
+        sections.append(Section("unstructured", "unknown", "", 0, len(text)))
     return ParsedDoc(doc_id=doc_id, text=text, sections=sections)

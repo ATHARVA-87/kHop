@@ -85,6 +85,17 @@ def test_10q_items_are_keyed_by_part():
 def test_unstructured_document_falls_back_to_one_section():
     doc = parse_filing("u", "<p>just text</p>", "10-K")
     assert len(doc.sections) == 1 and doc.sections[0].end == len(doc.text)
+    assert doc.sections[0].name == "unknown"
+
+
+def test_unrecognised_layout_is_marked_unknown_not_mislabelled():
+    # Intel-style: a nav list mentioning "Risk Factors", own headings, Items only in an index
+    html = f"""<html><body><p>Risk Factors</p><p>Sales and Marketing</p>
+<p>Our Strategy</p><p>{BODY * 20}</p>
+<p>Form 10-K Cross-Reference Index</p><p>Item 1. | Business: | Our Strategy</p>
+<p>Item 7. | MD&A | Financial Performance</p></body></html>"""
+    doc = parse_filing("intc", html, "10-K")
+    assert [s.name for s in doc.sections] == ["unknown"]
 
 
 # ---- regressions from the Phase 1 review --------------------------------------------
@@ -171,3 +182,24 @@ def test_10q_parts_from_titles_when_body_has_no_part_lines():
         "II-6",
     ]
     assert doc.sections[-1].name == "exhibits"
+
+
+def test_title_fallback_finds_mdna_without_item_prefix():
+    # Credo-style 10-Q: body MD&A heading has no "Item 2."
+    html = f"""<html><body>
+<p>Item 1.</p><p>Financial Statements</p><p>Item 2.</p><p>Management’s Discussion and Analysis of Financial Condition and Results of Operations</p>
+<p>Item 3.</p><p>Quantitative and Qualitative Disclosures About Market Risk</p><p>Item 4.</p><p>Controls and Procedures</p>
+<p>Item 1. Financial Statements.</p><p>{BODY}</p>
+<p>MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS</p><p>Demand rose. {BODY} {BODY}</p>
+<p>Item 3. Quantitative and Qualitative Disclosures About Market Risk.</p><p>{BODY}</p></body></html>"""
+    doc = parse_filing("q", html, "10-Q")
+    assert doc.section_at(doc.text.index("Demand rose")).name == "mdna"
+
+
+def test_title_fallback_skips_titles_repeated_as_page_headers():
+    pages = "".join(
+        f"<p>Risk Factors and Other Key Information</p><p>Risk Factors</p><p>Page {i} {BODY}</p>"
+        for i in range(5)
+    )
+    doc = parse_filing("intc", f"<html><body>{pages}</body></html>", "10-K")
+    assert "risk_factors" not in {s.name for s in doc.sections}

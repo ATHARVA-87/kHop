@@ -1,0 +1,3213 @@
+{
+  "snapshot": "semis-2025",
+  "documents": 156,
+  "docs_missing_expected_sections": 4,
+  "unstructured_docs": [
+    "INTC_10K_2025-01-31",
+    "INTC_10Q_2025-04-25",
+    "INTC_10Q_2025-07-24",
+    "INTC_10Q_2025-11-06"
+  ],
+  "coverage": {
+    "10-K": {
+      "business": 0.9743589743589743,
+      "risk_factors": 0.9743589743589743,
+      "mdna": 0.9743589743589743
+    },
+    "10-Q": {
+      "mdna": 0.9743589743589743,
+      "financial_statements": 0.9743589743589743
+    }
+  },
+  "per_doc": [
+    {
+      "doc_id": "NVDA_10K_2025-02-26",
+      "chars": 349868,
+      "sections": {
+        "cover": 10175,
+        "business": 54633,
+        "risk_factors": 110357,
+        "unresolved_staff_comments": 51,
+        "cybersecurity": 3912,
+        "properties": 906,
+        "legal_proceedings": 197,
+        "mine_safety": 56,
+        "market_for_equity": 5598,
+        "reserved": 19,
+        "mdna": 38033,
+        "market_risk": 3283,
+        "financial_statements": 207,
+        "accountant_changes": 99,
+        "controls": 3429,
+        "other_information": 956,
+        "foreign_jurisdiction_disclosure": 427,
+        "directors_officers": 2254,
+        "executive_compensation": 360,
+        "security_ownership": 637,
+        "relationships": 455,
+        "accountant_fees": 302,
+        "exhibits": 110715,
+        "summary": 2807
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "NVDA_10Q_2025-05-28",
+      "chars": 134833,
+      "sections": {
+        "cover": 5317,
+        "financial_statements": 51748,
+        "mdna": 31140,
+        "market_risk": 874,
+        "controls": 2324,
+        "legal_proceedings": 381,
+        "risk_factors": 35996,
+        "equity_sales": 3529,
+        "other_information": 841,
+        "exhibits": 2683
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "NVDA_10Q_2025-08-27",
+      "chars": 135899,
+      "sections": {
+        "cover": 5385,
+        "financial_statements": 54782,
+        "mdna": 33339,
+        "market_risk": 1772,
+        "controls": 2324,
+        "legal_proceedings": 381,
+        "risk_factors": 30795,
+        "equity_sales": 3574,
+        "other_information": 667,
+        "exhibits": 2880
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "NVDA_10Q_2025-11-19",
+      "chars": 153832,
+      "sections": {
+        "cover": 5485,
+        "financial_statements": 57003,
+        "mdna": 33563,
+        "market_risk": 1778,
+        "controls": 2326,
+        "legal_proceedings": 381,
+        "risk_factors": 46718,
+        "equity_sales": 3234,
+        "other_information": 853,
+        "exhibits": 2491
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMD_10K_2025-02-05",
+      "chars": 374998,
+      "sections": {
+        "cover": 5870,
+        "business": 56870,
+        "risk_factors": 125465,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 4719,
+        "properties": 1187,
+        "legal_proceedings": 189,
+        "mine_safety": 56,
+        "market_for_equity": 2898,
+        "reserved": 19,
+        "mdna": 32736,
+        "market_risk": 4166,
+        "financial_statements": 105341,
+        "accountant_changes": 99,
+        "controls": 5351,
+        "other_information": 678,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 1151,
+        "executive_compensation": 733,
+        "security_ownership": 330,
+        "relationships": 284,
+        "accountant_fees": 792,
+        "exhibits": 24453,
+        "summary": 1468
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMD_10Q_2025-05-07",
+      "chars": 203526,
+      "sections": {
+        "cover": 3572,
+        "financial_statements": 38109,
+        "mdna": 24472,
+        "market_risk": 376,
+        "controls": 1641,
+        "legal_proceedings": 214,
+        "risk_factors": 130907,
+        "equity_sales": 1603,
+        "other_information": 381,
+        "exhibits": 2251
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMD_10Q_2025-08-06",
+      "chars": 220503,
+      "sections": {
+        "cover": 3573,
+        "financial_statements": 49089,
+        "mdna": 32968,
+        "market_risk": 376,
+        "controls": 1639,
+        "legal_proceedings": 214,
+        "risk_factors": 127526,
+        "equity_sales": 1594,
+        "other_information": 1041,
+        "exhibits": 2483
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMD_10Q_2025-11-05",
+      "chars": 224806,
+      "sections": {
+        "cover": 3581,
+        "financial_statements": 51876,
+        "mdna": 33084,
+        "market_risk": 376,
+        "controls": 1649,
+        "legal_proceedings": 214,
+        "risk_factors": 128364,
+        "equity_sales": 1553,
+        "other_information": 1423,
+        "exhibits": 2686
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "QCOM_10Q_2025-02-05",
+      "chars": 197766,
+      "sections": {
+        "cover": 3616,
+        "financial_statements": 31862,
+        "mdna": 23267,
+        "market_risk": 342,
+        "controls": 1020,
+        "legal_proceedings": 209,
+        "risk_factors": 132620,
+        "equity_sales": 1490,
+        "defaults": 56,
+        "mine_safety": 48,
+        "other_information": 946,
+        "exhibits": 2290
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "QCOM_10Q_2025-04-30",
+      "chars": 207012,
+      "sections": {
+        "cover": 3608,
+        "financial_statements": 34802,
+        "mdna": 29556,
+        "market_risk": 687,
+        "controls": 1021,
+        "legal_proceedings": 209,
+        "risk_factors": 133773,
+        "equity_sales": 1161,
+        "defaults": 56,
+        "mine_safety": 48,
+        "other_information": 306,
+        "exhibits": 1785
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "QCOM_10Q_2025-07-30",
+      "chars": 213038,
+      "sections": {
+        "cover": 3605,
+        "financial_statements": 36516,
+        "mdna": 32365,
+        "market_risk": 1600,
+        "controls": 1020,
+        "legal_proceedings": 209,
+        "risk_factors": 133958,
+        "equity_sales": 1149,
+        "defaults": 56,
+        "mine_safety": 48,
+        "other_information": 359,
+        "exhibits": 2153
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "QCOM_10K_2025-11-05",
+      "chars": 387567,
+      "sections": {
+        "cover": 8374,
+        "business": 63104,
+        "risk_factors": 132331,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 7721,
+        "properties": 1168,
+        "legal_proceedings": 196,
+        "mine_safety": 56,
+        "market_for_equity": 3528,
+        "reserved": 19,
+        "mdna": 36695,
+        "market_risk": 5357,
+        "financial_statements": 151,
+        "accountant_changes": 99,
+        "controls": 3848,
+        "other_information": 356,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 664,
+        "executive_compensation": 156,
+        "security_ownership": 228,
+        "relationships": 207,
+        "accountant_fees": 180,
+        "exhibits": 9433,
+        "summary": 113553
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AVGO_10Q_2025-03-12",
+      "chars": 182086,
+      "sections": {
+        "cover": 3296,
+        "financial_statements": 49481,
+        "mdna": 26014,
+        "market_risk": 1580,
+        "controls": 1788,
+        "legal_proceedings": 298,
+        "risk_factors": 86255,
+        "equity_sales": 498,
+        "defaults": 46,
+        "mine_safety": 38,
+        "other_information": 2419,
+        "exhibits": 10373
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AVGO_10Q_2025-06-11",
+      "chars": 194676,
+      "sections": {
+        "cover": 3281,
+        "financial_statements": 55999,
+        "mdna": 31298,
+        "market_risk": 1564,
+        "controls": 1778,
+        "legal_proceedings": 298,
+        "risk_factors": 88292,
+        "equity_sales": 12166
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AVGO_10Q_2025-09-10",
+      "chars": 199762,
+      "sections": {
+        "cover": 3290,
+        "financial_statements": 58834,
+        "mdna": 31633,
+        "market_risk": 1569,
+        "controls": 1784,
+        "legal_proceedings": 298,
+        "risk_factors": 102354
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AVGO_10K_2025-12-18",
+      "chars": 365243,
+      "sections": {
+        "cover": 8382,
+        "business": 45082,
+        "risk_factors": 90028,
+        "unresolved_staff_comments": 40,
+        "cybersecurity": 4950,
+        "properties": 1273,
+        "legal_proceedings": 307,
+        "mine_safety": 46,
+        "market_for_equity": 3043,
+        "reserved": 18,
+        "mdna": 49511,
+        "market_risk": 1434,
+        "financial_statements": 135556,
+        "accountant_changes": 108,
+        "controls": 4451,
+        "other_information": 61,
+        "foreign_jurisdiction_disclosure": 101,
+        "directors_officers": 414,
+        "executive_compensation": 498,
+        "security_ownership": 430,
+        "relationships": 336,
+        "accountant_fees": 324,
+        "exhibits": 16380,
+        "summary": 2470
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MRVL_10K_2025-03-12",
+      "chars": 419389,
+      "sections": {
+        "cover": 11542,
+        "business": 45409,
+        "risk_factors": 137242,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 6393,
+        "properties": 1317,
+        "legal_proceedings": 369,
+        "mine_safety": 56,
+        "market_for_equity": 7492,
+        "reserved": 19,
+        "mdna": 47082,
+        "market_risk": 3541,
+        "financial_statements": 128144,
+        "accountant_changes": 99,
+        "controls": 5676,
+        "other_information": 784,
+        "foreign_jurisdiction_disclosure": 4468,
+        "directors_officers": 2078,
+        "executive_compensation": 389,
+        "security_ownership": 2061,
+        "relationships": 524,
+        "accountant_fees": 286,
+        "exhibits": 11488,
+        "summary": 2889
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MRVL_10Q_2025-05-30",
+      "chars": 254829,
+      "sections": {
+        "cover": 3748,
+        "financial_statements": 55096,
+        "mdna": 32981,
+        "market_risk": 3590,
+        "controls": 2779,
+        "legal_proceedings": 426,
+        "risk_factors": 140045,
+        "equity_sales": 2121,
+        "other_information": 3224,
+        "exhibits": 10819
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MRVL_10Q_2025-08-29",
+      "chars": 268119,
+      "sections": {
+        "cover": 3803,
+        "financial_statements": 61833,
+        "mdna": 38987,
+        "market_risk": 3153,
+        "controls": 2785,
+        "legal_proceedings": 426,
+        "risk_factors": 143179,
+        "equity_sales": 2124,
+        "other_information": 1056,
+        "exhibits": 10773
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MRVL_10Q_2025-12-03",
+      "chars": 274771,
+      "sections": {
+        "cover": 3829,
+        "financial_statements": 65669,
+        "mdna": 40413,
+        "market_risk": 3164,
+        "controls": 2789,
+        "legal_proceedings": 426,
+        "risk_factors": 143520,
+        "equity_sales": 2898,
+        "other_information": 1143,
+        "exhibits": 10920
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MPWR_10K_2025-03-03",
+      "chars": 319783,
+      "sections": {
+        "cover": 10679,
+        "business": 29574,
+        "risk_factors": 108083,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 3396,
+        "properties": 488,
+        "legal_proceedings": 1395,
+        "mine_safety": 56,
+        "market_for_equity": 4244,
+        "reserved": 19,
+        "mdna": 28248,
+        "market_risk": 2596,
+        "financial_statements": 112470,
+        "accountant_changes": 99,
+        "controls": 4321,
+        "other_information": 1240,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 665,
+        "executive_compensation": 242,
+        "security_ownership": 390,
+        "relationships": 338,
+        "accountant_fees": 256,
+        "exhibits": 9170,
+        "summary": 1671
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MPWR_10Q_2025-05-05",
+      "chars": 89012,
+      "sections": {
+        "cover": 3528,
+        "financial_statements": 51538,
+        "mdna": 23758,
+        "market_risk": 490,
+        "controls": 2000,
+        "legal_proceedings": 1833,
+        "risk_factors": 672,
+        "equity_sales": 1013,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 1768,
+        "exhibits": 2318
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MPWR_10Q_2025-08-04",
+      "chars": 98723,
+      "sections": {
+        "cover": 3525,
+        "financial_statements": 56260,
+        "mdna": 28764,
+        "market_risk": 497,
+        "controls": 1998,
+        "legal_proceedings": 1935,
+        "risk_factors": 672,
+        "equity_sales": 1644,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 881,
+        "exhibits": 2453
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MPWR_10Q_2025-11-05",
+      "chars": 96779,
+      "sections": {
+        "cover": 3895,
+        "financial_statements": 54782,
+        "mdna": 27436,
+        "market_risk": 503,
+        "controls": 2008,
+        "legal_proceedings": 1870,
+        "risk_factors": 672,
+        "equity_sales": 1743,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 1733,
+        "exhibits": 2043
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "LSCC_10K_2025-02-14",
+      "chars": 294100,
+      "sections": {
+        "cover": 14235,
+        "business": 30118,
+        "risk_factors": 89951,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 3294,
+        "properties": 1083,
+        "legal_proceedings": 455,
+        "mine_safety": 56,
+        "market_for_equity": 3625,
+        "reserved": 17,
+        "mdna": 36971,
+        "market_risk": 1922,
+        "financial_statements": 90743,
+        "accountant_changes": 99,
+        "controls": 5634,
+        "other_information": 742,
+        "foreign_jurisdiction_disclosure": 628,
+        "directors_officers": 2361,
+        "executive_compensation": 1785,
+        "security_ownership": 331,
+        "relationships": 310,
+        "accountant_fees": 283,
+        "exhibits": 9416
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "LSCC_10Q_2025-05-05",
+      "chars": 78728,
+      "sections": {
+        "cover": 10018,
+        "financial_statements": 33304,
+        "mdna": 26277,
+        "market_risk": 723,
+        "controls": 2713,
+        "legal_proceedings": 207,
+        "risk_factors": 1543,
+        "equity_sales": 1896,
+        "other_information": 235,
+        "exhibits": 1812
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "LSCC_10Q_2025-08-04",
+      "chars": 88844,
+      "sections": {
+        "cover": 9981,
+        "financial_statements": 39824,
+        "mdna": 29527,
+        "market_risk": 723,
+        "controls": 2714,
+        "legal_proceedings": 207,
+        "risk_factors": 1543,
+        "equity_sales": 1876,
+        "other_information": 634,
+        "exhibits": 1815
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "LSCC_10Q_2025-11-03",
+      "chars": 91177,
+      "sections": {
+        "cover": 10131,
+        "financial_statements": 40685,
+        "mdna": 30880,
+        "market_risk": 723,
+        "controls": 2713,
+        "legal_proceedings": 207,
+        "risk_factors": 1543,
+        "equity_sales": 1842,
+        "other_information": 636,
+        "exhibits": 1817
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SYNA_10Q_2025-02-06",
+      "chars": 133632,
+      "sections": {
+        "cover": 4367,
+        "financial_statements": 73052,
+        "mdna": 39620,
+        "market_risk": 342,
+        "controls": 1707,
+        "legal_proceedings": 377,
+        "risk_factors": 8194,
+        "equity_sales": 1045,
+        "defaults": 46,
+        "other_information": 1703,
+        "exhibits": 3179
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SYNA_10Q_2025-05-08",
+      "chars": 144554,
+      "sections": {
+        "cover": 4323,
+        "financial_statements": 79821,
+        "mdna": 42990,
+        "market_risk": 339,
+        "controls": 1717,
+        "legal_proceedings": 377,
+        "risk_factors": 9824,
+        "equity_sales": 1088,
+        "defaults": 46,
+        "other_information": 1122,
+        "exhibits": 2907
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SYNA_10K_2025-08-21",
+      "chars": 273364,
+      "sections": {
+        "cover": 8310,
+        "business": 34334,
+        "risk_factors": 56810,
+        "unresolved_staff_comments": 51,
+        "cybersecurity": 4786,
+        "properties": 860,
+        "legal_proceedings": 593,
+        "mine_safety": 56,
+        "market_for_equity": 5342,
+        "reserved": 17,
+        "mdna": 31951,
+        "market_risk": 2678,
+        "financial_statements": 108732,
+        "accountant_changes": 109,
+        "controls": 3730,
+        "other_information": 339,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 1118,
+        "executive_compensation": 302,
+        "security_ownership": 440,
+        "relationships": 440,
+        "accountant_fees": 386,
+        "exhibits": 10454,
+        "summary": 1424
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SYNA_10Q_2025-11-06",
+      "chars": 92750,
+      "sections": {
+        "cover": 4232,
+        "financial_statements": 54831,
+        "mdna": 24571,
+        "market_risk": 343,
+        "controls": 1725,
+        "legal_proceedings": 377,
+        "risk_factors": 314,
+        "equity_sales": 1439,
+        "defaults": 46,
+        "other_information": 2519,
+        "exhibits": 2353
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SLAB_10K_2025-02-04",
+      "chars": 268723,
+      "sections": {
+        "cover": 6880,
+        "business": 46421,
+        "risk_factors": 70707,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 5291,
+        "properties": 859,
+        "legal_proceedings": 217,
+        "mine_safety": 56,
+        "market_for_equity": 1993,
+        "reserved": 19,
+        "mdna": 28338,
+        "market_risk": 2107,
+        "financial_statements": 214,
+        "accountant_changes": 99,
+        "controls": 4257,
+        "other_information": 1141,
+        "foreign_jurisdiction_disclosure": 431,
+        "directors_officers": 183,
+        "executive_compensation": 151,
+        "security_ownership": 223,
+        "relationships": 202,
+        "accountant_fees": 175,
+        "exhibits": 8105,
+        "summary": 90613
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SLAB_10Q_2025-05-13",
+      "chars": 138130,
+      "sections": {
+        "cover": 5011,
+        "financial_statements": 31090,
+        "mdna": 23718,
+        "market_risk": 329,
+        "controls": 1394,
+        "legal_proceedings": 226,
+        "risk_factors": 73018,
+        "equity_sales": 159,
+        "defaults": 55,
+        "mine_safety": 47,
+        "other_information": 846,
+        "exhibits": 2237
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SLAB_10Q_2025-08-05",
+      "chars": 147104,
+      "sections": {
+        "cover": 5025,
+        "financial_statements": 36950,
+        "mdna": 26905,
+        "market_risk": 329,
+        "controls": 1392,
+        "legal_proceedings": 226,
+        "risk_factors": 73532,
+        "equity_sales": 158,
+        "defaults": 55,
+        "mine_safety": 47,
+        "other_information": 437,
+        "exhibits": 2048
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SLAB_10Q_2025-11-04",
+      "chars": 150676,
+      "sections": {
+        "cover": 5070,
+        "financial_statements": 39148,
+        "mdna": 26577,
+        "market_risk": 329,
+        "controls": 1398,
+        "legal_proceedings": 226,
+        "risk_factors": 74666,
+        "equity_sales": 161,
+        "defaults": 55,
+        "mine_safety": 47,
+        "other_information": 880,
+        "exhibits": 2119
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "CRUS_10Q_2025-02-04",
+      "chars": 82953,
+      "sections": {
+        "cover": 4017,
+        "financial_statements": 41660,
+        "mdna": 21710,
+        "market_risk": 1200,
+        "controls": 1505,
+        "legal_proceedings": 240,
+        "risk_factors": 7490,
+        "equity_sales": 2189,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 276,
+        "exhibits": 2572
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "CRUS_10K_2025-05-23",
+      "chars": 278947,
+      "sections": {
+        "cover": 8682,
+        "business": 25258,
+        "risk_factors": 94673,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 5708,
+        "properties": 1488,
+        "legal_proceedings": 1139,
+        "mine_safety": 56,
+        "market_for_equity": 4591,
+        "reserved": 19,
+        "mdna": 18619,
+        "market_risk": 3123,
+        "financial_statements": 97633,
+        "accountant_changes": 99,
+        "controls": 3132,
+        "other_information": 921,
+        "foreign_jurisdiction_disclosure": 92,
+        "directors_officers": 1242,
+        "executive_compensation": 491,
+        "security_ownership": 313,
+        "relationships": 260,
+        "accountant_fees": 297,
+        "exhibits": 11070
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "CRUS_10Q_2025-08-05",
+      "chars": 73523,
+      "sections": {
+        "cover": 3945,
+        "financial_statements": 37178,
+        "mdna": 18378,
+        "market_risk": 1260,
+        "controls": 1489,
+        "legal_proceedings": 240,
+        "risk_factors": 5277,
+        "equity_sales": 2441,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 859,
+        "exhibits": 2362
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "CRUS_10Q_2025-11-04",
+      "chars": 85768,
+      "sections": {
+        "cover": 4024,
+        "financial_statements": 42866,
+        "mdna": 21908,
+        "market_risk": 1265,
+        "controls": 1499,
+        "legal_proceedings": 240,
+        "risk_factors": 8289,
+        "equity_sales": 2179,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 1040,
+        "exhibits": 2364
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SMTC_10K_2025-03-25",
+      "chars": 526565,
+      "sections": {
+        "cover": 5657,
+        "foreign_jurisdiction_disclosure": 12931,
+        "business": 41451,
+        "risk_factors": 124539,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 4779,
+        "properties": 1907,
+        "legal_proceedings": 204,
+        "mine_safety": 56,
+        "market_for_equity": 3626,
+        "reserved": 19,
+        "mdna": 83297,
+        "market_risk": 7995,
+        "financial_statements": 206131,
+        "accountant_changes": 99,
+        "controls": 9973,
+        "other_information": 393,
+        "directors_officers": 2024,
+        "executive_compensation": 470,
+        "security_ownership": 511,
+        "relationships": 517,
+        "accountant_fees": 525,
+        "exhibits": 18006,
+        "summary": 1414
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SMTC_10Q_2025-05-29",
+      "chars": 167819,
+      "sections": {
+        "cover": 10508,
+        "financial_statements": 101216,
+        "mdna": 43602,
+        "market_risk": 6742,
+        "controls": 1424,
+        "legal_proceedings": 565,
+        "risk_factors": 570,
+        "equity_sales": 156,
+        "defaults": 45,
+        "mine_safety": 47,
+        "other_information": 284,
+        "exhibits": 2660
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SMTC_10Q_2025-08-26",
+      "chars": 187656,
+      "sections": {
+        "cover": 10509,
+        "financial_statements": 111075,
+        "mdna": 51409,
+        "market_risk": 6965,
+        "controls": 1422,
+        "legal_proceedings": 565,
+        "risk_factors": 570,
+        "equity_sales": 156,
+        "defaults": 45,
+        "mine_safety": 47,
+        "other_information": 2456,
+        "exhibits": 2437
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SMTC_10Q_2025-11-25",
+      "chars": 211400,
+      "sections": {
+        "cover": 10521,
+        "financial_statements": 127206,
+        "mdna": 59019,
+        "market_risk": 6700,
+        "controls": 1428,
+        "legal_proceedings": 565,
+        "risk_factors": 570,
+        "equity_sales": 977,
+        "defaults": 45,
+        "mine_safety": 47,
+        "other_information": 1694,
+        "exhibits": 2628
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MXL_10K_2025-01-29",
+      "chars": 526922,
+      "sections": {
+        "cover": 13957,
+        "business": 63389,
+        "risk_factors": 195148,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 7150,
+        "properties": 677,
+        "legal_proceedings": 13309,
+        "mine_safety": 80,
+        "market_for_equity": 2274,
+        "reserved": 19,
+        "mdna": 51432,
+        "market_risk": 1811,
+        "financial_statements": 171,
+        "accountant_changes": 99,
+        "controls": 7856,
+        "other_information": 805,
+        "foreign_jurisdiction_disclosure": 101,
+        "directors_officers": 2035,
+        "executive_compensation": 304,
+        "security_ownership": 394,
+        "relationships": 449,
+        "accountant_fees": 380,
+        "exhibits": 165041
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MXL_10Q_2025-04-23",
+      "chars": 348219,
+      "sections": {
+        "cover": 3798,
+        "financial_statements": 91144,
+        "mdna": 41534,
+        "market_risk": 1844,
+        "controls": 3206,
+        "legal_proceedings": 14279,
+        "risk_factors": 189766,
+        "equity_sales": 160,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 318,
+        "exhibits": 2076
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MXL_10Q_2025-07-23",
+      "chars": 360955,
+      "sections": {
+        "cover": 3805,
+        "financial_statements": 96813,
+        "mdna": 47769,
+        "market_risk": 1838,
+        "controls": 3204,
+        "legal_proceedings": 14042,
+        "risk_factors": 190388,
+        "equity_sales": 160,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 767,
+        "exhibits": 2075
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MXL_10Q_2025-10-23",
+      "chars": 359109,
+      "sections": {
+        "cover": 3841,
+        "financial_statements": 104138,
+        "mdna": 47799,
+        "market_risk": 1850,
+        "controls": 3214,
+        "legal_proceedings": 14179,
+        "risk_factors": 181261,
+        "equity_sales": 160,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 318,
+        "exhibits": 2255
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "RMBS_10K_2025-02-24",
+      "chars": 386895,
+      "sections": {
+        "cover": 11582,
+        "business": 24212,
+        "risk_factors": 114871,
+        "unresolved_staff_comments": 43,
+        "cybersecurity": 6173,
+        "properties": 800,
+        "legal_proceedings": 691,
+        "mine_safety": 58,
+        "market_for_equity": 2461,
+        "reserved": 19,
+        "mdna": 67175,
+        "market_risk": 3849,
+        "financial_statements": 194,
+        "accountant_changes": 101,
+        "controls": 4173,
+        "other_information": 1359,
+        "foreign_jurisdiction_disclosure": 104,
+        "directors_officers": 547,
+        "executive_compensation": 361,
+        "security_ownership": 433,
+        "relationships": 412,
+        "accountant_fees": 385,
+        "exhibits": 146892
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "RMBS_10Q_2025-04-29",
+      "chars": 218715,
+      "sections": {
+        "cover": 9259,
+        "financial_statements": 47506,
+        "mdna": 35884,
+        "market_risk": 3813,
+        "controls": 1587,
+        "legal_proceedings": 689,
+        "risk_factors": 115566,
+        "equity_sales": 1620,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 360,
+        "exhibits": 2337
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "RMBS_10Q_2025-07-29",
+      "chars": 226659,
+      "sections": {
+        "cover": 9099,
+        "financial_statements": 50256,
+        "mdna": 40739,
+        "market_risk": 3179,
+        "controls": 1585,
+        "legal_proceedings": 689,
+        "risk_factors": 116249,
+        "equity_sales": 1675,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 986,
+        "exhibits": 2108
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "RMBS_10Q_2025-10-28",
+      "chars": 228852,
+      "sections": {
+        "cover": 9138,
+        "financial_statements": 51202,
+        "mdna": 42998,
+        "market_risk": 3207,
+        "controls": 1595,
+        "legal_proceedings": 689,
+        "risk_factors": 116818,
+        "equity_sales": 640,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 360,
+        "exhibits": 2111
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SITM_10K_2025-02-14",
+      "chars": 359497,
+      "sections": {
+        "cover": 18954,
+        "business": 47384,
+        "risk_factors": 123805,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 5237,
+        "properties": 890,
+        "legal_proceedings": 380,
+        "mine_safety": 56,
+        "market_for_equity": 2509,
+        "reserved": 19,
+        "mdna": 43768,
+        "market_risk": 1938,
+        "financial_statements": 86551,
+        "accountant_changes": 100,
+        "controls": 8690,
+        "other_information": 1193,
+        "foreign_jurisdiction_disclosure": 103,
+        "directors_officers": 2471,
+        "executive_compensation": 359,
+        "security_ownership": 3005,
+        "relationships": 330,
+        "accountant_fees": 305,
+        "exhibits": 8180,
+        "summary": 3229
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SITM_10Q_2025-05-08",
+      "chars": 210134,
+      "sections": {
+        "cover": 10491,
+        "financial_statements": 35495,
+        "mdna": 33077,
+        "market_risk": 1953,
+        "controls": 2079,
+        "legal_proceedings": 244,
+        "risk_factors": 123503,
+        "other_information": 32,
+        "exhibits": 3260
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SITM_10Q_2025-08-07",
+      "chars": 222222,
+      "sections": {
+        "cover": 10493,
+        "financial_statements": 41571,
+        "mdna": 37387,
+        "market_risk": 1945,
+        "controls": 2078,
+        "legal_proceedings": 244,
+        "risk_factors": 123990,
+        "other_information": 1355,
+        "exhibits": 3159
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SITM_10Q_2025-11-06",
+      "chars": 221522,
+      "sections": {
+        "cover": 10500,
+        "financial_statements": 41298,
+        "mdna": 37818,
+        "market_risk": 1972,
+        "controls": 2083,
+        "legal_proceedings": 244,
+        "risk_factors": 124266,
+        "other_information": 32,
+        "exhibits": 3309
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMBA_10K_2025-03-28",
+      "chars": 382805,
+      "sections": {
+        "cover": 10454,
+        "business": 57640,
+        "risk_factors": 134235,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 6034,
+        "properties": 1650,
+        "legal_proceedings": 390,
+        "mine_safety": 56,
+        "market_for_equity": 2337,
+        "reserved": 19,
+        "mdna": 51522,
+        "market_risk": 2752,
+        "financial_statements": 276,
+        "accountant_changes": 109,
+        "controls": 6012,
+        "other_information": 334,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 1013,
+        "executive_compensation": 359,
+        "security_ownership": 431,
+        "relationships": 410,
+        "accountant_fees": 383,
+        "exhibits": 97489,
+        "summary": 8757
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMBA_10Q_2025-06-03",
+      "chars": 226164,
+      "sections": {
+        "cover": 3742,
+        "financial_statements": 44403,
+        "mdna": 34019,
+        "market_risk": 314,
+        "controls": 2771,
+        "legal_proceedings": 259,
+        "risk_factors": 135950,
+        "equity_sales": 1701,
+        "other_information": 335,
+        "exhibits": 2670
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMBA_10Q_2025-09-03",
+      "chars": 233619,
+      "sections": {
+        "cover": 3763,
+        "financial_statements": 48064,
+        "mdna": 36074,
+        "market_risk": 314,
+        "controls": 2769,
+        "legal_proceedings": 267,
+        "risk_factors": 137871,
+        "equity_sales": 1756,
+        "other_information": 334,
+        "exhibits": 2407
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMBA_10Q_2025-12-04",
+      "chars": 238782,
+      "sections": {
+        "cover": 3787,
+        "financial_statements": 51253,
+        "mdna": 36216,
+        "market_risk": 314,
+        "controls": 2775,
+        "legal_proceedings": 267,
+        "risk_factors": 138017,
+        "equity_sales": 1776,
+        "other_information": 1466,
+        "exhibits": 2911
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "CRDO_10Q_2025-03-10",
+      "chars": 85346,
+      "sections": {
+        "cover": 8067,
+        "financial_statements": 39330,
+        "mdna": 27397,
+        "market_risk": 448,
+        "controls": 2194,
+        "legal_proceedings": 579,
+        "risk_factors": 604,
+        "other_information": 4640,
+        "exhibits": 2087
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "CRDO_10K_2025-07-02",
+      "chars": 369982,
+      "sections": {
+        "cover": 15525,
+        "business": 35735,
+        "risk_factors": 175133,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 4956,
+        "properties": 1063,
+        "legal_proceedings": 925,
+        "mine_safety": 56,
+        "market_for_equity": 1678,
+        "reserved": 19,
+        "mdna": 33569,
+        "market_risk": 3214,
+        "financial_statements": 81239,
+        "accountant_changes": 99,
+        "controls": 3215,
+        "other_information": 5568,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 285,
+        "executive_compensation": 135,
+        "security_ownership": 207,
+        "relationships": 186,
+        "accountant_fees": 159,
+        "exhibits": 4718,
+        "summary": 2155
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "CRDO_10Q_2025-09-04",
+      "chars": 70646,
+      "sections": {
+        "cover": 8069,
+        "financial_statements": 35136,
+        "mdna": 20105,
+        "market_risk": 431,
+        "controls": 2192,
+        "legal_proceedings": 579,
+        "risk_factors": 598,
+        "other_information": 1596,
+        "exhibits": 1940
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "CRDO_10Q_2025-12-02",
+      "chars": 87806,
+      "sections": {
+        "cover": 8073,
+        "financial_statements": 44803,
+        "mdna": 25064,
+        "market_risk": 441,
+        "controls": 2194,
+        "legal_proceedings": 579,
+        "risk_factors": 598,
+        "equity_sales": 1743,
+        "other_information": 2321,
+        "exhibits": 1990
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "PI_10K_2025-02-10",
+      "chars": 293184,
+      "sections": {
+        "cover": 11642,
+        "business": 31587,
+        "risk_factors": 91441,
+        "unresolved_staff_comments": 51,
+        "cybersecurity": 4808,
+        "properties": 707,
+        "legal_proceedings": 401,
+        "mine_safety": 56,
+        "market_for_equity": 2519,
+        "reserved": 19,
+        "mdna": 35039,
+        "market_risk": 2966,
+        "financial_statements": 95288,
+        "accountant_changes": 99,
+        "controls": 2796,
+        "other_information": 1271,
+        "foreign_jurisdiction_disclosure": 93,
+        "directors_officers": 1147,
+        "executive_compensation": 299,
+        "security_ownership": 371,
+        "relationships": 350,
+        "accountant_fees": 323,
+        "exhibits": 7809,
+        "summary": 2102
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "PI_10Q_2025-04-23",
+      "chars": 169847,
+      "sections": {
+        "cover": 6695,
+        "financial_statements": 36232,
+        "mdna": 27137,
+        "market_risk": 2837,
+        "controls": 1952,
+        "legal_proceedings": 317,
+        "risk_factors": 92164,
+        "exhibits": 2513
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "PI_10Q_2025-07-30",
+      "chars": 176960,
+      "sections": {
+        "cover": 6810,
+        "financial_statements": 36366,
+        "mdna": 32964,
+        "market_risk": 2836,
+        "controls": 1949,
+        "legal_proceedings": 317,
+        "risk_factors": 93208,
+        "exhibits": 2510
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "PI_10Q_2025-10-29",
+      "chars": 189363,
+      "sections": {
+        "cover": 6693,
+        "financial_statements": 43063,
+        "mdna": 37027,
+        "market_risk": 2841,
+        "controls": 1964,
+        "legal_proceedings": 317,
+        "risk_factors": 94833,
+        "exhibits": 2625
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "INTC_10K_2025-01-31",
+      "chars": 471991,
+      "sections": {
+        "unknown": 471991
+      },
+      "missing_expected": [
+        "business",
+        "risk_factors",
+        "mdna"
+      ]
+    },
+    {
+      "doc_id": "INTC_10Q_2025-04-25",
+      "chars": 122037,
+      "sections": {
+        "unknown": 122037
+      },
+      "missing_expected": [
+        "mdna",
+        "financial_statements"
+      ]
+    },
+    {
+      "doc_id": "INTC_10Q_2025-07-24",
+      "chars": 171109,
+      "sections": {
+        "unknown": 171109
+      },
+      "missing_expected": [
+        "mdna",
+        "financial_statements"
+      ]
+    },
+    {
+      "doc_id": "INTC_10Q_2025-11-06",
+      "chars": 184723,
+      "sections": {
+        "unknown": 184723
+      },
+      "missing_expected": [
+        "mdna",
+        "financial_statements"
+      ]
+    },
+    {
+      "doc_id": "TXN_10K_2025-02-14",
+      "chars": 187055,
+      "sections": {
+        "cover": 4013,
+        "business": 22492,
+        "risk_factors": 26701,
+        "unresolved_staff_comments": 51,
+        "cybersecurity": 5235,
+        "properties": 1565,
+        "legal_proceedings": 465,
+        "mine_safety": 56,
+        "market_for_equity": 1400,
+        "reserved": 19,
+        "mdna": 14990,
+        "market_risk": 2057,
+        "financial_statements": 84297,
+        "accountant_changes": 109,
+        "controls": 6671,
+        "other_information": 43,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 1706,
+        "executive_compensation": 587,
+        "security_ownership": 2654,
+        "relationships": 314,
+        "accountant_fees": 365,
+        "exhibits": 11163
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "TXN_10Q_2025-04-24",
+      "chars": 51252,
+      "sections": {
+        "cover": 2658,
+        "financial_statements": 27521,
+        "mdna": 12189,
+        "controls": 960,
+        "legal_proceedings": 300,
+        "risk_factors": 182,
+        "equity_sales": 1226,
+        "exhibits": 6216
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "TXN_10Q_2025-07-29",
+      "chars": 66368,
+      "sections": {
+        "cover": 2656,
+        "financial_statements": 34012,
+        "mdna": 20694,
+        "controls": 960,
+        "legal_proceedings": 300,
+        "risk_factors": 182,
+        "equity_sales": 1192,
+        "exhibits": 6372
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "TXN_10Q_2025-10-23",
+      "chars": 69618,
+      "sections": {
+        "cover": 2664,
+        "financial_statements": 36385,
+        "mdna": 21692,
+        "controls": 960,
+        "legal_proceedings": 300,
+        "risk_factors": 182,
+        "equity_sales": 1211,
+        "exhibits": 6224
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MU_10Q_2025-03-21",
+      "chars": 200326,
+      "sections": {
+        "cover": 9391,
+        "financial_statements": 55749,
+        "mdna": 31942,
+        "market_risk": 455,
+        "controls": 1322,
+        "legal_proceedings": 535,
+        "risk_factors": 94641,
+        "equity_sales": 1907,
+        "other_information": 342,
+        "exhibits": 4042
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MU_10Q_2025-06-26",
+      "chars": 207672,
+      "sections": {
+        "cover": 9579,
+        "financial_statements": 60023,
+        "mdna": 34056,
+        "market_risk": 451,
+        "controls": 1339,
+        "legal_proceedings": 517,
+        "risk_factors": 95307,
+        "equity_sales": 1898,
+        "other_information": 2068,
+        "exhibits": 2434
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MU_10K_2025-10-03",
+      "chars": 357755,
+      "sections": {
+        "cover": 10743,
+        "business": 59060,
+        "risk_factors": 101986,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 5677,
+        "properties": 5092,
+        "legal_proceedings": 517,
+        "mine_safety": 56,
+        "market_for_equity": 4723,
+        "reserved": 19,
+        "mdna": 41461,
+        "market_risk": 4148,
+        "financial_statements": 105317,
+        "accountant_changes": 99,
+        "controls": 3570,
+        "other_information": 2020,
+        "foreign_jurisdiction_disclosure": 11543,
+        "summary": 1683
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MU_10Q_2025-12-18",
+      "chars": 198680,
+      "sections": {
+        "cover": 9017,
+        "financial_statements": 49283,
+        "mdna": 29312,
+        "market_risk": 454,
+        "controls": 1321,
+        "legal_proceedings": 537,
+        "risk_factors": 103603,
+        "equity_sales": 2001,
+        "other_information": 3152
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ADI_10Q_2025-02-19",
+      "chars": 60491,
+      "sections": {
+        "cover": 2768,
+        "financial_statements": 25821,
+        "mdna": 23274,
+        "market_risk": 595,
+        "controls": 2158,
+        "risk_factors": 387,
+        "equity_sales": 1431,
+        "other_information": 1314,
+        "exhibits": 2743
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ADI_10Q_2025-05-22",
+      "chars": 67425,
+      "sections": {
+        "cover": 2758,
+        "financial_statements": 30595,
+        "mdna": 26392,
+        "market_risk": 588,
+        "controls": 2143,
+        "risk_factors": 389,
+        "equity_sales": 1436,
+        "other_information": 955,
+        "exhibits": 2169
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ADI_10Q_2025-08-20",
+      "chars": 75601,
+      "sections": {
+        "cover": 2764,
+        "financial_statements": 37013,
+        "mdna": 27753,
+        "market_risk": 592,
+        "controls": 2152,
+        "risk_factors": 389,
+        "equity_sales": 1443,
+        "other_information": 1487,
+        "exhibits": 2008
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ADI_10K_2025-11-25",
+      "chars": 360483,
+      "sections": {
+        "cover": 9322,
+        "business": 44434,
+        "risk_factors": 80745,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 6169,
+        "properties": 2661,
+        "legal_proceedings": 575,
+        "mine_safety": 56,
+        "market_for_equity": 3667,
+        "reserved": 17,
+        "mdna": 39118,
+        "market_risk": 13520,
+        "financial_statements": 122825,
+        "accountant_changes": 109,
+        "controls": 9020,
+        "other_information": 246,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 1355,
+        "executive_compensation": 216,
+        "security_ownership": 288,
+        "relationships": 267,
+        "accountant_fees": 339,
+        "exhibits": 23715,
+        "summary": 1676
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "NXPI_10K_2025-02-20",
+      "chars": 367986,
+      "sections": {
+        "cover": 12991,
+        "business": 49955,
+        "risk_factors": 74014,
+        "unresolved_staff_comments": 51,
+        "cybersecurity": 6350,
+        "properties": 752,
+        "legal_proceedings": 375,
+        "mine_safety": 56,
+        "market_for_equity": 2756,
+        "reserved": 19,
+        "mdna": 59955,
+        "market_risk": 5320,
+        "financial_statements": 135900,
+        "accountant_changes": 109,
+        "controls": 3976,
+        "other_information": 278,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 552,
+        "executive_compensation": 264,
+        "security_ownership": 379,
+        "relationships": 390,
+        "accountant_fees": 333,
+        "exhibits": 10631,
+        "summary": 2478
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "NXPI_10Q_2025-04-29",
+      "chars": 94785,
+      "sections": {
+        "cover": 10322,
+        "financial_statements": 36201,
+        "mdna": 34107,
+        "market_risk": 441,
+        "controls": 1038,
+        "legal_proceedings": 42,
+        "risk_factors": 173,
+        "equity_sales": 1643,
+        "other_information": 68,
+        "exhibits": 10750
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "NXPI_10Q_2025-07-24",
+      "chars": 109433,
+      "sections": {
+        "cover": 10403,
+        "financial_statements": 43314,
+        "mdna": 42328,
+        "market_risk": 439,
+        "controls": 1190,
+        "legal_proceedings": 42,
+        "risk_factors": 173,
+        "equity_sales": 1598,
+        "other_information": 68,
+        "exhibits": 9878
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "NXPI_10Q_2025-10-28",
+      "chars": 118531,
+      "sections": {
+        "cover": 10416,
+        "financial_statements": 47090,
+        "mdna": 45824,
+        "market_risk": 440,
+        "controls": 1206,
+        "legal_proceedings": 42,
+        "risk_factors": 173,
+        "equity_sales": 1622,
+        "other_information": 1208,
+        "exhibits": 10510
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ON_10K_2025-02-10",
+      "chars": 375003,
+      "sections": {
+        "cover": 9526,
+        "business": 45031,
+        "risk_factors": 84136,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 8702,
+        "properties": 2000,
+        "legal_proceedings": 554,
+        "mine_safety": 55,
+        "market_for_equity": 5793,
+        "reserved": 19,
+        "mdna": 39434,
+        "market_risk": 3368,
+        "financial_statements": 692,
+        "accountant_changes": 99,
+        "controls": 3096,
+        "other_information": 1367,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 1083,
+        "executive_compensation": 793,
+        "security_ownership": 453,
+        "relationships": 320,
+        "accountant_fees": 229,
+        "exhibits": 14264,
+        "summary": 153846
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ON_10Q_2025-05-05",
+      "chars": 101278,
+      "sections": {
+        "cover": 5237,
+        "financial_statements": 64469,
+        "mdna": 21749,
+        "market_risk": 255,
+        "controls": 1721,
+        "legal_proceedings": 412,
+        "risk_factors": 2830,
+        "equity_sales": 2326,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 338,
+        "exhibits": 1847
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ON_10Q_2025-08-04",
+      "chars": 120068,
+      "sections": {
+        "cover": 5235,
+        "financial_statements": 73749,
+        "mdna": 31285,
+        "market_risk": 254,
+        "controls": 1719,
+        "legal_proceedings": 412,
+        "risk_factors": 2830,
+        "equity_sales": 2303,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 337,
+        "exhibits": 1850
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ON_10Q_2025-11-03",
+      "chars": 123554,
+      "sections": {
+        "cover": 5241,
+        "financial_statements": 74714,
+        "mdna": 32326,
+        "market_risk": 254,
+        "controls": 2379,
+        "legal_proceedings": 412,
+        "risk_factors": 2830,
+        "equity_sales": 2323,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 340,
+        "exhibits": 2641
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MCHP_10Q_2025-02-06",
+      "chars": 282890,
+      "sections": {
+        "cover": 7261,
+        "financial_statements": 64532,
+        "mdna": 62644,
+        "market_risk": 1044,
+        "controls": 2106,
+        "legal_proceedings": 172,
+        "risk_factors": 141670,
+        "exhibits": 3461
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MCHP_10K_2025-05-23",
+      "chars": 448947,
+      "sections": {
+        "cover": 47345,
+        "risk_factors": 147231,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 9986,
+        "properties": 2749,
+        "legal_proceedings": 162,
+        "mine_safety": 56,
+        "market_for_equity": 2316,
+        "reserved": 19,
+        "mdna": 65970,
+        "market_risk": 1272,
+        "accountant_changes": 99,
+        "controls": 4565,
+        "other_information": 935,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 2743,
+        "executive_compensation": 1121,
+        "security_ownership": 756,
+        "relationships": 632,
+        "accountant_fees": 377,
+        "exhibits": 1195,
+        "summary": 13722,
+        "financial_statements": 11253,
+        "business": 134300
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MCHP_10Q_2025-08-07",
+      "chars": 282419,
+      "sections": {
+        "cover": 6982,
+        "financial_statements": 57487,
+        "mdna": 59807,
+        "market_risk": 1037,
+        "controls": 2102,
+        "legal_proceedings": 172,
+        "risk_factors": 149304,
+        "equity_sales": 882,
+        "defaults": 56,
+        "mine_safety": 48,
+        "other_information": 1987,
+        "exhibits": 2555
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MCHP_10Q_2025-11-06",
+      "chars": 295915,
+      "sections": {
+        "cover": 7029,
+        "financial_statements": 65940,
+        "mdna": 64256,
+        "market_risk": 1042,
+        "controls": 2107,
+        "legal_proceedings": 172,
+        "risk_factors": 152812,
+        "exhibits": 2557
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SWKS_10Q_2025-02-05",
+      "chars": 74844,
+      "sections": {
+        "cover": 3473,
+        "financial_statements": 32783,
+        "mdna": 16713,
+        "market_risk": 3839,
+        "controls": 2094,
+        "legal_proceedings": 120,
+        "risk_factors": 11750,
+        "equity_sales": 1705,
+        "exhibits": 2367
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SWKS_10Q_2025-05-07",
+      "chars": 85012,
+      "sections": {
+        "cover": 3462,
+        "financial_statements": 35212,
+        "mdna": 18688,
+        "market_risk": 3843,
+        "controls": 2089,
+        "legal_proceedings": 120,
+        "risk_factors": 16634,
+        "equity_sales": 2071,
+        "exhibits": 2893
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SWKS_10Q_2025-08-05",
+      "chars": 92922,
+      "sections": {
+        "cover": 3462,
+        "financial_statements": 37739,
+        "mdna": 18964,
+        "market_risk": 3851,
+        "controls": 2102,
+        "legal_proceedings": 120,
+        "risk_factors": 21856,
+        "equity_sales": 2538,
+        "exhibits": 2290
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "SWKS_10K_2025-11-07",
+      "chars": 311434,
+      "sections": {
+        "cover": 11497,
+        "business": 28365,
+        "risk_factors": 118416,
+        "unresolved_staff_comments": 42,
+        "cybersecurity": 4821,
+        "properties": 1087,
+        "legal_proceedings": 149,
+        "mine_safety": 57,
+        "market_for_equity": 2656,
+        "reserved": 19,
+        "mdna": 26596,
+        "market_risk": 4075,
+        "financial_statements": 93668,
+        "accountant_changes": 100,
+        "controls": 4649,
+        "other_information": 2445,
+        "foreign_jurisdiction_disclosure": 93,
+        "directors_officers": 1046,
+        "executive_compensation": 295,
+        "security_ownership": 296,
+        "relationships": 275,
+        "accountant_fees": 248,
+        "exhibits": 10539
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "WOLF_10Q_2025-01-30",
+      "chars": 206624,
+      "sections": {
+        "cover": 3327,
+        "financial_statements": 67372,
+        "mdna": 37912,
+        "market_risk": 812,
+        "controls": 1760,
+        "legal_proceedings": 246,
+        "risk_factors": 91449,
+        "exhibits": 3746
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "WOLF_10Q_2025-05-09",
+      "chars": 225092,
+      "sections": {
+        "cover": 3316,
+        "financial_statements": 78231,
+        "mdna": 39785,
+        "market_risk": 803,
+        "controls": 1739,
+        "legal_proceedings": 246,
+        "risk_factors": 98804,
+        "exhibits": 2168
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "WOLF_10K_2025-08-26",
+      "chars": 479632,
+      "sections": {
+        "cover": 7570,
+        "business": 37124,
+        "risk_factors": 136530,
+        "unresolved_staff_comments": 51,
+        "cybersecurity": 5669,
+        "properties": 1287,
+        "legal_proceedings": 404,
+        "mine_safety": 56,
+        "market_for_equity": 2377,
+        "reserved": 17,
+        "mdna": 79026,
+        "market_risk": 262,
+        "financial_statements": 189714,
+        "accountant_changes": 99,
+        "controls": 4364,
+        "other_information": 1814,
+        "foreign_jurisdiction_disclosure": 385,
+        "directors_officers": 160,
+        "executive_compensation": 128,
+        "security_ownership": 200,
+        "relationships": 179,
+        "accountant_fees": 152,
+        "exhibits": 10642,
+        "summary": 1422
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "WOLF_10Q_2025-11-07",
+      "chars": 248554,
+      "sections": {
+        "cover": 3583,
+        "financial_statements": 97346,
+        "mdna": 60760,
+        "market_risk": 384,
+        "controls": 1743,
+        "legal_proceedings": 311,
+        "risk_factors": 77702,
+        "equity_sales": 84,
+        "defaults": 1151,
+        "mine_safety": 48,
+        "other_information": 940,
+        "exhibits": 4502
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "POWI_10K_2025-02-07",
+      "chars": 282695,
+      "sections": {
+        "cover": 9450,
+        "business": 48680,
+        "risk_factors": 40182,
+        "unresolved_staff_comments": 52,
+        "cybersecurity": 8857,
+        "properties": 659,
+        "legal_proceedings": 281,
+        "mine_safety": 57,
+        "market_for_equity": 2934,
+        "reserved": 19,
+        "mdna": 32201,
+        "market_risk": 4950,
+        "financial_statements": 97217,
+        "accountant_changes": 110,
+        "controls": 12501,
+        "foreign_jurisdiction_disclosure": 103,
+        "directors_officers": 2162,
+        "executive_compensation": 1153,
+        "security_ownership": 664,
+        "relationships": 503,
+        "accountant_fees": 364,
+        "exhibits": 12184,
+        "other_information": 5255,
+        "summary": 2157
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "POWI_10Q_2025-05-12",
+      "chars": 98492,
+      "sections": {
+        "cover": 7497,
+        "financial_statements": 43692,
+        "mdna": 34375,
+        "market_risk": 446,
+        "controls": 2455,
+        "legal_proceedings": 318,
+        "risk_factors": 3450,
+        "equity_sales": 1505,
+        "other_information": 497,
+        "exhibits": 4257
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "POWI_10Q_2025-08-06",
+      "chars": 112282,
+      "sections": {
+        "cover": 7516,
+        "financial_statements": 52055,
+        "mdna": 39126,
+        "market_risk": 444,
+        "controls": 2454,
+        "legal_proceedings": 318,
+        "risk_factors": 4568,
+        "equity_sales": 1522,
+        "other_information": 713,
+        "exhibits": 3566
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "POWI_10Q_2025-11-05",
+      "chars": 112990,
+      "sections": {
+        "cover": 7566,
+        "financial_statements": 53459,
+        "mdna": 39089,
+        "market_risk": 445,
+        "controls": 2459,
+        "legal_proceedings": 318,
+        "risk_factors": 4568,
+        "equity_sales": 1571,
+        "other_information": 501,
+        "exhibits": 3014
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "DIOD_10K_2025-02-14",
+      "chars": 350792,
+      "sections": {
+        "cover": 5755,
+        "business": 48498,
+        "risk_factors": 83708,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 12242,
+        "properties": 2968,
+        "legal_proceedings": 1277,
+        "mine_safety": 57,
+        "market_for_equity": 3241,
+        "reserved": 18,
+        "mdna": 34656,
+        "market_risk": 8919,
+        "financial_statements": 234,
+        "accountant_changes": 110,
+        "controls": 4583,
+        "other_information": 34,
+        "foreign_jurisdiction_disclosure": 93,
+        "directors_officers": 899,
+        "executive_compensation": 312,
+        "security_ownership": 483,
+        "relationships": 446,
+        "accountant_fees": 420,
+        "exhibits": 1186,
+        "summary": 140612
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "DIOD_10Q_2025-05-08",
+      "chars": 89470,
+      "sections": {
+        "cover": 3188,
+        "financial_statements": 43807,
+        "mdna": 36009,
+        "market_risk": 257,
+        "controls": 1903,
+        "legal_proceedings": 712,
+        "risk_factors": 3594
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "DIOD_10Q_2025-08-07",
+      "chars": 103562,
+      "sections": {
+        "cover": 3191,
+        "financial_statements": 51279,
+        "mdna": 41641,
+        "market_risk": 257,
+        "controls": 1897,
+        "legal_proceedings": 712,
+        "risk_factors": 272,
+        "equity_sales": 4313
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "DIOD_10Q_2025-11-06",
+      "chars": 104036,
+      "sections": {
+        "cover": 3197,
+        "financial_statements": 52629,
+        "mdna": 41737,
+        "market_risk": 257,
+        "controls": 1907,
+        "legal_proceedings": 712,
+        "risk_factors": 3597
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ALGM_10Q_2025-01-31",
+      "chars": 110800,
+      "sections": {
+        "cover": 7776,
+        "financial_statements": 51126,
+        "mdna": 45856,
+        "market_risk": 370,
+        "controls": 1720,
+        "legal_proceedings": 590,
+        "risk_factors": 248,
+        "equity_sales": 75,
+        "other_information": 975,
+        "exhibits": 2064
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ALGM_10K_2025-05-22",
+      "chars": 426204,
+      "sections": {
+        "cover": 14676,
+        "business": 78188,
+        "risk_factors": 98893,
+        "unresolved_staff_comments": 42,
+        "cybersecurity": 4752,
+        "properties": 3513,
+        "legal_proceedings": 718,
+        "mine_safety": 57,
+        "market_for_equity": 2338,
+        "reserved": 18,
+        "mdna": 60524,
+        "market_risk": 4455,
+        "financial_statements": 235,
+        "accountant_changes": 100,
+        "controls": 2603,
+        "other_information": 1157,
+        "foreign_jurisdiction_disclosure": 103,
+        "directors_officers": 1955,
+        "executive_compensation": 278,
+        "security_ownership": 1834,
+        "relationships": 329,
+        "accountant_fees": 302,
+        "exhibits": 12373,
+        "summary": 136761
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ALGM_10Q_2025-08-01",
+      "chars": 90389,
+      "sections": {
+        "cover": 7695,
+        "financial_statements": 45965,
+        "mdna": 31161,
+        "market_risk": 369,
+        "controls": 1711,
+        "legal_proceedings": 589,
+        "risk_factors": 257,
+        "equity_sales": 74,
+        "other_information": 270,
+        "exhibits": 2298
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ALGM_10Q_2025-10-31",
+      "chars": 110581,
+      "sections": {
+        "cover": 7782,
+        "financial_statements": 54114,
+        "mdna": 43006,
+        "market_risk": 369,
+        "controls": 1721,
+        "legal_proceedings": 589,
+        "risk_factors": 257,
+        "equity_sales": 74,
+        "other_information": 873,
+        "exhibits": 1796
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MTSI_10Q_2025-02-06",
+      "chars": 110058,
+      "sections": {
+        "cover": 3488,
+        "financial_statements": 65515,
+        "mdna": 28872,
+        "market_risk": 2839,
+        "controls": 1626,
+        "legal_proceedings": 204,
+        "risk_factors": 2945,
+        "equity_sales": 1229,
+        "other_information": 269,
+        "exhibits": 3071
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MTSI_10Q_2025-05-08",
+      "chars": 120786,
+      "sections": {
+        "cover": 3481,
+        "financial_statements": 68130,
+        "mdna": 32262,
+        "market_risk": 2842,
+        "controls": 1624,
+        "legal_proceedings": 204,
+        "risk_factors": 7317,
+        "equity_sales": 1209,
+        "other_information": 1408,
+        "exhibits": 2309
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MTSI_10Q_2025-08-07",
+      "chars": 118878,
+      "sections": {
+        "cover": 3483,
+        "financial_statements": 71145,
+        "mdna": 35049,
+        "market_risk": 2840,
+        "controls": 1623,
+        "legal_proceedings": 204,
+        "risk_factors": 764,
+        "equity_sales": 1191,
+        "other_information": 266,
+        "exhibits": 2313
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "MTSI_10K_2025-11-14",
+      "chars": 350572,
+      "sections": {
+        "cover": 8342,
+        "business": 44163,
+        "risk_factors": 94408,
+        "unresolved_staff_comments": 42,
+        "cybersecurity": 4973,
+        "properties": 1570,
+        "legal_proceedings": 784,
+        "mine_safety": 57,
+        "market_for_equity": 4035,
+        "reserved": 19,
+        "mdna": 32901,
+        "market_risk": 3162,
+        "financial_statements": 129143,
+        "accountant_changes": 100,
+        "controls": 8141,
+        "other_information": 2029,
+        "foreign_jurisdiction_disclosure": 103,
+        "directors_officers": 948,
+        "executive_compensation": 249,
+        "security_ownership": 325,
+        "relationships": 300,
+        "accountant_fees": 273,
+        "exhibits": 13260,
+        "summary": 1245
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "VSH_10K_2025-02-14",
+      "chars": 448125,
+      "sections": {
+        "cover": 6621,
+        "business": 56596,
+        "risk_factors": 64386,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 4911,
+        "properties": 3504,
+        "legal_proceedings": 3320,
+        "mine_safety": 4194,
+        "market_for_equity": 5420,
+        "reserved": 33,
+        "mdna": 90179,
+        "market_risk": 9127,
+        "financial_statements": 158,
+        "accountant_changes": 99,
+        "controls": 6806,
+        "other_information": 287,
+        "foreign_jurisdiction_disclosure": 92,
+        "directors_officers": 1709,
+        "executive_compensation": 254,
+        "security_ownership": 326,
+        "relationships": 305,
+        "accountant_fees": 278,
+        "exhibits": 24829,
+        "summary": 164650
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "VSH_10Q_2025-05-07",
+      "chars": 99011,
+      "sections": {
+        "cover": 3830,
+        "financial_statements": 33185,
+        "mdna": 55996,
+        "market_risk": 381,
+        "controls": 1405,
+        "legal_proceedings": 287,
+        "risk_factors": 239,
+        "equity_sales": 1363,
+        "defaults": 56,
+        "mine_safety": 48,
+        "other_information": 283,
+        "exhibits": 1938
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "VSH_10Q_2025-08-06",
+      "chars": 113716,
+      "sections": {
+        "cover": 4047,
+        "financial_statements": 42527,
+        "mdna": 62714,
+        "market_risk": 381,
+        "controls": 1405,
+        "legal_proceedings": 287,
+        "risk_factors": 709,
+        "exhibits": 1646
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "VSH_10Q_2025-11-05",
+      "chars": 119780,
+      "sections": {
+        "cover": 4089,
+        "financial_statements": 45162,
+        "mdna": 64074,
+        "market_risk": 381,
+        "controls": 1405,
+        "legal_proceedings": 287,
+        "risk_factors": 2341,
+        "exhibits": 2041
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMAT_10Q_2025-02-20",
+      "chars": 179734,
+      "sections": {
+        "cover": 3888,
+        "financial_statements": 58228,
+        "mdna": 34177,
+        "market_risk": 2652,
+        "controls": 1890,
+        "legal_proceedings": 376,
+        "risk_factors": 75180,
+        "equity_sales": 1270,
+        "defaults": 45,
+        "mine_safety": 48,
+        "other_information": 273,
+        "exhibits": 1707
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMAT_10Q_2025-05-22",
+      "chars": 190499,
+      "sections": {
+        "cover": 3887,
+        "financial_statements": 63693,
+        "mdna": 38473,
+        "market_risk": 2642,
+        "controls": 1891,
+        "legal_proceedings": 376,
+        "risk_factors": 75968,
+        "equity_sales": 1304,
+        "defaults": 45,
+        "mine_safety": 48,
+        "other_information": 271,
+        "exhibits": 1901
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMAT_10Q_2025-08-21",
+      "chars": 196370,
+      "sections": {
+        "cover": 3879,
+        "financial_statements": 64115,
+        "mdna": 43143,
+        "market_risk": 2637,
+        "controls": 1890,
+        "legal_proceedings": 359,
+        "risk_factors": 76994,
+        "equity_sales": 1287,
+        "defaults": 45,
+        "mine_safety": 48,
+        "other_information": 270,
+        "exhibits": 1703
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMAT_10K_2025-12-12",
+      "chars": 293812,
+      "sections": {
+        "cover": 7681,
+        "business": 29008,
+        "risk_factors": 68247,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 5007,
+        "properties": 1045,
+        "legal_proceedings": 311,
+        "mine_safety": 46,
+        "market_for_equity": 3229,
+        "reserved": 19,
+        "mdna": 41147,
+        "market_risk": 2420,
+        "financial_statements": 164,
+        "accountant_changes": 99,
+        "controls": 2855,
+        "other_information": 274,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 1872,
+        "executive_compensation": 169,
+        "security_ownership": 2518,
+        "relationships": 220,
+        "accountant_fees": 303,
+        "exhibits": 786,
+        "summary": 126249
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "LRCX_10Q_2025-01-31",
+      "chars": 158556,
+      "sections": {
+        "cover": 4063,
+        "financial_statements": 38860,
+        "mdna": 27155,
+        "market_risk": 364,
+        "controls": 2738,
+        "legal_proceedings": 224,
+        "risk_factors": 79841,
+        "equity_sales": 2155,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 1285,
+        "exhibits": 1777
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "LRCX_10Q_2025-04-25",
+      "chars": 159895,
+      "sections": {
+        "cover": 4035,
+        "financial_statements": 39104,
+        "mdna": 28090,
+        "market_risk": 364,
+        "controls": 2735,
+        "legal_proceedings": 224,
+        "risk_factors": 80547,
+        "equity_sales": 2172,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 540,
+        "exhibits": 1990
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "LRCX_10K_2025-08-11",
+      "chars": 331958,
+      "sections": {
+        "cover": 11670,
+        "business": 50226,
+        "risk_factors": 80947,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 5251,
+        "properties": 978,
+        "legal_proceedings": 225,
+        "mine_safety": 94,
+        "market_for_equity": 5676,
+        "reserved": 19,
+        "mdna": 32779,
+        "market_risk": 3993,
+        "financial_statements": 114106,
+        "accountant_changes": 99,
+        "controls": 3747,
+        "other_information": 1516,
+        "foreign_jurisdiction_disclosure": 627,
+        "directors_officers": 1318,
+        "executive_compensation": 302,
+        "security_ownership": 393,
+        "relationships": 345,
+        "accountant_fees": 285,
+        "exhibits": 931,
+        "summary": 16390
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "LRCX_10Q_2025-10-24",
+      "chars": 153503,
+      "sections": {
+        "cover": 4051,
+        "financial_statements": 32419,
+        "mdna": 25294,
+        "market_risk": 405,
+        "controls": 2698,
+        "legal_proceedings": 224,
+        "risk_factors": 82001,
+        "equity_sales": 3080,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 1617,
+        "exhibits": 1620
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "KLAC_10Q_2025-01-31",
+      "chars": 308032,
+      "sections": {
+        "cover": 3873,
+        "financial_statements": 103028,
+        "mdna": 63074,
+        "market_risk": 4448,
+        "controls": 4556,
+        "legal_proceedings": 217,
+        "risk_factors": 123140,
+        "equity_sales": 1908,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 1701,
+        "exhibits": 1993
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "KLAC_10Q_2025-05-01",
+      "chars": 317747,
+      "sections": {
+        "cover": 3857,
+        "financial_statements": 106354,
+        "mdna": 67083,
+        "market_risk": 4329,
+        "controls": 4556,
+        "legal_proceedings": 217,
+        "risk_factors": 124548,
+        "equity_sales": 1880,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 2707,
+        "exhibits": 2122
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "KLAC_10K_2025-08-08",
+      "chars": 454089,
+      "sections": {
+        "cover": 15595,
+        "business": 49001,
+        "risk_factors": 124295,
+        "unresolved_staff_comments": 40,
+        "cybersecurity": 4680,
+        "properties": 1319,
+        "legal_proceedings": 186,
+        "mine_safety": 55,
+        "market_for_equity": 3617,
+        "reserved": 18,
+        "mdna": 53349,
+        "market_risk": 4224,
+        "financial_statements": 177528,
+        "accountant_changes": 98,
+        "controls": 5580,
+        "other_information": 2681,
+        "foreign_jurisdiction_disclosure": 101,
+        "directors_officers": 602,
+        "executive_compensation": 584,
+        "security_ownership": 325,
+        "relationships": 336,
+        "accountant_fees": 337,
+        "exhibits": 6891,
+        "summary": 2647
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "KLAC_10Q_2025-10-31",
+      "chars": 160091,
+      "sections": {
+        "cover": 3836,
+        "financial_statements": 87693,
+        "mdna": 41591,
+        "market_risk": 486,
+        "controls": 4556,
+        "legal_proceedings": 217,
+        "risk_factors": 17172,
+        "equity_sales": 1892,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 272,
+        "exhibits": 2282
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "TER_10K_2025-02-20",
+      "chars": 334213,
+      "sections": {
+        "cover": 6671,
+        "business": 34368,
+        "risk_factors": 57365,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 6606,
+        "properties": 780,
+        "legal_proceedings": 651,
+        "mine_safety": 55,
+        "market_for_equity": 2377,
+        "reserved": 19,
+        "mdna": 46240,
+        "market_risk": 3429,
+        "financial_statements": 152998,
+        "accountant_changes": 99,
+        "controls": 2703,
+        "other_information": 793,
+        "foreign_jurisdiction_disclosure": 102,
+        "directors_officers": 1058,
+        "executive_compensation": 464,
+        "security_ownership": 542,
+        "relationships": 389,
+        "accountant_fees": 362,
+        "exhibits": 2244,
+        "summary": 13857
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "TER_10Q_2025-05-02",
+      "chars": 109978,
+      "sections": {
+        "cover": 3737,
+        "financial_statements": 75949,
+        "mdna": 21369,
+        "market_risk": 473,
+        "controls": 1359,
+        "legal_proceedings": 664,
+        "risk_factors": 750,
+        "equity_sales": 2181,
+        "mine_safety": 47,
+        "other_information": 2079,
+        "exhibits": 1370
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "TER_10Q_2025-08-01",
+      "chars": 128873,
+      "sections": {
+        "cover": 3753,
+        "financial_statements": 89587,
+        "mdna": 27794,
+        "market_risk": 473,
+        "controls": 1358,
+        "legal_proceedings": 664,
+        "risk_factors": 836,
+        "equity_sales": 2134,
+        "mine_safety": 47,
+        "other_information": 811,
+        "exhibits": 1416
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "TER_10Q_2025-10-30",
+      "chars": 134435,
+      "sections": {
+        "cover": 3810,
+        "financial_statements": 92628,
+        "mdna": 30062,
+        "market_risk": 473,
+        "controls": 1363,
+        "legal_proceedings": 664,
+        "risk_factors": 836,
+        "equity_sales": 2174,
+        "mine_safety": 47,
+        "other_information": 816,
+        "exhibits": 1562
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ENTG_10K_2025-02-12",
+      "chars": 378602,
+      "sections": {
+        "cover": 6719,
+        "business": 69632,
+        "risk_factors": 74147,
+        "unresolved_staff_comments": 52,
+        "cybersecurity": 7750,
+        "properties": 2321,
+        "legal_proceedings": 1109,
+        "mine_safety": 57,
+        "market_for_equity": 3112,
+        "reserved": 19,
+        "mdna": 56291,
+        "market_risk": 2170,
+        "financial_statements": 245,
+        "accountant_changes": 110,
+        "controls": 3817,
+        "other_information": 304,
+        "foreign_jurisdiction_disclosure": 103,
+        "directors_officers": 11077,
+        "executive_compensation": 406,
+        "security_ownership": 1757,
+        "relationships": 460,
+        "accountant_fees": 430,
+        "exhibits": 15529,
+        "summary": 120985
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ENTG_10Q_2025-05-07",
+      "chars": 94636,
+      "sections": {
+        "cover": 8886,
+        "financial_statements": 36916,
+        "mdna": 38150,
+        "market_risk": 429,
+        "controls": 2736,
+        "legal_proceedings": 421,
+        "risk_factors": 3152,
+        "equity_sales": 839,
+        "other_information": 958,
+        "exhibits": 2149
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ENTG_10Q_2025-07-30",
+      "chars": 114341,
+      "sections": {
+        "cover": 8876,
+        "financial_statements": 44391,
+        "mdna": 48358,
+        "market_risk": 429,
+        "controls": 2734,
+        "legal_proceedings": 421,
+        "risk_factors": 603,
+        "equity_sales": 838,
+        "other_information": 5027,
+        "exhibits": 2664
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ENTG_10Q_2025-10-30",
+      "chars": 114146,
+      "sections": {
+        "cover": 8858,
+        "financial_statements": 46185,
+        "mdna": 51353,
+        "market_risk": 429,
+        "controls": 2744,
+        "legal_proceedings": 421,
+        "risk_factors": 603,
+        "equity_sales": 850,
+        "other_information": 502,
+        "exhibits": 2201
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ONTO_10K_2025-02-25",
+      "chars": 301839,
+      "sections": {
+        "cover": 8349,
+        "business": 46583,
+        "risk_factors": 89280,
+        "unresolved_staff_comments": 42,
+        "cybersecurity": 7501,
+        "properties": 1639,
+        "legal_proceedings": 208,
+        "mine_safety": 47,
+        "market_for_equity": 4190,
+        "reserved": 19,
+        "mdna": 34689,
+        "market_risk": 2235,
+        "financial_statements": 207,
+        "accountant_changes": 100,
+        "controls": 3902,
+        "other_information": 359,
+        "foreign_jurisdiction_disclosure": 538,
+        "directors_officers": 1373,
+        "executive_compensation": 452,
+        "security_ownership": 327,
+        "relationships": 275,
+        "accountant_fees": 276,
+        "exhibits": 6065,
+        "summary": 93183
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ONTO_10Q_2025-05-08",
+      "chars": 166307,
+      "sections": {
+        "cover": 3739,
+        "financial_statements": 40038,
+        "mdna": 25645,
+        "market_risk": 255,
+        "controls": 1918,
+        "legal_proceedings": 284,
+        "risk_factors": 90098,
+        "equity_sales": 2005,
+        "defaults": 46,
+        "mine_safety": 38,
+        "other_information": 357,
+        "exhibits": 1884
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ONTO_10Q_2025-08-07",
+      "chars": 93359,
+      "sections": {
+        "cover": 3750,
+        "financial_statements": 44956,
+        "mdna": 31293,
+        "market_risk": 255,
+        "controls": 1915,
+        "legal_proceedings": 284,
+        "risk_factors": 5394,
+        "equity_sales": 1982,
+        "defaults": 46,
+        "mine_safety": 38,
+        "other_information": 356,
+        "exhibits": 3090
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "ONTO_10Q_2025-11-06",
+      "chars": 97647,
+      "sections": {
+        "cover": 3807,
+        "financial_statements": 50899,
+        "mdna": 34240,
+        "market_risk": 255,
+        "controls": 2243,
+        "legal_proceedings": 284,
+        "risk_factors": 558,
+        "equity_sales": 2030,
+        "defaults": 46,
+        "mine_safety": 38,
+        "other_information": 361,
+        "exhibits": 2886
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "FORM_10K_2025-02-21",
+      "chars": 296451,
+      "sections": {
+        "cover": 10577,
+        "business": 31803,
+        "risk_factors": 57424,
+        "unresolved_staff_comments": 41,
+        "cybersecurity": 8523,
+        "properties": 3015,
+        "legal_proceedings": 277,
+        "mine_safety": 56,
+        "market_for_equity": 3052,
+        "reserved": 19,
+        "mdna": 43139,
+        "market_risk": 2608,
+        "financial_statements": 352,
+        "accountant_changes": 99,
+        "controls": 5726,
+        "other_information": 297,
+        "foreign_jurisdiction_disclosure": 92,
+        "directors_officers": 777,
+        "executive_compensation": 366,
+        "security_ownership": 384,
+        "relationships": 321,
+        "accountant_fees": 348,
+        "exhibits": 1231,
+        "summary": 125924
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "FORM_10Q_2025-05-06",
+      "chars": 85891,
+      "sections": {
+        "cover": 3807,
+        "financial_statements": 44075,
+        "mdna": 27591,
+        "market_risk": 438,
+        "controls": 3097,
+        "risk_factors": 2286,
+        "equity_sales": 1698,
+        "other_information": 308,
+        "exhibits": 2591
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "FORM_10Q_2025-08-05",
+      "chars": 104375,
+      "sections": {
+        "cover": 3817,
+        "financial_statements": 51069,
+        "mdna": 36968,
+        "market_risk": 438,
+        "controls": 3097,
+        "risk_factors": 4059,
+        "equity_sales": 1485,
+        "other_information": 307,
+        "exhibits": 3135
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "FORM_10Q_2025-11-04",
+      "chars": 107876,
+      "sections": {
+        "cover": 3879,
+        "financial_statements": 54687,
+        "mdna": 39328,
+        "market_risk": 438,
+        "controls": 3097,
+        "risk_factors": 927,
+        "equity_sales": 1498,
+        "other_information": 1019,
+        "exhibits": 3003
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMKR_10K_2025-02-21",
+      "chars": 334539,
+      "sections": {
+        "cover": 10549,
+        "business": 52007,
+        "risk_factors": 77965,
+        "unresolved_staff_comments": 40,
+        "cybersecurity": 4518,
+        "properties": 1415,
+        "legal_proceedings": 476,
+        "mine_safety": 55,
+        "market_for_equity": 2972,
+        "reserved": 18,
+        "mdna": 39705,
+        "market_risk": 6511,
+        "financial_statements": 112446,
+        "accountant_changes": 98,
+        "controls": 4310,
+        "other_information": 3921,
+        "foreign_jurisdiction_disclosure": 101,
+        "directors_officers": 2116,
+        "executive_compensation": 339,
+        "security_ownership": 3060,
+        "relationships": 343,
+        "accountant_fees": 296,
+        "exhibits": 8624,
+        "summary": 2654
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMKR_10Q_2025-04-29",
+      "chars": 170137,
+      "sections": {
+        "cover": 8202,
+        "financial_statements": 43271,
+        "mdna": 27930,
+        "market_risk": 6599,
+        "controls": 2206,
+        "legal_proceedings": 201,
+        "risk_factors": 78648,
+        "equity_sales": 860,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 370,
+        "exhibits": 1756
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMKR_10Q_2025-07-29",
+      "chars": 183100,
+      "sections": {
+        "cover": 8215,
+        "financial_statements": 51347,
+        "mdna": 30812,
+        "market_risk": 6772,
+        "controls": 2203,
+        "legal_proceedings": 201,
+        "risk_factors": 79351,
+        "equity_sales": 843,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 755,
+        "exhibits": 2507
+      },
+      "missing_expected": []
+    },
+    {
+      "doc_id": "AMKR_10Q_2025-10-28",
+      "chars": 188294,
+      "sections": {
+        "cover": 8359,
+        "financial_statements": 54880,
+        "mdna": 32640,
+        "market_risk": 6776,
+        "controls": 2223,
+        "legal_proceedings": 201,
+        "risk_factors": 79387,
+        "equity_sales": 864,
+        "defaults": 46,
+        "mine_safety": 48,
+        "other_information": 784,
+        "exhibits": 2086
+      },
+      "missing_expected": []
+    }
+  ]
+}

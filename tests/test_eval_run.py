@@ -77,7 +77,9 @@ def test_gold_spans_locate_quotes():
 def test_configs_load_and_typos_fail(tmp_path):
     cfg = ExperimentConfig.load("configs/a0_naive.yaml")
     assert cfg.name == "a0_naive" and cfg.retrieval.top_k == 20
-    assert cfg.index_key == "semis-2025__p2__fixed-300-50__BAAI_bge-small-en-v1.5"
+    from plexus.ingest.parse import VERSION
+
+    assert cfg.index_key == f"semis-2025__p{VERSION}__fixed-300-50__BAAI_bge-small-en-v1.5"
     bad = tmp_path / "bad.yaml"
     bad.write_text("name: x\nretreival:\n  top_k: 5\n")
     with pytest.raises(ValidationError):
