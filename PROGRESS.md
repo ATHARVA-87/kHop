@@ -64,6 +64,22 @@ Step 1, 2026-10-27: BM25 keyword retriever, reciprocal rank fusion and a retriev
 - Bias check: the golden questions were written from their passages, which favours keyword matching. On average 40% of a question's words appear in its gold quote. On the high-overlap half BM25 scores 0.60 vs dense 0.32; on the low-overlap half it still wins, 0.34 vs 0.28. So the BM25 advantage is partly an artefact of how the golden set was made, but not only that.
 - Global questions: no retriever reaches more than ~55% of the relevant companies in the top 10 (company_coverage@10). That is the job of A5 (community summaries).
 
+Step 2, 2026-10-27: A1 structure-aware parent-child chunks (`structured_chunks`): children are section-bounded and paragraph-aligned, at most 200 words / 1,400 chars; parents group up to 800 words. 31,530 children, 8,347 parents, mean 161 words. **Chunks truncated by the embedder: 10 (A0: 1,031).**
+New metric `recall@{B}w`: recall within the first B words retrieved. Chunkers are only comparable at an equal reading budget (A0's top 10 ≈ 3,000 words, A1's ≈ 1,650).
+
+| config | R@500w | R@1000w | R@2000w | R@3000w | R@5000w | R@10 |
+| --- | --- | --- | --- | --- | --- | --- |
+| a0_naive | 0.128 | 0.199 | 0.245 | 0.276 | 0.325 | 0.276 |
+| a0_bm25 | 0.190 | 0.302 | 0.387 | 0.432 | 0.486 | 0.432 |
+| a0_hybrid | 0.184 | 0.255 | 0.341 | 0.374 | 0.454 | 0.374 |
+| a1_structured | 0.175 | 0.235 | 0.269 | 0.333 | 0.376 | 0.250 |
+| a1_bm25 | 0.202 | 0.310 | 0.377 | 0.435 | 0.485 | 0.347 |
+| a1_hybrid | 0.190 | 0.261 | 0.378 | 0.438 | 0.512 | 0.356 |
+
+- Paired Δ at 3,000 words, A1 − A0: dense +0.057 [0.000, +0.117]; hybrid +0.064 [+0.006, +0.128]; BM25 +0.004 [−0.050, +0.060].
+- A1 helps the embedding-based retrievers (whole paragraphs, no truncation) and does nothing for BM25. At equal top-k it looks worse only because each chunk is about half the size.
+- From here the ladder runs on A1 chunks: A2 = a1_hybrid, A3 = A2 + reranker. Primary Phase 2 metric: recall@3000w, with recall@10 alongside.
+
 ## What was built in Phase 1 (branch `phase1-harness`)
 | Module | What | Review needed |
 | --- | --- | --- |

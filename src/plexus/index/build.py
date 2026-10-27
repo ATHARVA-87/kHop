@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 
 from plexus.config import ExperimentConfig
-from plexus.ingest.chunk import Chunk, fixed_chunks
+from plexus.ingest.chunk import Chunk, fixed_chunks, structured_chunks
 from plexus.ingest.process import iter_docs
 from plexus.settings import Settings
 
@@ -30,8 +30,11 @@ def index_dir(data_dir: Path, cfg: ExperimentConfig) -> Path:
 def make_chunks(cfg: ExperimentConfig, data_dir: Path) -> list[Chunk]:
     chunks: list[Chunk] = []
     for _, doc in iter_docs(data_dir / "processed", cfg.snapshot):
-        if cfg.chunker.type == "fixed":
-            chunks.extend(fixed_chunks(doc, cfg.chunker.size_words, cfg.chunker.overlap_words))
+        c = cfg.chunker
+        if c.type == "fixed":
+            chunks.extend(fixed_chunks(doc, c.size_words, c.overlap_words))
+        elif c.type == "structured":
+            chunks.extend(structured_chunks(doc, c.child_words, c.child_chars, c.parent_words))
         else:  # pragma: no cover - guarded by the config Literal
             raise ValueError(cfg.chunker.type)
     return chunks
@@ -72,6 +75,8 @@ def build(cfg: ExperimentConfig, data_dir: Path) -> dict:
         "corpus_checksum": checksum,
         "documents": len({c.doc_id for c in chunks}),
         "chunks": len(chunks),
+        "parents": len({c.parent_id for c in chunks if c.parent_id}),
+        "mean_chunk_words": round(sum(len(c.text.split()) for c in chunks) / len(chunks), 1),
         "indexed_points": n,
         "embedder": cfg.embedder.model,
         "embedding_dim": embedder.dim,

@@ -16,9 +16,14 @@ class _Strict(BaseModel):
 
 
 class ChunkerConfig(_Strict):
-    type: Literal["fixed"] = "fixed"
+    type: Literal["fixed", "structured"] = "fixed"
+    # fixed (A0)
     size_words: int = 300
     overlap_words: int = 50
+    # structured (A1): see plexus.ingest.chunk.structured_chunks
+    child_words: int = 200
+    child_chars: int = 1400
+    parent_words: int = 800
 
 
 class EmbedderConfig(_Strict):
@@ -77,4 +82,8 @@ class ExperimentConfig(_Strict):
         from plexus.ingest.parse import VERSION as PARSER_VERSION
 
         # parser version included: a parser fix must not silently reuse an old index
-        return f"{self.snapshot}__p{PARSER_VERSION}__{c.type}-{c.size_words}-{c.overlap_words}__{model}"
+        if c.type == "fixed":
+            shape = f"fixed-{c.size_words}-{c.overlap_words}"
+        else:
+            shape = f"structured-{c.child_words}-{c.child_chars}-{c.parent_words}"
+        return f"{self.snapshot}__p{PARSER_VERSION}__{shape}__{model}"

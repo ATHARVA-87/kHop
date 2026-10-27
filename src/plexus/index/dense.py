@@ -90,6 +90,9 @@ class Hit:
     section: str
     score: float
     text: str = ""
+    parent_id: str = ""
+    parent_start: int = -1
+    parent_end: int = -1
 
 
 class DenseIndex:
@@ -141,6 +144,9 @@ class DenseIndex:
                 section=p.payload["section"],
                 score=float(p.score),
                 text=p.payload["text"],
+                parent_id=p.payload.get("parent_id", ""),
+                parent_start=p.payload.get("parent_start", -1),
+                parent_end=p.payload.get("parent_end", -1),
             )
             for p in res
         ]

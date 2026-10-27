@@ -124,8 +124,9 @@ def score_retrieval(
             label_errors.extend(missing)
             continue
         t0 = time.perf_counter()
-        hits = retriever.retrieve(q.question, k)
+        deep = retriever.retrieve(q.question, max(k, BUDGET_DEPTH))
         ms = (time.perf_counter() - t0) * 1000
+        hits = deep[:k]  # every rank-based metric uses the top k, as before
         retrieved = [Span(h.doc_id, h.start, h.end) for h in hits]
         extra: dict = {}
         kw = theme_of(q, label_to_keyword or {}) if q.qtype == "global" else None
@@ -147,16 +148,40 @@ def score_retrieval(
                 **threshold_sensitivity(retrieved, gold),
                 # secondary: only the exact filing the question was written from counts
                 "strict_recall@10": recall_at_k(retrieved, strict, min(10, k)),
+                # cost side: words a writer would read if given the top 10 chunks
+                "context_words@10": float(sum(len((h.text or "").split()) for h in hits[:10])),
+                **budget_recall(deep, gold),
             }
         )
     return rows, label_errors
 
 
+def budget_recall(hits: Sequence, gold, budgets: Sequence[int] | None = None) -> dict[str, float]:
+    """Recall within the first `budget` words of the ranked list (at least one chunk).
+
+    Chunkers with different chunk sizes are only comparable at an equal reading budget:
+    ten 160-word chunks are not ten 300-word chunks.
+    """
+    out = {}
+    words = [len((h.text or "").split()) for h in hits]
+    spans = [Span(h.doc_id, h.start, h.end) for h in hits]
+    for b in budgets or WORD_BUDGETS:
+        n, total = 0, 0
+        while n < len(hits) and (n == 0 or total + words[n] <= b):
+            total += words[n]
+            n += 1
+        out[f"recall@{b}w"] = recall_at_k(spans[:n], gold, n) if n else 0.0
+    return out
+
+
 RECALL_KS = (1, 5, 10, 20)
+WORD_BUDGETS = (500, 1000, 2000, 3000, 5000)
+BUDGET_DEPTH = 60  # hits fetched so a 5,000-word budget fills even with ~160-word chunks
 METRICS = [
     "recall@1", "recall@5", "recall@10", "recall@20", "ndcg@10", "mrr",
     "recall@10@cover0.3", "recall@10@cover0.7", "strict_recall@10",
-    "company_coverage@10", "company_coverage@20",
+    "company_coverage@10", "company_coverage@20", "context_words@10",
+    *(f"recall@{b}w" for b in WORD_BUDGETS),
 ]  # fmt: skip
 
 

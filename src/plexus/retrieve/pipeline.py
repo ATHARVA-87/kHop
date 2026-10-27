@@ -68,7 +68,8 @@ class BM25Retriever:
         for i, score in self.index.search(question, k):
             c = self.chunks[i]
             fields = {f: c[f] for f in ("chunk_id", "doc_id", "start", "end", "section", "text")}
-            out.append(Hit(score=score, **fields))
+            parent = {f: c[f] for f in ("parent_id", "parent_start", "parent_end") if f in c}
+            out.append(Hit(score=score, **fields, **parent))
         return out
 
 

@@ -152,3 +152,17 @@ def test_same_company_copy_of_quote_counts_but_strict_does_not():
     hit_other_co = Hit("y", "AMD_10K_2025-02-05", a, a + 42, "risk_factors", 1.0)
     rows, _ = score_retrieval([q], FakeRetriever({"l?": [hit_other_co]}), docs, k=10)
     assert rows[0]["recall@10"] == 0.0  # another company's identical sentence is not evidence
+
+
+def test_budget_recall_counts_words_not_chunks():
+    from plexus.eval.metrics import Span
+    from plexus.eval.run import budget_recall
+
+    gold = [Span("D", 1000, 1010)]
+    small = [Hit(f"D#{i}", "D", i * 100, i * 100 + 50, "s", 1.0, "w " * 100) for i in range(12)]
+    # 100-word chunks: the gold (offset 1000) is hit by chunk 10, i.e. after 1,100 words
+    r = budget_recall(small, gold, budgets=(500, 1000, 2000))
+    assert r == {"recall@500w": 0.0, "recall@1000w": 0.0, "recall@2000w": 1.0}
+    # a first chunk larger than the budget still counts (at least one chunk is read)
+    big = [Hit("D#x", "D", 995, 1020, "s", 1.0, "w " * 900)]
+    assert budget_recall(big, gold, budgets=(500,))["recall@500w"] == 1.0
