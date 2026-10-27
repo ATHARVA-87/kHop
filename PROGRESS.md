@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | 0. Setup | Toolchain, repo, CLAUDE.md, PROGRESS.md, Makefile, `make doctor`, CI skeleton, LLM wrapper + cache | `make doctor` and CI pass | **Passed 2026-10-27.** Doctor phase 0 all OK; GitHub CI green (run 40440596122) |
 | 1. Harness | EDGAR snapshot, golden-set candidates, human verification, metrics, A0 | A0 scored with CIs | **Gate met 2026-10-27** (134 verified queries; A0 recall@10 0.276). Branch `phase1-harness`, PR #1 needs your review |
-| 2. Retrieval + CI gate | A1–A3, retrieval gate on PRs | A1–A3 recorded; gate blocks a planted regression | Not started (gate rule) |
+| 2. Retrieval + CI gate | A1–A3, retrieval gate on PRs | A1–A3 recorded; gate blocks a planted regression | **Gate met 2026-10-27.** A2 hybrid + headers recall@10 0.704 (A0 0.276); CI gate blocks planted regression (run 40527190366). Branch `phase2-retrieval`, PR #2 needs your review |
 | 3. Graph | Extraction, resolution, Kuzu, Leiden, summaries, A4, A5 | Extraction P/R; A4, A5 recorded | — |
 | 4. Single-graph agent | Router, grade-and-rewrite, A6, A7 | Router vs always-local/global | — |
 | 5. Multi-agent | 4 agents, guardrails, A9 | A9 vs A7 with latency/cost; guardrail metrics | — |
@@ -15,20 +15,16 @@
 
 ## Resume here
 
-**State:** branch `phase1-harness` (checked out). `main` holds Phase 0. 92 tests pass (`make test-all`). A reviewer subagent checked the branch; all 9 confirmed bugs are fixed with regression tests (see `docs/ai_review_log.md`). No real data yet: every number so far comes from synthetic test fixtures.
+**State (2026-10-27 evening):** Phases 0–2 gates met. Branches: `main` = Phase 0; `phase1-harness` (PR #1) = harness, golden set, A0; `phase2-retrieval` (PR #2, stacked on #1) = A1–A3 + CI retrieval gate. Fast tests pass; CI green on `phase2-retrieval` (run 40526855835). GitHub does not fire push/PR events for this repo, so CI is started with `gh workflow run ci --ref <branch>`.
 
-**Your steps, in order** (each one unblocks the next; run `make doctor PHASE=1` after each):
+**Best retriever so far:** A2 = `configs/a1h_hybrid.yaml` (structure-aware chunks + contextual headers + BM25/dense RRF): recall@10 0.704, multi-hop 0.675. The reranker (A3) helps single-company questions (0.923) but hurts two-company ones. Use it only on single-company questions once the router exists (docs/failures.md).
 
-1. ~~**GitHub repo**~~ Done 2026-10-27: https://github.com/ATHARVA-87/plexus, PR #1 open (phase1-harness → main). **Review PR #1** (metrics and golden-set code) before merging.
-2. ~~**SEC User-Agent**~~ Done 2026-10-27. (step 3): `cp .env.example .env`, set `SEC_USER_AGENT="Your Name your@email"`.
-3. ~~**Download + parse**~~ Done 2026-10-27: 156 filings / 39 companies; 152 fully sectioned, 4 Intel unstructured (docs/failures.md). A0 index built (20,360 chunks). Originally:
-   `conda activate torch && make ingest && make process`. Then read `data/snapshots/semis-2025.parse_report.json`. Section coverage below ~90% for `risk_factors` or `mdna` means the parser needs fixing on real filings. Tell me which doc IDs fail.
-4. **Gemini key** (step 5, pulled forward because candidates and the judge need it): create a free key at https://aistudio.google.com/apikey and paste it into `.env` as `GEMINI_API_KEY` yourself. Check your free-tier limits in AI Studio (ADR 0005).
-5. **Candidates:** `make candidates` writes about 200 rows to `data/golden/review.csv`. Then `make index CONFIG=configs/a0_naive.yaml`.
-6. ~~**Review**~~ Done 2026-10-27: 134 verified questions (see "Golden-set review status"). Originally: follow `docs/golden_review_guide.md` and verify at least 100 rows. Then `make golden`.
-7. **A0:** `make eval CONFIG=configs/a0_naive.yaml` gives retrieval metrics with CIs, which is the Phase 1 gate. For generation metrics, install Ollama (step 4, needs sudo) and `ollama pull qwen3.5:4b`, then `make eval-full`, `make judge-export`, label about 50 answers, and `make judge-agreement`.
+**Your open items:**
+1. Review PR #1 (metrics, golden-set code) and PR #2 (`eval/run.py`, `eval/gate.py`, `eval/compare.py`), then merge #1 before #2.
+2. Sign off ADRs 0001–0005.
+3. Phase 3 needs Ollama (human step 4, sudo): install it and `ollama pull qwen3.5:4b`. Graph extraction can use Gemini/Groq free tier meanwhile.
 
-**Next Claude task once data exists:** fix the parser on real filings using the parse report, then start Phase 2 (A1 structure-aware parent-child chunks).
+**Next Claude task:** Phase 3 (graph). LLM entity/relation extraction with a strict JSON schema → entity resolution → Kuzu → Leiden communities + summaries; A4 graph traversal, A5 community search (aimed at global questions: company_coverage@10 is stuck at ~0.5 for every retriever).
 
 ## Gate evidence
 
@@ -50,7 +46,11 @@
 - Generation metrics not run yet: they need Ollama (sudo install), so those are deferred and not part of the gate.
 - Global questions were reworded by you: "How do all semiconductor companies …" instead of "… in the corpus". All 122 local/multi-hop/bridge questions were then rephrased the way a user would type them (short company names, no filing dates unless the answer depends on the period; your request 2026-10-27). Same answers and evidence. A0 recall@10 rose from 0.216 to 0.276: the legal names and filing dates were noise for the dense embedder.
 
-### Phase 2 (in progress, branch `phase2-retrieval`)
+### Phase 2: gate met 2026-10-27 (branch `phase2-retrieval`, PR #2 stacked on #1)
+- **Gate evidence.** CI job `retrieval-gate` (BM25 path, no torch) passes on the branch: run 40526855835. A planted regression (S-stemmer disabled, throwaway branch `gate-demo-planted-regression`, now deleted) fails it: run 40527190366. Failing metrics: all recall@10 0.5808 < 0.6119, local 0.7000 < 0.7308, multi-hop 0.5614 < 0.6053. The unit tests also failed (2). `make gate` runs the full gate locally (BM25, hybrid, reranker).
+- CI data: release `ci-data-semis-2025` (processed filings, 9.0 MB gz); both checksums are verified by `plexus.ingest.ci_data`.
+- Retrieval is fully deterministic: re-running all three gated configs, including the fp16 GPU reranker, reproduced every per-query score exactly.
+- A1–A3 recorded (tables below).
 Step 1, 2026-10-27: BM25 keyword retriever, reciprocal rank fusion and a retriever interface (`src/plexus/retrieve/`), `make compare` (paired bootstrap B − A). Tested on A0's chunks, so only the retriever changes:
 
 | config | recall@10 (95% CI) | nDCG@10 | MRR | Δ recall@10 vs A0 (paired 95% CI) |
