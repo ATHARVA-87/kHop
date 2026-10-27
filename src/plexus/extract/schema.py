@@ -8,6 +8,7 @@ provenance (doc id + character span) that graph search can return as evidence.
 
 from __future__ import annotations
 
+import re
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -33,6 +34,7 @@ RelationType = Literal[
     "partners_with",  # alliances, joint development, ecosystem partners (named)
     "licenses_from",  # subject licenses technology/IP from object
     "acquired",  # subject acquired object (company, business or product line)
+    "sold_business_to",  # subject sold a business/asset to object (buyer); qualifier = what
     "has_segment",  # reporting segment or end market
     "makes_product",
     "exposed_to",  # a named risk, regulation or geography the subject is exposed to
@@ -53,9 +55,11 @@ RELATION_SIGNATURES: dict[str, tuple[set[str], set[str]]] = {
     "partners_with": ({"company"}, {"company"}),
     "licenses_from": ({"company"}, {"company"}),
     "acquired": ({"company"}, {"company", "product", "segment"}),
+    "sold_business_to": ({"company"}, {"company"}),
     "has_segment": ({"company"}, {"segment"}),
     "makes_product": ({"company"}, {"product"}),
-    "exposed_to": ({"company"}, {"risk_factor", "regulation", "geography"}),
+    # a company object covers e.g. "Huawei is on the Entity List, which restricts our sales"
+    "exposed_to": ({"company"}, {"risk_factor", "regulation", "geography", "company"}),
     "operates_in": ({"company"}, {"geography"}),
     "subject_to": ({"company"}, {"regulation"}),
     "has_executive": ({"company"}, {"person"}),
@@ -79,6 +83,9 @@ class Relation(BaseModel):
     object: str
     object_type: EntityType
     quote: str = Field(description="verbatim sentence fragment from the passage, 8-40 words")
+    # optional detail the bare edge cannot hold: "12% of revenue", "sole source", "wafers",
+    # "PHY IP business", "fiscal 2024"
+    qualifier: str = ""
 
 
 class Extraction(BaseModel):
@@ -96,12 +103,28 @@ GENERIC_NAMES = {
 }  # fmt: skip
 
 
+# real organisations whose names are written in lower case
+LOWERCASE_NAMES = {"onsemi", "imec", "ebay", "e.on"}
+
+_ANON_CUSTOMER = re.compile(r"^(?:direct |indirect |end )?(?:customer|distributor) [a-z]$", re.I)
+
+
+def strip_article(name: str) -> str:
+    return re.sub(r"^the\s+", "", name.strip(), flags=re.I)
+
+
+def is_anonymous(name: str) -> bool:
+    """ "Customer A" in one filing is not "Customer A" in another."""
+    return bool(_ANON_CUSTOMER.match(strip_article(name)))
+
+
 def is_generic(name: str, etype: str) -> bool:
     """True for a group/pronoun rather than a named organisation or person."""
-    low = name.lower().strip()
+    name = strip_article(name)
+    low = name.lower()
     if low in GENERIC_NAMES:
         return True
-    # named organisations and people start with a capital letter or digit ("3M", "eBay" aside)
-    return etype in ("company", "person") and not (
-        name[:1].isupper() or name[:1].isdigit() or name[:2] == "eB"
-    )
+    if etype not in ("company", "person") or low in LOWERCASE_NAMES:
+        return False
+    # named organisations and people start with a capital letter or a digit ("3M")
+    return not (name[:1].isupper() or name[:1].isdigit())
