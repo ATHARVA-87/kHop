@@ -71,6 +71,8 @@ def test_company_coverage_counts_on_theme_chunks_of_relevant_companies():
         _hit("XYZ_10K_x", "Export control everywhere."),  # not a relevant company
     ]
     assert company_coverage(hits, {"NVDA", "AMD", "MU", "INTC"}, "export control", 10) == 0.25
+    # normalised by reachable maximum: with k=2 at most 2 of the 4 companies can be covered
+    assert company_coverage(hits, {"NVDA", "AMD", "MU", "INTC"}, "export control", 2) == 0.5
     assert company_coverage(hits[2:], {"NVDA"}, "export control", 10) == 0.0
 
 

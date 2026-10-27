@@ -77,6 +77,11 @@ Planned (by phase):
 - #9 Scope and pitch: no numeric/table questions (state it). Fiscal years differ (10-Ks filed Jan–Dec 2025). Pitch novelty as controlled ablations under free and small-model constraints with honest negative results (HybridRAG, GraphRAG and GraphRAG-Bench already exist).
 - Ladder change: A8 (semantic cache) becomes a systems metric, not a quality rung.
 
+## Golden-set review status (2026-10-27)
+- AI pre-review done (3 Claude reviewer agents); suggestions are in the `ai_*` columns. **Human verdicts pending.**
+- Theme table rebuilt with synonyms: 434 yes / 34 no. Gemini vs AI reviewer agreement on 93 spot-check rows: 96% (was 83% with literal keywords). Gemini 3.6-flash was overloaded, so all labels come from 3.5-flash-lite.
+- `company_coverage@k` is normalised by min(k, relevant companies).
+
 ## Open questions for you
 1. Sign off or amend ADRs 0001–0005. 0003 (the ticker list) and 0004 (definition of a retrieval hit) matter most.
 2. The brief puts the LLM key and Ollama in Phase 3, but Phase 1 needs an LLM for candidates and the judge. I pulled the Gemini key forward. Is that OK?

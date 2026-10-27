@@ -93,14 +93,16 @@ def _on_theme(keyword: str, text: str) -> bool:
 
 
 def company_coverage(hits: Sequence, relevant: set[str], keyword: str, k: int) -> float:
-    """Share of relevant companies with >=1 on-theme chunk (contains the theme keyword) in
-    the top k. Chunker-independent and needs no quote labels (design review finding #2)."""
+    """Relevant companies with >=1 on-theme chunk in the top k, divided by the most that k
+    chunks could cover, min(k, |relevant|). Chunker-independent and needs no quote labels (design review finding #2)."""
     covered = {
         _company(h.doc_id)
         for h in hits[:k]
         if _company(h.doc_id) in relevant and _on_theme(keyword, getattr(h, "text", "") or "")
     }
-    return len(covered) / len(relevant)
+    # normalised by what top-k can reach: k chunks can cover at most k companies, and most
+    # themes apply to 30+ of 39 companies, so plain coverage would be capped near k/|relevant|
+    return len(covered) / min(k, len(relevant))
 
 
 def score_retrieval(
