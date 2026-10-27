@@ -20,9 +20,13 @@
 ## Decision
 | Use | Provider / model | Why |
 | --- | --- | --- |
-| Golden candidates, LLM judge | `gemini/gemini-3.8-flash` | Strongest free option. Low call volume (about 200 candidates, about 300 judge calls), all cached |
+| Golden candidates, LLM judge | `gemini/gemini-3.6-flash` (see update below) | Strongest free option. Low call volume (about 200 candidates, about 300 judge calls), all cached |
 | A0 generation, small agents (Planner, Researcher, Verifier) | `ollama/qwen3.5:4b` | Local, free, no rate limit |
 | Writer, extraction (Phase 3+) | Gemini Flash, or Groq `openai/gpt-oss-120b` as the fallback | Stronger free option; decide by measured quality |
+
+## Update 2026-10-27 (first live calls)
+- `gemini-3.8-flash` timed out and returned 503 "high demand" on repeated tries. `gemini-3.6-flash` answered in about 4 s, `gemini-3.5-flash-lite` in about 1.5 s. **Default is now `gemini-3.6-flash`**, with `gemini-3.5-flash-lite` as the fallback.
+- Gemini 3 models spend output tokens on hidden reasoning (about 90 tokens to answer "OK"). `max_tokens` for candidates and the judge is raised to 2048. Empty responses are now errors and are never cached.
 
 ## Consequences
 - Daily caps make the disk cache essential. A capped run resumes the next day from the cache.

@@ -97,3 +97,11 @@ def test_complete_json_rejects_wrong_shape(tmp_path):
     c = LLMClient(LLMCache(tmp_path / "c.sqlite"), {"fake": fake})
     with pytest.raises(StructuredOutputError):
         c.complete_json(_req(), Answer)
+
+
+def test_empty_response_is_never_cached(tmp_path):
+    fake = FakeProvider(lambda r: "   ")
+    c = LLMClient(LLMCache(tmp_path / "c.sqlite"), {"fake": fake})
+    with pytest.raises(ProviderError, match="empty"):
+        c.complete(_req())
+    assert len(c.cache) == 0

@@ -19,4 +19,4 @@ generation:
   context_chunks: 5
 judge:
   provider: gemini
-  model: gemini-3.8-flash
+  model: gemini-3.6-flash

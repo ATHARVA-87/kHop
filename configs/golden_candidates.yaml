@@ -2,7 +2,7 @@
 snapshot: semis-2025
 seed: 0
 provider: gemini              # any provider LLMClient knows; needs its key/server
-model: gemini-3.8-flash      # checked 2026-10-27, ADR 0005
+model: gemini-3.6-flash      # 3.8-flash overloaded on 2026-10-27, ADR 0005
 counts:                       # ~200 candidates -> ~150 verified after review
   local: 80
   multi_hop: 70

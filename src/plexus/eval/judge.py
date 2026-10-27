@@ -81,7 +81,7 @@ class Judge:
                 Message(role="user", content=prompt),
             ),
             temperature=0.0,
-            max_tokens=900,
+            max_tokens=2048,  # Gemini 3 spends output tokens on hidden thinking
             seed=self.seed,
         )
 

@@ -250,7 +250,7 @@ def _request(cfg: CandidateConfig, prompt: str) -> LLMRequest:
         model=cfg.model,
         messages=(Message(role="system", content=SYSTEM), Message(role="user", content=prompt)),
         temperature=0.3,  # a little diversity across questions; cached, so still reproducible
-        max_tokens=700,
+        max_tokens=2048,  # Gemini 3 spends output tokens on hidden thinking
         seed=cfg.seed,
     )
 

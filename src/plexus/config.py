@@ -44,7 +44,7 @@ class GenerationConfig(_Strict):
 
 class JudgeConfig(_Strict):
     provider: str = "gemini"
-    model: str = "gemini-3.8-flash"  # checked 2026-10-27, ADR 0005
+    model: str = "gemini-3.6-flash"  # 3.8-flash overloaded on 2026-10-27, ADR 0005
 
 
 class ExperimentConfig(_Strict):

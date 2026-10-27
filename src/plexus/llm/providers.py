@@ -70,6 +70,9 @@ class LiteLLMProvider:
             kwargs["seed"] = request.seed
         if self.api_base and self.name == "ollama":
             kwargs["api_base"] = self.api_base
+        # one attempt per call with a hard timeout; LLMClient owns the retry policy
+        kwargs.setdefault("timeout", 120)
+        kwargs.setdefault("num_retries", 0)
         if request.json_schema is not None:
             kwargs["response_format"] = {
                 "type": "json_schema",
@@ -82,8 +85,12 @@ class LiteLLMProvider:
             raise ProviderError(f"{self.name}/{request.model}: {exc}") from exc
         latency = (time.perf_counter() - start) * 1000
         usage = getattr(resp, "usage", None)
+        text = resp.choices[0].message.content or ""
+        if not text.strip():
+            # e.g. a thinking model spent max_tokens on hidden reasoning; never cache this
+            raise ProviderError(f"{self.name}/{request.model}: empty response (raise max_tokens?)")
         return LLMResponse(
-            text=resp.choices[0].message.content or "",
+            text=text,
             usage=Usage(
                 prompt_tokens=getattr(usage, "prompt_tokens", 0) or 0,
                 completion_tokens=getattr(usage, "completion_tokens", 0) or 0,

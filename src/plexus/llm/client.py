@@ -91,6 +91,8 @@ class LLMClient:
             )
             raise ProviderError(f"provider {request.provider!r} is not enabled{hint}")
         response = self._call_with_retry(provider, request)
+        if not response.text.strip():  # defence in depth: an empty answer is never cached
+            raise ProviderError(f"{request.provider}/{request.model}: empty response")
         self.stats.prompt_tokens += response.usage.prompt_tokens
         self.stats.completion_tokens += response.usage.completion_tokens
         self.cache.put(request, response)
