@@ -1,0 +1,8 @@
+{
+  "snapshot": "semis-2025",
+  "parser_version": "4",
+  "url": "https://github.com/ATHARVA-87/plexus/releases/download/ci-data-semis-2025/semis-2025-docs.jsonl.gz",
+  "bytes_gz": 8983466,
+  "sha256_gz": "e523481c6cc058afe2ea1845d6c20819a71b34d1d3914f963a7814f5c01efb8e",
+  "sha256_jsonl": "d4b43887f7fb14dbd380238068946556caee642f10798fc8f46a9cf332415c54"
+}

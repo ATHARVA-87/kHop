@@ -16,9 +16,16 @@ class _Strict(BaseModel):
 
 
 class ChunkerConfig(_Strict):
-    type: Literal["fixed"] = "fixed"
+    type: Literal["fixed", "structured"] = "fixed"
+    # fixed (A0)
     size_words: int = 300
     overlap_words: int = 50
+    # structured (A1): see plexus.ingest.chunk.structured_chunks
+    child_words: int = 200
+    child_chars: int = 1400
+    parent_words: int = 800
+    # prepend "Company (TICKER) form, period. Section: X." to the indexed text (any chunker)
+    headers: bool = False
 
 
 class EmbedderConfig(_Strict):
@@ -29,9 +36,22 @@ class EmbedderConfig(_Strict):
     device: str | None = None  # None = cuda if available
 
 
+class RerankConfig(_Strict):
+    model: str = "BAAI/bge-reranker-base"
+    candidates: int = 50  # base hits the cross-encoder reorders
+    max_length: int = 512
+    batch_size: int = 32
+    device: str | None = None  # None = cuda if available
+
+
 class RetrievalConfig(_Strict):
-    type: Literal["dense"] = "dense"
+    type: Literal["dense", "bm25", "hybrid"] = "dense"
     top_k: int = 20
+    candidates: int = 100  # hybrid: hits taken from each retriever before fusion
+    rrf_k: int = 60  # reciprocal rank fusion constant (the paper's default)
+    bm25_k1: float = 1.2
+    bm25_b: float = 0.75
+    rerank: RerankConfig | None = None  # A3
 
 
 class GenerationConfig(_Strict):
@@ -73,4 +93,10 @@ class ExperimentConfig(_Strict):
         from plexus.ingest.parse import VERSION as PARSER_VERSION
 
         # parser version included: a parser fix must not silently reuse an old index
-        return f"{self.snapshot}__p{PARSER_VERSION}__{c.type}-{c.size_words}-{c.overlap_words}__{model}"
+        if c.type == "fixed":
+            shape = f"fixed-{c.size_words}-{c.overlap_words}"
+        else:
+            shape = f"structured-{c.child_words}-{c.child_chars}-{c.parent_words}"
+        if c.headers:
+            shape += "-hdr1"  # bump if the header format changes
+        return f"{self.snapshot}__p{PARSER_VERSION}__{shape}__{model}"

@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | 0. Setup | Toolchain, repo, CLAUDE.md, PROGRESS.md, Makefile, `make doctor`, CI skeleton, LLM wrapper + cache | `make doctor` and CI pass | **Passed 2026-10-27.** Doctor phase 0 all OK; GitHub CI green (run 40440596122) |
 | 1. Harness | EDGAR snapshot, golden-set candidates, human verification, metrics, A0 | A0 scored with CIs | **Gate met 2026-10-27** (134 verified queries; A0 recall@10 0.276). Branch `phase1-harness`, PR #1 needs your review |
-| 2. Retrieval + CI gate | A1–A3, retrieval gate on PRs | A1–A3 recorded; gate blocks a planted regression | Not started (gate rule) |
+| 2. Retrieval + CI gate | A1–A3, retrieval gate on PRs | A1–A3 recorded; gate blocks a planted regression | **Gate met 2026-10-27.** A2 hybrid + headers recall@10 0.704 (A0 0.276); CI gate blocks planted regression (run 40527190366). Branch `phase2-retrieval`, PR #2 needs your review |
 | 3. Graph | Extraction, resolution, Kuzu, Leiden, summaries, A4, A5 | Extraction P/R; A4, A5 recorded | — |
 | 4. Single-graph agent | Router, grade-and-rewrite, A6, A7 | Router vs always-local/global | — |
 | 5. Multi-agent | 4 agents, guardrails, A9 | A9 vs A7 with latency/cost; guardrail metrics | — |
@@ -15,20 +15,16 @@
 
 ## Resume here
 
-**State:** branch `phase1-harness` (checked out). `main` holds Phase 0. 92 tests pass (`make test-all`). A reviewer subagent checked the branch; all 9 confirmed bugs are fixed with regression tests (see `docs/ai_review_log.md`). No real data yet: every number so far comes from synthetic test fixtures.
+**State (2026-10-27 evening):** Phases 0–2 gates met. Branches: `main` = Phase 0; `phase1-harness` (PR #1) = harness, golden set, A0; `phase2-retrieval` (PR #2, stacked on #1) = A1–A3 + CI retrieval gate. Fast tests pass; CI green on `phase2-retrieval` (run 40526855835). GitHub does not fire push/PR events for this repo, so CI is started with `gh workflow run ci --ref <branch>`.
 
-**Your steps, in order** (each one unblocks the next; run `make doctor PHASE=1` after each):
+**Best retriever so far:** A2 = `configs/a1h_hybrid.yaml` (structure-aware chunks + contextual headers + BM25/dense RRF): recall@10 0.704, multi-hop 0.675. The reranker (A3) helps single-company questions (0.923) but hurts two-company ones. Use it only on single-company questions once the router exists (docs/failures.md).
 
-1. ~~**GitHub repo**~~ Done 2026-10-27: https://github.com/ATHARVA-87/plexus, PR #1 open (phase1-harness → main). **Review PR #1** (metrics and golden-set code) before merging.
-2. ~~**SEC User-Agent**~~ Done 2026-10-27. (step 3): `cp .env.example .env`, set `SEC_USER_AGENT="Your Name your@email"`.
-3. ~~**Download + parse**~~ Done 2026-10-27: 156 filings / 39 companies; 152 fully sectioned, 4 Intel unstructured (docs/failures.md). A0 index built (20,360 chunks). Originally:
-   `conda activate torch && make ingest && make process`. Then read `data/snapshots/semis-2025.parse_report.json`. Section coverage below ~90% for `risk_factors` or `mdna` means the parser needs fixing on real filings. Tell me which doc IDs fail.
-4. **Gemini key** (step 5, pulled forward because candidates and the judge need it): create a free key at https://aistudio.google.com/apikey and paste it into `.env` as `GEMINI_API_KEY` yourself. Check your free-tier limits in AI Studio (ADR 0005).
-5. **Candidates:** `make candidates` writes about 200 rows to `data/golden/review.csv`. Then `make index CONFIG=configs/a0_naive.yaml`.
-6. ~~**Review**~~ Done 2026-10-27: 134 verified questions (see "Golden-set review status"). Originally: follow `docs/golden_review_guide.md` and verify at least 100 rows. Then `make golden`.
-7. **A0:** `make eval CONFIG=configs/a0_naive.yaml` gives retrieval metrics with CIs, which is the Phase 1 gate. For generation metrics, install Ollama (step 4, needs sudo) and `ollama pull qwen3.5:4b`, then `make eval-full`, `make judge-export`, label about 50 answers, and `make judge-agreement`.
+**Your open items:**
+1. Review PR #1 (metrics, golden-set code) and PR #2 (`eval/run.py`, `eval/gate.py`, `eval/compare.py`), then merge #1 before #2.
+2. Sign off ADRs 0001–0005.
+3. Phase 3 needs Ollama (human step 4, sudo): install it and `ollama pull qwen3.5:4b`. Graph extraction can use Gemini/Groq free tier meanwhile.
 
-**Next Claude task once data exists:** fix the parser on real filings using the parse report, then start Phase 2 (A1 structure-aware parent-child chunks).
+**Next Claude task:** Phase 3 (graph). LLM entity/relation extraction with a strict JSON schema → entity resolution → Kuzu → Leiden communities + summaries; A4 graph traversal, A5 community search (aimed at global questions: company_coverage@10 is stuck at ~0.5 for every retriever).
 
 ## Gate evidence
 
@@ -49,6 +45,61 @@
 - strict_recall@10 (exact source filing only) 0.204. Retrieval p50 46.46 ms.
 - Generation metrics not run yet: they need Ollama (sudo install), so those are deferred and not part of the gate.
 - Global questions were reworded by you: "How do all semiconductor companies …" instead of "… in the corpus". All 122 local/multi-hop/bridge questions were then rephrased the way a user would type them (short company names, no filing dates unless the answer depends on the period; your request 2026-10-27). Same answers and evidence. A0 recall@10 rose from 0.216 to 0.276: the legal names and filing dates were noise for the dense embedder.
+
+### Phase 2: gate met 2026-10-27 (branch `phase2-retrieval`, PR #2 stacked on #1)
+- **Gate evidence.** CI job `retrieval-gate` (BM25 path, no torch) passes on the branch: run 40526855835. A planted regression (S-stemmer disabled, throwaway branch `gate-demo-planted-regression`, now deleted) fails it: run 40527190366. Failing metrics: all recall@10 0.5808 < 0.6119, local 0.7000 < 0.7308, multi-hop 0.5614 < 0.6053. The unit tests also failed (2). `make gate` runs the full gate locally (BM25, hybrid, reranker).
+- CI data: release `ci-data-semis-2025` (processed filings, 9.0 MB gz); both checksums are verified by `plexus.ingest.ci_data`.
+- Retrieval is fully deterministic: re-running all three gated configs, including the fp16 GPU reranker, reproduced every per-query score exactly.
+- A1–A3 recorded (tables below).
+Step 1, 2026-10-27: BM25 keyword retriever, reciprocal rank fusion and a retriever interface (`src/plexus/retrieve/`), `make compare` (paired bootstrap B − A). Tested on A0's chunks, so only the retriever changes:
+
+| config | recall@10 (95% CI) | nDCG@10 | MRR | Δ recall@10 vs A0 (paired 95% CI) |
+| --- | --- | --- | --- | --- |
+| a0_naive (dense) | 0.276 (0.208–0.343) | 0.211 | 0.238 | |
+| a0_bm25 | 0.432 | 0.318 | 0.328 | +0.155 [+0.080, +0.231] |
+| a0_hybrid (RRF k=60, 100+100) | 0.374 | 0.290 | 0.318 | +0.098; vs bm25 −0.057 [−0.110, −0.007] |
+
+- BM25 alone beats dense bge-small clearly on local and multi-hop questions.
+- Negative result: equal-weight RRF is worse than BM25 alone, because the weaker dense list pulls good BM25 hits out of the top 10. Weighted fusion and a reranker (A3) are the next fixes.
+- Bias check: the golden questions were written from their passages, which favours keyword matching. On average 40% of a question's words appear in its gold quote. On the high-overlap half BM25 scores 0.60 vs dense 0.32; on the low-overlap half it still wins, 0.34 vs 0.28. So the BM25 advantage is partly an artefact of how the golden set was made, but not only that.
+- Global questions: no retriever reaches more than ~55% of the relevant companies in the top 10 (company_coverage@10). That is the job of A5 (community summaries).
+
+Step 2, 2026-10-27: A1 structure-aware parent-child chunks (`structured_chunks`): children are section-bounded and paragraph-aligned, at most 200 words / 1,400 chars; parents group up to 800 words. 31,530 children, 8,347 parents, mean 161 words. **Chunks truncated by the embedder: 10 (A0: 1,031).**
+New metric `recall@{B}w`: recall within the first B words retrieved. Chunkers are only comparable at an equal reading budget (A0's top 10 ≈ 3,000 words, A1's ≈ 1,650).
+
+| config | R@500w | R@1000w | R@2000w | R@3000w | R@5000w | R@10 |
+| --- | --- | --- | --- | --- | --- | --- |
+| a0_naive | 0.128 | 0.199 | 0.245 | 0.276 | 0.325 | 0.276 |
+| a0_bm25 | 0.190 | 0.302 | 0.387 | 0.432 | 0.486 | 0.432 |
+| a0_hybrid | 0.184 | 0.255 | 0.341 | 0.374 | 0.454 | 0.374 |
+| a1_structured | 0.175 | 0.235 | 0.269 | 0.333 | 0.376 | 0.250 |
+| a1_bm25 | 0.202 | 0.310 | 0.377 | 0.435 | 0.485 | 0.347 |
+| a1_hybrid | 0.190 | 0.261 | 0.378 | 0.438 | 0.512 | 0.356 |
+
+- Paired Δ at 3,000 words, A1 − A0: dense +0.057 [0.000, +0.117]; hybrid +0.064 [+0.006, +0.128]; BM25 +0.004 [−0.050, +0.060].
+- A1 helps the embedding-based retrievers (whole paragraphs, no truncation) and does nothing for BM25. At equal top-k it looks worse only because each chunk is about half the size.
+- From here the ladder runs on A1 chunks: A2 = a1_hybrid, A3 = A2 + reranker. Primary Phase 2 metric: recall@3000w, with recall@10 alongside.
+
+Step 3, 2026-10-27: A3 cross-encoder reranker (`bge-reranker-base`, fp16, top 50 of A2 = a1_hybrid). Eval run 3.7 min including the model download.
+- vs A2: nDCG@10 +0.065 [+0.009, +0.121], MRR +0.072 [+0.006, +0.138]; local recall@10 0.538 → 0.646 (+0.108 [+0.015, +0.185]).
+- Multi-hop recall@10 0.219 → 0.140 (−0.079 [−0.175, +0.018], not significant but a warning). It is not company crowding: both companies appear in the top 10 more often after reranking (44/57 vs 40/57).
+- Cause, from inspecting the 15 multi-hop losses: the short user-style questions are dominated by company names, so the cross-encoder scores generic "Lam Research Corporation is a global supplier…" overview passages near 1.0. The answer passages say "we", not the company name. Next step: contextual chunk headers (company, form, section) on every chunk, for all retrievers.
+
+Step 4, 2026-10-27: contextual chunk headers (`ingest/headers.py`): "Lam Research Corp (LRCX) 10-K for the period ended 2025-06-29. Section: Risk Factors." is prepended to the text that is embedded, BM25-indexed and reranked. The chunk text and offsets are unchanged, and no gold information is involved. Small alias table for common names (onsemi, TI, Silicon Labs, …).
+
+| config | R@1000w | R@3000w | R@10 | local | multi-hop | nDCG@10 | MRR | p50 ms |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| a0_naive (A0) | 0.199 | 0.276 | 0.276 | 0.408 | 0.175 | 0.211 | 0.238 | 30 |
+| a1h_structured (A1: chunks + headers, dense) | | 0.640 | 0.541 | 0.769 | 0.386 | 0.442 | 0.471 | |
+| a1h_bm25 | 0.504 | 0.693 | 0.612 | 0.731 | 0.605 | 0.461 | 0.454 | 1 |
+| **a1h_hybrid (A2)** | **0.623** | **0.778** | **0.704** | 0.846 | **0.675** | 0.560 | 0.563 | 45 |
+| a3h_rerank (A3) | 0.602 | 0.770 | 0.684 | **0.923** | 0.544 | **0.582** | **0.613** | 231 |
+
+- Headers alone, hybrid: recall@10 +0.348 [+0.273, +0.423]; multi-hop +0.456. Same pattern with the reranker (+0.309).
+- A3 vs A2: local +0.077 [+0.015, +0.139] and nDCG +0.141; multi-hop −0.132 [−0.237, −0.026]. Net flat (see docs/failures.md). Decision: rerank single-company questions only, once the router exists (Phase 4).
+- A3h vs A0: recall@10 +0.408 [+0.335, +0.484].
+- Global company_coverage@10 stays at ~0.45–0.52 for every retriever. That is A5's job.
+- Ladder from here: A1 = a1h_structured, A2 = a1h_hybrid, A3 = a3h_rerank. The configs without headers stay as the header ablation.
 
 ## What was built in Phase 1 (branch `phase1-harness`)
 | Module | What | Review needed |
