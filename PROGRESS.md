@@ -20,8 +20,8 @@
 **Your steps, in order** (each one unblocks the next; run `make doctor PHASE=1` after each):
 
 1. ~~**GitHub repo**~~ Done 2026-10-27: https://github.com/ATHARVA-87/plexus, PR #1 open (phase1-harness → main). **Review PR #1** (metrics and golden-set code) before merging.
-2. **SEC User-Agent** (step 3): `cp .env.example .env`, set `SEC_USER_AGENT="Your Name your@email"`.
-3. **Download + parse** (you run these, about 5 minutes):
+2. ~~**SEC User-Agent**~~ Done 2026-10-27. (step 3): `cp .env.example .env`, set `SEC_USER_AGENT="Your Name your@email"`.
+3. ~~**Download + parse**~~ Done 2026-10-27: 156 filings / 39 companies; 152 fully sectioned, 4 Intel unstructured (docs/failures.md). A0 index built (20,360 chunks). Originally:
    `conda activate torch && make ingest && make process`. Then read `data/snapshots/semis-2025.parse_report.json`. Section coverage below ~90% for `risk_factors` or `mdna` means the parser needs fixing on real filings. Tell me which doc IDs fail.
 4. **Gemini key** (step 5, pulled forward because candidates and the judge need it): create a free key at https://aistudio.google.com/apikey and paste it into `.env` as `GEMINI_API_KEY` yourself. Check your free-tier limits in AI Studio (ADR 0005).
 5. **Candidates:** `make candidates` writes about 200 rows to `data/golden/review.csv`. Then `make index CONFIG=configs/a0_naive.yaml`.
@@ -68,3 +68,5 @@
 - 2026-10-27 00:00: free tiers checked (ADR 0005): `gemini-2.0-flash` is shut down, so configs moved to `gemini-3.8-flash` and `qwen3.5:4b`.
 - 2026-10-27 00:05–00:12: reviewer subagent pass on the Phase 1 branch. 9 confirmed bugs fixed: partial-evidence recall inflation, greedy matching, TOC sections, heading regex, section gaps, judge agreement, golden build crashes, BOM CSVs, repeated quotes. Plus EDGAR robustness and a versioned index key.
 - Known limits, not fixed: chunks longer than bge's 512 tokens are truncated (now counted in `build_info.json`); the parser is validated on synthetic HTML only.
+- 2026-10-27 09:20–09:40: `make ingest` (156 filings, 39 cos; QRVO missing after the Skyworks merger; YAML `ON` ticker bug fixed). `make process`: parser v4, 152/156 fully sectioned. `make index` for A0: 20,360 chunks, 156 s on GPU, **1,031 chunks (5.1%) exceed bge's 512 tokens** (table-heavy), a known A0 weakness for A1 to address with token-based sizing.
+- User chose to keep the brief's phase order (multi-agent = Phase 5). **Next: user adds GEMINI_API_KEY to .env → `make candidates`.**
