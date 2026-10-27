@@ -1,0 +1,24 @@
+name: a1h_bm25
+description: >
+  Same as a1_bm25 plus contextual chunk headers (company, ticker, form, period, section)
+  prepended to the indexed text. A1 chunks with BM25 keyword retrieval (compare with a0_bm25).
+snapshot: semis-2025
+seed: 0
+chunker:
+  type: structured
+  child_words: 200
+  child_chars: 1400
+  parent_words: 800
+  headers: true
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: bm25
+  top_k: 20
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 5
+judge:
+  provider: gemini
+  model: gemini-3.6-flash

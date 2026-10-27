@@ -13,6 +13,7 @@ from dataclasses import replace
 
 from plexus.config import RerankConfig
 from plexus.index.dense import Hit
+from plexus.ingest.headers import index_text
 
 ScoreFn = Callable[[str, Sequence[str]], Sequence[float]]
 
@@ -43,7 +44,7 @@ class RerankingRetriever:
         head, tail = hits[: self.candidates], hits[self.candidates :]
         if not head:
             return []
-        scores = self.score_fn(question, [h.text for h in head])
+        scores = self.score_fn(question, [index_text(h.header, h.text) for h in head])
         order = sorted(range(len(head)), key=lambda i: (-scores[i], i))  # ties keep base order
         reranked = [replace(head[i], score=scores[i]) for i in order]
         return (reranked + tail)[:k]

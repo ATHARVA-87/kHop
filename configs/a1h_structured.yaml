@@ -1,0 +1,26 @@
+name: a1h_structured
+description: >
+  Same as a1_structured plus contextual chunk headers (company, ticker, form, period, section)
+  prepended to the indexed text. A1: structure-aware chunks. Children are section-bounded, paragraph-aligned, at most
+  200 words / 1,400 chars (inside bge's 512-token window); parents group children up to 800
+  words. Dense retrieval over children, as in A0, so only the chunking differs.
+snapshot: semis-2025
+seed: 0
+chunker:
+  type: structured
+  child_words: 200
+  child_chars: 1400
+  parent_words: 800
+  headers: true
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: dense
+  top_k: 20
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 5
+judge:
+  provider: gemini
+  model: gemini-3.6-flash

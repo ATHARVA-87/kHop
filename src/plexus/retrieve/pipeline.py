@@ -15,6 +15,7 @@ from typing import Protocol
 
 from plexus.config import ExperimentConfig
 from plexus.index.dense import Hit
+from plexus.ingest.headers import index_text
 from plexus.retrieve.bm25 import BM25Index
 from plexus.retrieve.fusion import rrf
 
@@ -58,7 +59,9 @@ class BM25Retriever:
         index = BM25Index.load(cache, k1, b) if cache.exists() else None
         if index is None or index.n_docs != len(chunks):
             t0 = time.perf_counter()
-            index = BM25Index.build((c["text"] for c in chunks), k1, b)
+            index = BM25Index.build(
+                (index_text(c.get("header", ""), c["text"]) for c in chunks), k1, b
+            )
             index.save(cache)
             log.info("built BM25 over %d chunks in %.1fs", len(chunks), time.perf_counter() - t0)
         return cls(chunks, index)
@@ -68,7 +71,9 @@ class BM25Retriever:
         for i, score in self.index.search(question, k):
             c = self.chunks[i]
             fields = {f: c[f] for f in ("chunk_id", "doc_id", "start", "end", "section", "text")}
-            parent = {f: c[f] for f in ("parent_id", "parent_start", "parent_end") if f in c}
+            parent = {
+                f: c[f] for f in ("parent_id", "parent_start", "parent_end", "header") if f in c
+            }
             out.append(Hit(score=score, **fields, **parent))
         return out
 

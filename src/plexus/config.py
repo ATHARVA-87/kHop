@@ -24,6 +24,8 @@ class ChunkerConfig(_Strict):
     child_words: int = 200
     child_chars: int = 1400
     parent_words: int = 800
+    # prepend "Company (TICKER) form, period. Section: X." to the indexed text (any chunker)
+    headers: bool = False
 
 
 class EmbedderConfig(_Strict):
@@ -95,4 +97,6 @@ class ExperimentConfig(_Strict):
             shape = f"fixed-{c.size_words}-{c.overlap_words}"
         else:
             shape = f"structured-{c.child_words}-{c.child_chars}-{c.parent_words}"
+        if c.headers:
+            shape += "-hdr1"  # bump if the header format changes
         return f"{self.snapshot}__p{PARSER_VERSION}__{shape}__{model}"

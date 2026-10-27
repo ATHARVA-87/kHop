@@ -13,10 +13,12 @@ import json
 import logging
 import sys
 import time
+from dataclasses import replace
 from pathlib import Path
 
 from plexus.config import ExperimentConfig
 from plexus.ingest.chunk import Chunk, fixed_chunks, structured_chunks
+from plexus.ingest.headers import chunk_header, index_text
 from plexus.ingest.process import iter_docs
 from plexus.settings import Settings
 
@@ -29,14 +31,17 @@ def index_dir(data_dir: Path, cfg: ExperimentConfig) -> Path:
 
 def make_chunks(cfg: ExperimentConfig, data_dir: Path) -> list[Chunk]:
     chunks: list[Chunk] = []
-    for _, doc in iter_docs(data_dir / "processed", cfg.snapshot):
-        c = cfg.chunker
+    c = cfg.chunker
+    for meta, doc in iter_docs(data_dir / "processed", cfg.snapshot):
         if c.type == "fixed":
-            chunks.extend(fixed_chunks(doc, c.size_words, c.overlap_words))
+            doc_chunks = fixed_chunks(doc, c.size_words, c.overlap_words)
         elif c.type == "structured":
-            chunks.extend(structured_chunks(doc, c.child_words, c.child_chars, c.parent_words))
+            doc_chunks = structured_chunks(doc, c.child_words, c.child_chars, c.parent_words)
         else:  # pragma: no cover - guarded by the config Literal
-            raise ValueError(cfg.chunker.type)
+            raise ValueError(c.type)
+        if c.headers:
+            doc_chunks = [replace(x, header=chunk_header(meta, x.section)) for x in doc_chunks]
+        chunks.extend(doc_chunks)
     return chunks
 
 
@@ -56,7 +61,7 @@ def build(cfg: ExperimentConfig, data_dir: Path) -> dict:
 
     t0 = time.perf_counter()
     embedder = Embedder(cfg.embedder, cache_path=data_dir / "cache" / "embeddings.sqlite")
-    vectors = embedder.embed_passages([c.text for c in chunks])
+    vectors = embedder.embed_passages([index_text(c.header, c.text) for c in chunks])
     embed_s = time.perf_counter() - t0
 
     index = DenseIndex(out / "qdrant", "chunks", embedder.dim)
@@ -81,7 +86,9 @@ def build(cfg: ExperimentConfig, data_dir: Path) -> dict:
         "embedder": cfg.embedder.model,
         "embedding_dim": embedder.dim,
         "embed_seconds": round(embed_s, 1),
-        "chunks_truncated_by_embedder": embedder.count_truncated([c.text for c in chunks]),
+        "chunks_truncated_by_embedder": embedder.count_truncated(
+            [index_text(c.header, c.text) for c in chunks]
+        ),
     }
     (out / "build_info.json").write_text(json.dumps(info, indent=2) + "\n")
     return info

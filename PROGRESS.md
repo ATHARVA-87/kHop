@@ -85,6 +85,22 @@ Step 3, 2026-10-27: A3 cross-encoder reranker (`bge-reranker-base`, fp16, top 50
 - Multi-hop recall@10 0.219 → 0.140 (−0.079 [−0.175, +0.018], not significant but a warning). It is not company crowding: both companies appear in the top 10 more often after reranking (44/57 vs 40/57).
 - Cause, from inspecting the 15 multi-hop losses: the short user-style questions are dominated by company names, so the cross-encoder scores generic "Lam Research Corporation is a global supplier…" overview passages near 1.0. The answer passages say "we", not the company name. Next step: contextual chunk headers (company, form, section) on every chunk, for all retrievers.
 
+Step 4, 2026-10-27: contextual chunk headers (`ingest/headers.py`): "Lam Research Corp (LRCX) 10-K for the period ended 2025-06-29. Section: Risk Factors." is prepended to the text that is embedded, BM25-indexed and reranked. The chunk text and offsets are unchanged, and no gold information is involved. Small alias table for common names (onsemi, TI, Silicon Labs, …).
+
+| config | R@1000w | R@3000w | R@10 | local | multi-hop | nDCG@10 | MRR | p50 ms |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| a0_naive (A0) | 0.199 | 0.276 | 0.276 | 0.408 | 0.175 | 0.211 | 0.238 | 30 |
+| a1h_structured (A1: chunks + headers, dense) | | 0.640 | 0.541 | 0.769 | 0.386 | 0.442 | 0.471 | |
+| a1h_bm25 | 0.504 | 0.693 | 0.612 | 0.731 | 0.605 | 0.461 | 0.454 | 1 |
+| **a1h_hybrid (A2)** | **0.623** | **0.778** | **0.704** | 0.846 | **0.675** | 0.560 | 0.563 | 45 |
+| a3h_rerank (A3) | 0.602 | 0.770 | 0.684 | **0.923** | 0.544 | **0.582** | **0.613** | 231 |
+
+- Headers alone, hybrid: recall@10 +0.348 [+0.273, +0.423]; multi-hop +0.456. Same pattern with the reranker (+0.309).
+- A3 vs A2: local +0.077 [+0.015, +0.139] and nDCG +0.141; multi-hop −0.132 [−0.237, −0.026]. Net flat (see docs/failures.md). Decision: rerank single-company questions only, once the router exists (Phase 4).
+- A3h vs A0: recall@10 +0.408 [+0.335, +0.484].
+- Global company_coverage@10 stays at ~0.45–0.52 for every retriever. That is A5's job.
+- Ladder from here: A1 = a1h_structured, A2 = a1h_hybrid, A3 = a3h_rerank. The configs without headers stay as the header ablation.
+
 ## What was built in Phase 1 (branch `phase1-harness`)
 | Module | What | Review needed |
 | --- | --- | --- |

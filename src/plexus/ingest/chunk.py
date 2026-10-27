@@ -23,6 +23,7 @@ class Chunk:
     parent_id: str = ""
     parent_start: int = -1
     parent_end: int = -1
+    header: str = ""  # contextual header (company, form, section); see ingest/headers.py
 
     def to_dict(self) -> dict:
         return asdict(self)
