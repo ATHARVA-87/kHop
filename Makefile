@@ -3,7 +3,7 @@
 PY ?= python
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci extract serve ui
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates extract serve ui
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -47,8 +47,14 @@ candidates: ## Generate ~200 golden-set candidates into data/golden/review.csv (
 golden: ## Build data/golden/golden.jsonl from your reviewed review.csv (+ noise rate)
 	$(PY) -m plexus.eval.golden build
 
-extract: ## Graph extraction (Phase 3)
-	@echo "extract: not implemented yet (Phase 3)"; exit 1
+extract: ## Graph extraction over 10-K passages with local qwen3.5:4b (~4.5 h, resumable)
+	$(PY) -m plexus.extract.extract
+
+golden-test: ## Build data/golden/golden_test.jsonl from your reviewed review_test.csv
+	$(PY) -m plexus.eval.golden build --split test
+
+test-candidates: ## Held-out test-set candidates (Gemini, user-style, excludes dev passages)
+	$(PY) -m plexus.eval.candidates --config configs/golden_test.yaml --out data/golden/review_test.csv
 
 eval: ## Retrieval metrics for $(CONFIG) on the verified golden set (no LLM calls)
 	$(PY) -m plexus.eval.run --config $(CONFIG)

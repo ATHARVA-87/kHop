@@ -1,0 +1,64 @@
+# Held-out TEST set (Phase 3, 2026-10-27). Same procedure as the dev set: Gemini drafts ->
+# AI reviewer agents pre-review -> human verifies. Output: data/golden/review_test.csv.
+# Differences from dev, on purpose (design review of Phase 2):
+# - user-style phrasing, written to paraphrase rather than copy the passage (style: user)
+# - never reuses a dev passage or a dev (entity, company pair) (exclude_golden)
+# - different seed; ~3 phrasings per global theme so global results have more than 12 questions
+snapshot: semis-2025
+seed: 1
+provider: gemini
+model: gemini-3.6-flash
+fallback_models: [gemini-3.5-flash-lite, gemini-3.1-flash-lite]
+style: user
+qid_prefix: T
+exclude_golden: [data/golden/golden.jsonl]
+counts:
+  local: 60
+  multi_hop: 40
+  bridge: 25
+  global: 36
+passage_words: 180
+local_sections: [risk_factors, mdna, business]
+
+# counterparties and themes copied from golden_candidates.yaml (same entities and themes, new questions)
+counterparties:
+- TSMC
+- Taiwan Semiconductor
+- Samsung
+- SK hynix
+- GlobalFoundries
+- UMC
+- SMIC
+- ASML
+- Tokyo Electron
+- Apple
+- Microsoft
+- Amazon
+- Alphabet
+- Google
+- Meta
+- Dell
+- Foxconn
+- Hon Hai
+- Huawei
+- Arm
+- Synopsys
+- Cadence
+- Intel
+- NVIDIA
+- Qualcomm
+- Broadcom
+- Tesla
+themes:
+  export control: U.S. export controls
+  China: exposure to China
+  Taiwan: dependence on Taiwan / cross-strait risk
+  tariff: tariffs and trade policy
+  customer concentration: customer concentration
+  single source: single-source or limited suppliers
+  cyclical: industry cyclicality
+  inventory: inventory and supply-demand imbalance
+  cybersecurity: cybersecurity incidents
+  artificial intelligence: dependence on AI demand
+  interest rate: interest rate and financing risk
+  climate: climate and environmental regulation

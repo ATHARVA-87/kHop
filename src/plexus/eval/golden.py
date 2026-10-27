@@ -188,15 +188,23 @@ def load_golden(path: Path | None = None, qtypes: set[str] | None = None) -> lis
     return qs
 
 
+# dev: used to design and tune the system. test: held out, scored once per final config.
+# Inputs are listed explicitly: a glob would mix the held-out test reviews into dev.
+SPLITS = {
+    "dev": (["review.csv", "review_bridge.csv"], "golden.jsonl", "review_stats.json"),
+    "test": (["review_test.csv"], "golden_test.jsonl", "review_test_stats.json"),
+}
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("command", choices=["build"])
-    ap.add_argument(
-        "--review", type=Path, nargs="*", default=None, help="default: data/golden/review*.csv"
-    )
+    ap.add_argument("--split", choices=list(SPLITS), default="dev")
+    ap.add_argument("--review", type=Path, nargs="*", default=None, help="override the inputs")
     args = ap.parse_args(argv)
-    files = args.review or sorted(GOLDEN_DIR.glob("review*.csv"))
-    stats = build_golden(list(files), GOLDEN_DIR / "golden.jsonl", GOLDEN_DIR / "review_stats.json")
+    inputs, out, stats_path = SPLITS[args.split]
+    files = args.review or [GOLDEN_DIR / f for f in inputs]
+    stats = build_golden(list(files), GOLDEN_DIR / out, GOLDEN_DIR / stats_path)
     print(json.dumps(stats, indent=2))
     return 0
 
