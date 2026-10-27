@@ -23,14 +23,29 @@ class CI:
 
 
 def bootstrap_ci(
-    values: Sequence[float], n_resamples: int = 2000, alpha: float = 0.05, seed: int = 0
+    values: Sequence[float],
+    n_resamples: int = 2000,
+    alpha: float = 0.05,
+    seed: int = 0,
+    clusters: Sequence[str] | None = None,
 ) -> CI:
-    """Percentile bootstrap CI of the mean."""
+    """Percentile bootstrap CI of the mean.
+
+    With `clusters` (e.g. the theme of each global question), whole clusters are resampled,
+    so near-duplicate questions on one theme don't make the interval look falsely narrow.
+    """
     x = np.asarray(values, dtype=float)
     if x.size == 0:
         raise ValueError("no values")
     rng = np.random.default_rng(seed)
-    means = x[rng.integers(0, x.size, size=(n_resamples, x.size))].mean(axis=1)
+    if clusters is None:
+        means = x[rng.integers(0, x.size, size=(n_resamples, x.size))].mean(axis=1)
+    else:
+        groups = [np.flatnonzero(np.asarray(clusters) == c) for c in sorted(set(clusters))]
+        means = np.empty(n_resamples)
+        for i in range(n_resamples):
+            pick = rng.integers(0, len(groups), size=len(groups))
+            means[i] = np.concatenate([x[groups[j]] for j in pick]).mean()
     lo, hi = np.quantile(means, [alpha / 2, 1 - alpha / 2])
     return CI(float(x.mean()), float(lo), float(hi), int(x.size))
 

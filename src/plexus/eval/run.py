@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
@@ -79,8 +80,31 @@ def gold_spans(
     return items, missing
 
 
+def theme_of(q: GoldenQuery, label_to_keyword: dict[str, str]) -> str | None:
+    """Theme keyword of a global question, from its source tag 'theme=<label>'."""
+    m = re.search(r"theme=(.+)$", q.source)
+    return label_to_keyword.get(m.group(1).strip()) if m else None
+
+
+def company_coverage(hits: Sequence, relevant: set[str], keyword: str, k: int) -> float:
+    """Share of relevant companies with >=1 on-theme chunk (contains the theme keyword) in
+    the top k. Chunker-independent and needs no quote labels (design review finding #2)."""
+    covered = {
+        _company(h.doc_id)
+        for h in hits[:k]
+        if _company(h.doc_id) in relevant
+        and keyword.lower() in (getattr(h, "text", "") or "").lower()
+    }
+    return len(covered) / len(relevant)
+
+
 def score_retrieval(
-    queries: Sequence[GoldenQuery], retriever: Retriever, doc_texts: dict[str, str], k: int
+    queries: Sequence[GoldenQuery],
+    retriever: Retriever,
+    doc_texts: dict[str, str],
+    k: int,
+    theme_labels: dict[str, set[str]] | None = None,
+    label_to_keyword: dict[str, str] | None = None,
 ) -> tuple[list[dict], list[dict]]:
     """Queries with ANY unlocatable evidence are skipped (and reported), never scored on the
     remaining evidence, which would inflate recall."""
@@ -96,10 +120,21 @@ def score_retrieval(
         hits = retriever.retrieve(q.question, k)
         ms = (time.perf_counter() - t0) * 1000
         retrieved = [Span(h.doc_id, h.start, h.end) for h in hits]
+        extra: dict = {}
+        kw = theme_of(q, label_to_keyword or {}) if q.qtype == "global" else None
+        if kw and theme_labels and theme_labels.get(kw):
+            extra["theme"] = kw
+            extra["n_relevant_companies"] = len(theme_labels[kw])
+            for kk in (10, 20):
+                if kk <= k:
+                    extra[f"company_coverage@{kk}"] = company_coverage(
+                        hits, theme_labels[kw], kw, kk
+                    )
         rows.append(
             {
                 "qid": q.qid,
                 "qtype": q.qtype,
+                **extra,
                 "retrieval_ms": ms,
                 **retrieval_metrics(retrieved, gold, ks),
                 **threshold_sensitivity(retrieved, gold),
@@ -114,6 +149,7 @@ RECALL_KS = (1, 5, 10, 20)
 METRICS = [
     "recall@1", "recall@5", "recall@10", "recall@20", "ndcg@10", "mrr",
     "recall@10@cover0.3", "recall@10@cover0.7", "strict_recall@10",
+    "company_coverage@10", "company_coverage@20",
 ]  # fmt: skip
 
 
@@ -123,8 +159,14 @@ def aggregate(rows: list[dict], seed: int = 0) -> dict:
         groups.setdefault(r["qtype"], []).append(r)
     out = {}
     for name, rs in groups.items():
-        present = [m for m in METRICS if m in rs[0]]
-        out[name] = {m: bootstrap_ci([r[m] for r in rs], seed=seed).to_dict() for m in present}
+        out[name] = {}
+        for m in METRICS:
+            sub = [r for r in rs if m in r]
+            if not sub:
+                continue
+            # global questions: resample whole themes (questions on one theme are not independent)
+            clusters = [r["theme"] for r in sub] if all("theme" in r for r in sub) else None
+            out[name][m] = bootstrap_ci([r[m] for r in sub], seed=seed, clusters=clusters).to_dict()
         lat = np.array([r["retrieval_ms"] for r in rs])
         out[name]["retrieval_ms"] = {
             "p50": round(float(np.percentile(lat, 50)), 2),
@@ -248,7 +290,16 @@ def run(
     if (generate or use_judge) and llm is None:
         llm = LLMClient.from_settings()
     pipeline = NaiveRAG(cfg, embedder, index, llm)
-    rows, label_errors = score_retrieval(queries, pipeline, doc_texts, cfg.retrieval.top_k)
+    theme_labels, label_to_keyword = None, None
+    themes_csv = data / "golden" / "global_themes.csv"
+    if themes_csv.exists():
+        from plexus.eval.global_themes import load_labels, load_themes
+
+        theme_labels = load_labels(themes_csv)
+        label_to_keyword = {label: kw for kw, label in load_themes().items()}
+    rows, label_errors = score_retrieval(
+        queries, pipeline, doc_texts, cfg.retrieval.top_k, theme_labels, label_to_keyword
+    )
     generation = {}
     if generate or use_judge:
         judge = Judge(llm, cfg.judge.provider, cfg.judge.model, cfg.seed) if use_judge else None
