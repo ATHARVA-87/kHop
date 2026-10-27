@@ -107,6 +107,8 @@ def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:
     def dense() -> DenseRetriever:
         from plexus.index.dense import DenseIndex, Embedder
 
+        if not (path / "qdrant").exists():
+            raise FileNotFoundError(f"no dense index at {path}: built with --chunks-only?")
         emb = Embedder(cfg.embedder, cache_path=data_dir / "cache" / "embeddings.sqlite")
         return DenseRetriever(emb, DenseIndex(path / "qdrant", "chunks", emb.dim))
 

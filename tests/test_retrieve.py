@@ -134,3 +134,13 @@ def test_reranker_ties_keep_base_order():
 
     rr = RerankingRetriever(Base(), lambda q, ps: [1.0] * len(ps), candidates=50)
     assert [h.chunk_id for h in rr.retrieve("q", 3)] == ["x", "y", "z"]
+
+
+def test_bm25_cache_rejected_when_tokenizer_source_differs(tmp_path, monkeypatch):
+    import plexus.retrieve.bm25 as bm
+
+    idx = BM25Index.build(["alpha beta"])
+    idx.save(tmp_path / "b.pkl")
+    assert BM25Index.load(tmp_path / "b.pkl") is not None
+    monkeypatch.setattr(bm, "_fingerprint", lambda: "1:other-source")
+    assert BM25Index.load(tmp_path / "b.pkl") is None

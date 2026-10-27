@@ -45,9 +45,9 @@ def make_chunks(cfg: ExperimentConfig, data_dir: Path) -> list[Chunk]:
     return chunks
 
 
-def build(cfg: ExperimentConfig, data_dir: Path) -> dict:
-    from plexus.index.dense import DenseIndex, Embedder
-
+def build(cfg: ExperimentConfig, data_dir: Path, chunks_only: bool = False) -> dict:
+    """chunks_only: write chunks.jsonl (all BM25 needs) and skip embeddings, so the CI
+    retrieval gate runs without torch or a GPU."""
     out = index_dir(data_dir, cfg)
     out.mkdir(parents=True, exist_ok=True)
     chunks = make_chunks(cfg, data_dir)
@@ -58,17 +58,6 @@ def build(cfg: ExperimentConfig, data_dir: Path) -> dict:
     with open(out / "chunks.jsonl", "w") as fh:
         for c in chunks:
             fh.write(json.dumps(c.to_dict()) + "\n")
-
-    t0 = time.perf_counter()
-    embedder = Embedder(cfg.embedder, cache_path=data_dir / "cache" / "embeddings.sqlite")
-    vectors = embedder.embed_passages([index_text(c.header, c.text) for c in chunks])
-    embed_s = time.perf_counter() - t0
-
-    index = DenseIndex(out / "qdrant", "chunks", embedder.dim)
-    index.reset()
-    index.add(chunks, vectors)
-    n = index.count()
-    index.close()
 
     summary_path = data_dir / "snapshots" / f"{cfg.snapshot}.summary.json"
     checksum = (
@@ -82,24 +71,47 @@ def build(cfg: ExperimentConfig, data_dir: Path) -> dict:
         "chunks": len(chunks),
         "parents": len({c.parent_id for c in chunks if c.parent_id}),
         "mean_chunk_words": round(sum(len(c.text.split()) for c in chunks) / len(chunks), 1),
+    }
+    info_path = out / "build_info.json"
+    if chunks_only:
+        old = json.loads(info_path.read_text()) if info_path.exists() else {}
+        if old.get("chunks") == info["chunks"]:
+            info = {**old, **info}  # keep the dense fields of an earlier full build
+    else:
+        info.update(_embed(cfg, data_dir, out, chunks))
+    info_path.write_text(json.dumps(info, indent=2) + "\n")
+    return info
+
+
+def _embed(cfg: ExperimentConfig, data_dir: Path, out: Path, chunks: list[Chunk]) -> dict:
+    from plexus.index.dense import DenseIndex, Embedder
+
+    t0 = time.perf_counter()
+    embedder = Embedder(cfg.embedder, cache_path=data_dir / "cache" / "embeddings.sqlite")
+    texts = [index_text(c.header, c.text) for c in chunks]
+    vectors = embedder.embed_passages(texts)
+    embed_s = time.perf_counter() - t0
+    index = DenseIndex(out / "qdrant", "chunks", embedder.dim)
+    index.reset()
+    index.add(chunks, vectors)
+    n = index.count()
+    index.close()
+    return {
         "indexed_points": n,
         "embedder": cfg.embedder.model,
         "embedding_dim": embedder.dim,
         "embed_seconds": round(embed_s, 1),
-        "chunks_truncated_by_embedder": embedder.count_truncated(
-            [index_text(c.header, c.text) for c in chunks]
-        ),
+        "chunks_truncated_by_embedder": embedder.count_truncated(texts),
     }
-    (out / "build_info.json").write_text(json.dumps(info, indent=2) + "\n")
-    return info
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
+    ap.add_argument("--chunks-only", action="store_true", help="skip embeddings (BM25 / CI)")
     args = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    info = build(ExperimentConfig.load(args.config), Settings.load().data_dir)
+    info = build(ExperimentConfig.load(args.config), Settings.load().data_dir, args.chunks_only)
     print(json.dumps(info, indent=2))
     return 0
 

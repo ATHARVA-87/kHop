@@ -11,6 +11,7 @@ plurals folded with Harman's S-stemmer ("foundries" -> "foundry").
 
 from __future__ import annotations
 
+import hashlib
 import math
 import pickle
 import re
@@ -20,7 +21,14 @@ from pathlib import Path
 
 import numpy as np
 
-TOKENIZER_VERSION = "1"  # bump when tokenisation changes so saved indexes are rebuilt
+TOKENIZER_VERSION = "1"
+
+
+def _fingerprint() -> str:
+    """Saved indexes are tied to this file's exact source, so any edit to the tokenizer,
+    stemmer or stopwords rebuilds them (a stale cache would hide a regression)."""
+    return TOKENIZER_VERSION + ":" + hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:16]
+
 
 _TOKEN = re.compile(r"[a-z0-9]+(?:\.[0-9]+)?")
 STOPWORDS = frozenset(
@@ -212,7 +220,7 @@ class BM25Index:
     def save(self, path: Path) -> None:
         with open(path, "wb") as fh:
             pickle.dump(
-                {"version": TOKENIZER_VERSION, "postings": self.postings, "doc_len": self.doc_len},
+                {"version": _fingerprint(), "postings": self.postings, "doc_len": self.doc_len},
                 fh,
                 protocol=pickle.HIGHEST_PROTOCOL,
             )
@@ -222,7 +230,7 @@ class BM25Index:
         """Our own cache file; returns None if it was written by another tokenizer version."""
         with open(path, "rb") as fh:
             d = pickle.load(fh)  # our own file from save(), never downloaded
-        if d.get("version") != TOKENIZER_VERSION:
+        if d.get("version") != _fingerprint():
             return None
         return cls(d["postings"], d["doc_len"], k1, b)
 

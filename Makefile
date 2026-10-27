@@ -3,7 +3,7 @@
 PY ?= python
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare extract serve ui
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci extract serve ui
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -61,6 +61,13 @@ judge-export: ## Export answers from results/$${NAME:-a0_naive}.json for blind h
 
 judge-agreement: ## Cohen's kappa between the judge and your labels
 	$(PY) -m plexus.eval.judge agreement --results results/$${NAME:-a0_naive}.json
+
+gate: ## retrieval regression gate vs committed results (full set; needs GPU models)
+	$(PY) -m plexus.eval.gate --config configs/a1h_bm25.yaml --config configs/a1h_hybrid.yaml --config configs/a3h_rerank.yaml
+
+gate-ci: ## the CI subset of the gate: BM25 path only, no torch (needs data/processed)
+	$(PY) -m plexus.index.build --config configs/a1h_bm25.yaml --chunks-only
+	$(PY) -m plexus.eval.gate --config configs/a1h_bm25.yaml
 
 compare: ## paired bootstrap of B vs A on the same queries: make compare A=a0_naive B=a0_bm25
 	$(PY) -m plexus.eval.compare results/$(A).json results/$(B).json

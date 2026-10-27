@@ -166,3 +166,29 @@ def test_budget_recall_counts_words_not_chunks():
     # a first chunk larger than the budget still counts (at least one chunk is read)
     big = [Hit("D#x", "D", 995, 1020, "s", 1.0, "w " * 900)]
     assert budget_recall(big, gold, budgets=(500,))["recall@500w"] == 1.0
+
+
+def _res(golden="g1", corpus="c1", **means):
+    retrieval = {"all": {}, "local": {}, "multi_hop": {}}
+    for key, v in means.items():
+        slice_, metric = key.split("__")
+        retrieval[slice_][metric.replace("_at_", "@")] = {"mean": v}
+    return {"golden": {"sha256": golden}, "corpus_checksum": corpus, "retrieval": retrieval}
+
+
+def test_gate_passes_on_equal_and_fails_on_drop():
+    from plexus.eval.gate import check
+
+    base = _res(all__recall_at_10=0.70, multi_hop__recall_at_10=0.60)
+    assert check(base, _res(all__recall_at_10=0.70, multi_hop__recall_at_10=0.60), 0.005) == []
+    assert check(base, _res(all__recall_at_10=0.75, multi_hop__recall_at_10=0.60), 0.005) == []
+    bad = check(base, _res(all__recall_at_10=0.70, multi_hop__recall_at_10=0.55), 0.005)
+    assert len(bad) == 1 and bad[0].startswith("multi_hop recall@10")
+
+
+def test_gate_flags_stale_baseline():
+    from plexus.eval.gate import check
+
+    base = _res(all__recall_at_10=0.70)
+    assert "golden set changed" in check(base, _res(golden="g2", all__recall_at_10=0.9), 0.005)[0]
+    assert "corpus" in check(base, _res(corpus="c2", all__recall_at_10=0.7), 0.005)[0]

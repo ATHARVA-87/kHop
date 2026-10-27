@@ -10,6 +10,7 @@ README traces back to one file and one command.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -356,6 +357,7 @@ def run(
         "index": build_info,
         "golden": {
             "file": _display_path(golden_path),
+            "sha256": hashlib.sha256(golden_path.read_bytes()).hexdigest(),
             "verified_queries": len(queries),
             "scored_queries": len(rows),
             "label_errors": label_errors,
