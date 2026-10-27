@@ -80,6 +80,11 @@ New metric `recall@{B}w`: recall within the first B words retrieved. Chunkers ar
 - A1 helps the embedding-based retrievers (whole paragraphs, no truncation) and does nothing for BM25. At equal top-k it looks worse only because each chunk is about half the size.
 - From here the ladder runs on A1 chunks: A2 = a1_hybrid, A3 = A2 + reranker. Primary Phase 2 metric: recall@3000w, with recall@10 alongside.
 
+Step 3, 2026-10-27: A3 cross-encoder reranker (`bge-reranker-base`, fp16, top 50 of A2 = a1_hybrid). Eval run 3.7 min including the model download.
+- vs A2: nDCG@10 +0.065 [+0.009, +0.121], MRR +0.072 [+0.006, +0.138]; local recall@10 0.538 → 0.646 (+0.108 [+0.015, +0.185]).
+- Multi-hop recall@10 0.219 → 0.140 (−0.079 [−0.175, +0.018], not significant but a warning). It is not company crowding: both companies appear in the top 10 more often after reranking (44/57 vs 40/57).
+- Cause, from inspecting the 15 multi-hop losses: the short user-style questions are dominated by company names, so the cross-encoder scores generic "Lam Research Corporation is a global supplier…" overview passages near 1.0. The answer passages say "we", not the company name. Next step: contextual chunk headers (company, form, section) on every chunk, for all retrievers.
+
 ## What was built in Phase 1 (branch `phase1-harness`)
 | Module | What | Review needed |
 | --- | --- | --- |

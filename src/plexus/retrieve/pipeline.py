@@ -105,9 +105,14 @@ def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:
         emb = Embedder(cfg.embedder, cache_path=data_dir / "cache" / "embeddings.sqlite")
         return DenseRetriever(emb, DenseIndex(path / "qdrant", "chunks", emb.dim))
 
+    base: Retriever
     if r.type == "dense":
-        return dense()
-    bm25 = BM25Retriever.from_index_dir(path, r.bm25_k1, r.bm25_b)
-    if r.type == "bm25":
-        return bm25
-    return HybridRetriever([dense(), bm25], r.candidates, r.rrf_k)
+        base = dense()
+    else:
+        bm25 = BM25Retriever.from_index_dir(path, r.bm25_k1, r.bm25_b)
+        base = bm25 if r.type == "bm25" else HybridRetriever([dense(), bm25], r.candidates, r.rrf_k)
+    if r.rerank is None:
+        return base
+    from plexus.retrieve.rerank import CrossEncoderScorer, RerankingRetriever
+
+    return RerankingRetriever(base, CrossEncoderScorer(r.rerank), r.rerank.candidates)

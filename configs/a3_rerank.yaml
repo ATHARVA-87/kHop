@@ -1,0 +1,28 @@
+name: a3_rerank
+description: >
+  A3: A2 (A1 chunks + hybrid RRF) followed by a cross-encoder reranker (bge-reranker-base)
+  over the top 50 fused hits.
+snapshot: semis-2025
+seed: 0
+chunker:
+  type: structured
+  child_words: 200
+  child_chars: 1400
+  parent_words: 800
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: hybrid
+  top_k: 20
+  candidates: 100
+  rrf_k: 60
+  rerank:
+    model: BAAI/bge-reranker-base
+    candidates: 50
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 5
+judge:
+  provider: gemini
+  model: gemini-3.6-flash

@@ -34,6 +34,14 @@ class EmbedderConfig(_Strict):
     device: str | None = None  # None = cuda if available
 
 
+class RerankConfig(_Strict):
+    model: str = "BAAI/bge-reranker-base"
+    candidates: int = 50  # base hits the cross-encoder reorders
+    max_length: int = 512
+    batch_size: int = 32
+    device: str | None = None  # None = cuda if available
+
+
 class RetrievalConfig(_Strict):
     type: Literal["dense", "bm25", "hybrid"] = "dense"
     top_k: int = 20
@@ -41,6 +49,7 @@ class RetrievalConfig(_Strict):
     rrf_k: int = 60  # reciprocal rank fusion constant (the paper's default)
     bm25_k1: float = 1.2
     bm25_b: float = 0.75
+    rerank: RerankConfig | None = None  # A3
 
 
 class GenerationConfig(_Strict):

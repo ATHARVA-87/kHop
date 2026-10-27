@@ -109,3 +109,28 @@ def test_compare_paired_diff(tmp_path):
     assert res["all"]["recall@10"]["diff"]["mean"] == pytest.approx(0.5)
     with pytest.raises(ValueError):
         compare(write("a", [0, 1]), write("c", [0]), metrics=("recall@10",))
+
+
+def test_reranker_reorders_only_the_candidate_head():
+    from plexus.retrieve.rerank import RerankingRetriever
+
+    class Base:
+        def retrieve(self, q, k):
+            return [_hit(c) for c in "abcdef"[:k]]
+
+    # scores favour later letters; only the first 3 candidates are reranked
+    rr = RerankingRetriever(Base(), lambda q, ps: [ord(p) for p in ps], candidates=3)
+    assert [h.chunk_id for h in rr.retrieve("q", 6)] == ["c", "b", "a", "d", "e", "f"]
+    # the reranked prefix does not depend on k
+    assert [h.chunk_id for h in rr.retrieve("q", 2)] == ["c", "b"]
+
+
+def test_reranker_ties_keep_base_order():
+    from plexus.retrieve.rerank import RerankingRetriever
+
+    class Base:
+        def retrieve(self, q, k):
+            return [_hit(c) for c in "xyz"]
+
+    rr = RerankingRetriever(Base(), lambda q, ps: [1.0] * len(ps), candidates=50)
+    assert [h.chunk_id for h in rr.retrieve("q", 3)] == ["x", "y", "z"]
