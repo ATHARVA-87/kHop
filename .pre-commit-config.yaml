@@ -14,3 +14,10 @@ repos:
       - id: ruff
         args: ["--fix"]
       - id: ruff-format
+  - repo: local
+    hooks:
+      - id: no-secrets
+        name: block API keys, tokens and personal email addresses
+        language: pygrep
+        entry: '(AIza[0-9A-Za-z_-]{30,}|gsk_[0-9A-Za-z]{20,}|sk-[A-Za-z0-9_-]{20,}|ghp_[0-9A-Za-z]{30,}|github_pat_[0-9A-Za-z_]{20,}|hf_[A-Za-z0-9]{30,}|xox[baprs]-[0-9A-Za-z-]{10,}|[A-Za-z0-9._%+-]+@(gmail|yahoo|outlook|hotmail)\.com)'
+        exclude: ^\.pre-commit-config\.yaml$

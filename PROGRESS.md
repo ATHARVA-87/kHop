@@ -144,6 +144,11 @@ Planned (by phase):
 - Theme table rebuilt with synonyms: 434 yes / 34 no. Gemini vs AI reviewer agreement on 93 spot-check rows: 96% (was 83% with literal keywords). Gemini 3.6-flash was overloaded, so all labels come from 3.5-flash-lite.
 - `company_coverage@k` is normalised by min(k, relevant companies).
 
+## Security (user rule 2026-10-27: keys local only, nothing sensitive exposed)
+- Audit 2026-10-27: no API keys or tokens in any commit on any branch. `.env` is gitignored and `.env.example` has blanks only. The CI release asset has no keys or emails. GitHub secret scanning and push protection are on. `main` is protected (no force-push or deletion, PRs only, admins included).
+- Finding: the author email on the first 51 commits is a personal address, public in commit metadata. Future commits use the GitHub noreply address (repo-local git config). Rewriting history needs your decision.
+- New pre-commit hook `no-secrets` blocks API-key and token patterns and personal email addresses.
+
 ## Open questions for you
 1. Sign off or amend ADRs 0001–0005. 0003 (the ticker list) and 0004 (definition of a retrieval hit) matter most.
 2. The brief puts the LLM key and Ollama in Phase 3, but Phase 1 needs an LLM for candidates and the judge. I pulled the Gemini key forward. Is that OK?
