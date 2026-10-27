@@ -27,6 +27,7 @@ from plexus.eval.metrics import (
     GoldItem,
     Span,
     locate_quote_all,
+    recall_at_k,
     retrieval_metrics,
     threshold_sensitivity,
 )
@@ -43,9 +44,21 @@ class Retriever(Protocol):
     def retrieve(self, question: str, k: int | None = None) -> Sequence[SpanLike]: ...
 
 
-def gold_spans(q: GoldenQuery, doc_texts: dict[str, str]) -> tuple[list[GoldItem], list[dict]]:
-    """Locate each evidence quote -> one gold item per evidence (alternatives if the quote
-    occurs several times). Unlocatable evidence is returned separately as label errors."""
+def _company(doc_id: str) -> str:
+    return doc_id.split("_", 1)[0]  # doc ids are TICKER_FORM_DATE
+
+
+def gold_spans(
+    q: GoldenQuery, doc_texts: dict[str, str], same_company: bool = True
+) -> tuple[list[GoldItem], list[dict]]:
+    """Locate each evidence quote -> one gold item per evidence. Unlocatable evidence is
+    returned separately as label errors.
+
+    Alternatives: every occurrence of the quote in its own filing and, when
+    `same_company`, in the same company's other filings. 10-Qs repeat the 10-K's risk
+    factors word for word (~75% of risk-factor spans in this corpus), so retrieving the
+    identical sentence from the 10-Q is a correct retrieval, not a miss.
+    """
     items: list[GoldItem] = []
     missing = []
     for ev in q.evidence:
@@ -56,8 +69,13 @@ def gold_spans(q: GoldenQuery, doc_texts: dict[str, str]) -> tuple[list[GoldItem
             missing.append(
                 {"qid": q.qid, "doc_id": ev.doc_id, "reason": reason, "quote": ev.quote[:120]}
             )
-        else:
-            items.append(tuple(Span(ev.doc_id, s, e) for s, e in locs))
+            continue
+        alts = [Span(ev.doc_id, s, e) for s, e in locs]
+        if same_company:
+            for other, other_text in doc_texts.items():
+                if other != ev.doc_id and _company(other) == _company(ev.doc_id):
+                    alts += [Span(other, s, e) for s, e in locate_quote_all(other_text, ev.quote)]
+        items.append(tuple(alts))
     return items, missing
 
 
@@ -70,6 +88,7 @@ def score_retrieval(
     rows, label_errors = [], []
     for q in queries:
         gold, missing = gold_spans(q, doc_texts)
+        strict, _ = gold_spans(q, doc_texts, same_company=False)
         if missing:
             label_errors.extend(missing)
             continue
@@ -84,6 +103,8 @@ def score_retrieval(
                 "retrieval_ms": ms,
                 **retrieval_metrics(retrieved, gold, ks),
                 **threshold_sensitivity(retrieved, gold),
+                # secondary: only the exact filing the question was written from counts
+                "strict_recall@10": recall_at_k(retrieved, strict, min(10, k)),
             }
         )
     return rows, label_errors
@@ -92,7 +113,7 @@ def score_retrieval(
 RECALL_KS = (1, 5, 10, 20)
 METRICS = [
     "recall@1", "recall@5", "recall@10", "recall@20", "ndcg@10", "mrr",
-    "recall@10@cover0.3", "recall@10@cover0.7",
+    "recall@10@cover0.3", "recall@10@cover0.7", "strict_recall@10",
 ]  # fmt: skip
 
 

@@ -134,3 +134,21 @@ def test_recall_beyond_top_k_is_not_reported():
     rows, _ = score_retrieval([q], retr, DOCS, k=5)
     assert "recall@5" in rows[0] and "recall@10" not in rows[0] and "recall@20" not in rows[0]
     assert "recall@10" not in aggregate(rows)["all"]
+
+
+def test_same_company_copy_of_quote_counts_but_strict_does_not():
+    # researcher finding #1: 10-Qs repeat 10-K risk factors verbatim
+    docs = {
+        "NVDA_10K_2025-02-26": "Intro. We depend on TSMC to manufacture our GPUs. More text.",
+        "NVDA_10Q_2025-05-28": "Q text. We depend on TSMC to manufacture our GPUs. End.",
+        "AMD_10K_2025-02-05": "We depend on TSMC to manufacture our GPUs.",  # other company
+    }
+    q = _q("l", "local", [("NVDA_10K_2025-02-26", "depend on TSMC to manufacture our GPUs")])
+    s = docs["NVDA_10Q_2025-05-28"].index("We depend")
+    hit_in_10q = Hit("x", "NVDA_10Q_2025-05-28", s, s + 42, "risk_factors", 1.0)
+    rows, _ = score_retrieval([q], FakeRetriever({"l?": [hit_in_10q]}), docs, k=10)
+    assert rows[0]["recall@10"] == 1.0 and rows[0]["strict_recall@10"] == 0.0
+    a = docs["AMD_10K_2025-02-05"].index("We depend")
+    hit_other_co = Hit("y", "AMD_10K_2025-02-05", a, a + 42, "risk_factors", 1.0)
+    rows, _ = score_retrieval([q], FakeRetriever({"l?": [hit_other_co]}), docs, k=10)
+    assert rows[0]["recall@10"] == 0.0  # another company's identical sentence is not evidence

@@ -1,0 +1,118 @@
+{
+  "summary": {
+    "local": {
+      "kept": 73,
+      "quote_not_found": 7
+    },
+    "multi_hop": {
+      "kept": 57,
+      "quote_not_found": 13
+    },
+    "global": {
+      "kept": 50
+    },
+    "auto_filter_rejection_rate": 0.1
+  },
+  "rejected": [
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "A number of factors, including how products are manufactured to support end markets, yield, wafer pricing, cost of packaging raw materials, product mix, market acceptance of our new products, competit"
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "We depend on a limited number of customers and distributors for a substantial portion of our sales"
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "We are subject to legislation based on the Organization for Economic Cooperation and Development\u2019s 15% global minimum tax regime which applies to the majority of countries in which we operate."
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "Risks Related to Regulatory, Legal and Tax Challenges"
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "Fiscal 2024, 2023, and 2022 had 52 weeks."
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "We depend on third-party companies for the design, manufacture and supply of motherboards, software, memory and other computer platform components to support our business and products."
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "receipt of Hungarian foreign direct investment approval"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "We face intense competition in the semiconductor memory and storage markets from a number of companies, including Samsung Electronics Co., Ltd.; SK hynix Inc.; Kioxia Holdings Corporation || Leading s"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "If we lose Microsoft Corporation\u2019s support for our products or other software vendors do not design and develop software to run on our products, our ability to sell our products could be materially ad"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "our primary competitors include AMLogic Inc., Fuzhou Rockchip Electronics Co., Ltd., HiSilicon Technologies Co., Ltd., or HiSilicon, which is owned by Huawei Technologies Co., || if Huawei Technologie"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "accelerated computing solutions, including solutions offered for AI, such as Advanced Micro Devices, Inc., or AMD, Huawei Technologies Co. Ltd., or Huawei, and Intel Corporation, or Intel; || subject "
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "In fiscal 2025, revenues from Apple, Samsung and Xiaomi each comprised 10% or more of our consolidated revenues. || represented approximately 91 percent and 89 percent of the Company\u2019s total net sales"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "Delaware law, provisions in our governing documents and our agreement with Microsoft could delay or prevent a change in control. || If we lose Microsoft Corporation\u2019s support for our products or other"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "and primarily on TSMC for our analog circuits fabrication, and any disruption in the supply of wafers or any increases in the wafer or materials prices could adversely affect our gross margins || the "
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "Semiconductor Manufacturing International Corporation, or SMIC, was added to the BIS Entity list in December 2020. || Some of our products are manufactured at SMIC, and some of our suppliers buy produ"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "In 2024, revenues from Samsung, a customer of our Semiconductor Test segment, accounted for 12.5% of our consolidated revenues. || and business leadership roles at HIFN, Inc., Samsung Semiconductor, T"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "Direct sales to Apple and Qualcomm accounted for 30.8% and 10.2% of our net sales, respectively, for the year ended December 31, 2024. || We had one end customer, Apple Inc., that purchased through mu"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "1) Joint venture with TSMC. || We use a variety of foundries in the production of wafers, primarily supplied by GLOBALFOUNDRIES Inc., (\u201cGlobalFoundries\u201d) and Taiwan Semiconductor Manufacturing Company"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "Examples (some of which are strategic partners of ours in other areas) include Broadcom, HiSilicon, MediaTek, Mobileye, Nvidia, NXP Semiconductors, Qorvo, Samsung, Skyworks, Texas Instruments and UNIS"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "suppliers of hardware and software for SoC products that are used in servers or embedded into automobiles, autonomous machines, and gaming devices, such as Ambarella, Inc., AMD, Broadcom, Inc., or Bro"
+    }
+  ]
+}
