@@ -15,16 +15,15 @@
 
 ## Resume here
 
-**State (2026-10-27 evening):** Phases 0–2 gates met. Branches: `main` = Phase 0; `phase1-harness` (PR #1) = harness, golden set, A0; `phase2-retrieval` (PR #2, stacked on #1) = A1–A3 + CI retrieval gate. Fast tests pass; CI green on `phase2-retrieval` (run 40526855835). GitHub does not fire push/PR events for this repo, so CI is started with `gh workflow run ci --ref <branch>`.
+**State (2026-10-28, paused for the night):** Phases 0–3 done (PR #5 for Phase 3 open, you merge). Phase 4 on branch `phase4-router` (pushed, clean). Phase 4 gate met: the A6 rule router beats always-X on dev and test and equals the oracle. Honest reading: the gain is the reranker on single-company questions.
 
-**Best retriever so far:** A2 = `configs/a1h_hybrid.yaml` (structure-aware chunks + contextual headers + BM25/dense RRF): recall@10 0.704, multi-hop 0.675. The reranker (A3) helps single-company questions (0.923) but hurts two-company ones. Use it only on single-company questions once the router exists (docs/failures.md).
+**Waiting on you:** label `data/golden/judge_labels.csv`, 49 answers (blind, stratified). Fill `human_verdict` with `correct` / `partially_correct` / `incorrect`, save it in place, then say "labels done".
 
-**Your open items:**
-1. Review PR #1 (metrics, golden-set code) and PR #2 (`eval/run.py`, `eval/gate.py`, `eval/compare.py`), then merge #1 before #2.
-2. Sign off ADRs 0001–0005.
-3. Phase 3 needs Ollama (human step 4, sudo): install it and `ollama pull qwen3.5:4b`. Graph extraction can use Gemini/Groq free tier meanwhile.
-
-**Next Claude task:** Phase 3 (graph). LLM entity/relation extraction with a strict JSON schema → entity resolution → Kuzu → Leiden communities + summaries; A4 graph traversal, A5 community search (aimed at global questions: company_coverage@10 is stuck at ~0.5 for every retriever).
+**Next Claude steps, in order (agreed plan):**
+1. `python -m plexus.eval.judge agreement --results results/a6_router.json` gives kappa and the confusion matrix. If the judge is lenient (it rated two half-answers correct), make it stricter (gemini-3.6-flash when not overloaded, or a stricter prompt), re-measure, and report both.
+2. A7 grade-and-rewrite: deterministic coverage grade (every named company present? ≥N companies for global?) → corrective search in the missing company's filings (per-filing filter already built) → one yes/no LLM grade → at most 1 rewrite keeping the company names. Compare loop vs no loop (answer metrics, rewrite rate, latency).
+3. LangGraph wiring last: pinned version ≥ 2 weeks old, in-memory state only, no CLI/server (security advisories noted in the research report).
+4. A reviewer agent after each step; delete what loses (keep it explainable).
 
 ## Gate evidence
 
