@@ -81,6 +81,7 @@ class NaiveRAG:
             temperature=g.temperature,
             max_tokens=g.max_tokens,
             seed=self.cfg.seed,
+            params={"think": g.think} if g.provider == "ollama" else {},
         )
 
     def answer(self, question: str) -> Answer:

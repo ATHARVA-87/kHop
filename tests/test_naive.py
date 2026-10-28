@@ -68,3 +68,9 @@ def test_thinking_block_is_stripped_and_refusal_detected(tmp_path):
     assert is_refusal("<think>hmm</think> Not enough evidence in the filings to answer this")
     assert is_refusal("NOT ENOUGH EVIDENCE in the filings to answer this.")
     assert not is_refusal("TSMC makes them [1].")
+
+
+def test_ollama_requests_turn_thinking_off(tmp_path):
+    rag = _rag(tmp_path, lambda r: "ok [1]")
+    req = rag.build_request("q", HITS[:2])
+    assert req.params == {"think": False}  # qwen3.5 otherwise returns empty answers

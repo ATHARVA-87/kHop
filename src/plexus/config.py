@@ -69,6 +69,9 @@ class GenerationConfig(_Strict):
     temperature: float = 0.0
     max_tokens: int = 512
     context_chunks: int = 5
+    # qwen3.5 "thinking" spends the whole token budget on hidden reasoning and returns an
+    # empty answer (found 2026-10-28 in the first generation run); off unless asked for
+    think: bool = False
 
 
 class JudgeConfig(_Strict):
