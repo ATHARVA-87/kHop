@@ -54,3 +54,6 @@ Agreement with 49 blind human correctness labels (38 correct / 10 partially corr
 | prompt with the human's exact rubric (still flash-lite: 3.6-flash did not answer) | 0.755 | 0.133 |
 
 The judge rated 7–9 of the 10 human "partially correct" answers (one of two named companies answered, or "not enough evidence" for half the question) as correct. Its correctness scores (0.94–0.97) are therefore NOT reported as results. On this sample the human labels give 38/49 = 0.78 fully correct. Next: RAGAS claim-level metrics in a separate env, scored against the same labels.
+
+## A7 company-coverage fix did not help (2026-10-28)
+Deterministic corrective step: if a company the question names had no passage in the writer's top 5, search that company's filings only and insert its best passage. Dev: 20 of 57 multi-hop questions lack both gold passages in the top 5, but the fix triggered on only 8 (the named company was usually present, with the wrong passage), and multi-hop complete@5 stayed 0.649 (top-10 +0.018, n.s.). Removed. The gap is relevance within a company, not coverage: complete@10 is 0.789 vs complete@5 0.649, so showing the writer 10 passages instead of 5 is the simpler lever (to be measured with a validated judge).

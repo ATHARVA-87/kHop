@@ -202,7 +202,7 @@ WORD_BUDGETS = (500, 1000, 2000, 3000, 5000)
 BUDGET_DEPTH = 60  # hits fetched so a 5,000-word budget fills even with ~160-word chunks
 METRICS = [
     "recall@1", "recall@5", "recall@10", "recall@20", "ndcg@10", "mrr",
-    "complete@10", "complete@20", "strict_recall@10",
+    "complete@5", "complete@10", "complete@20", "strict_recall@10",
     "company_coverage@10", "company_coverage@20", "coverage_base_rate", "context_words@10",
     *(f"recall@{b}w" for b in WORD_BUDGETS),
 ]  # fmt: skip
