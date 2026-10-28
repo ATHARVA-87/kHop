@@ -289,23 +289,6 @@ def split_passage(p: Passage) -> list[Passage]:
     ]
 
 
-GLEAN = """Relations already extracted from this passage:
-{found}
-Read the passage again. List ONLY relations the passage states that are MISSING above, with
-the same rules (named entities only, exact quotes). Reply {{"relations": [...]}}, or
-{{"relations": []}} if nothing is missing."""
-
-
-def glean_request(p: Passage, provider: str, model: str, found: list[dict]) -> LLMRequest:
-    """GraphRAG-style gleaning: one more pass that asks only for what was missed."""
-    req = build_request(p, provider, model)
-    listed = (
-        "\n".join(f"- {r['subject']} {r['relation']} {r['object']}" for r in found) or "- (none)"
-    )
-    msgs = (*req.messages, Message(role="user", content=GLEAN.format(found=listed)))
-    return req.model_copy(update={"messages": msgs})
-
-
 def extract_one(llm: LLMClient, p: Passage, provider: str, model: str) -> tuple[dict, Counter]:
     try:
         ex = llm.complete_json(build_request(p, provider, model), Extraction)

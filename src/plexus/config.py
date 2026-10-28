@@ -47,7 +47,7 @@ class RerankConfig(_Strict):
 
 
 class RetrievalConfig(_Strict):
-    type: Literal["dense", "bm25", "hybrid", "graph_hybrid"] = "dense"
+    type: Literal["dense", "bm25", "hybrid", "graph_hybrid", "hybrid_rr"] = "dense"
     top_k: int = 20
     candidates: int = 100  # hybrid: hits taken from each retriever before fusion
     rrf_k: int = 60  # reciprocal rank fusion constant (the paper's default)

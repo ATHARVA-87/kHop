@@ -96,3 +96,18 @@ def test_partial_names_link_and_full_names_score_higher():
     assert link.link_scored("Who are Skyworks Solutions' customers?") == [("company:SWKS", 1.0)]
     assert link.link("Which companies make diodes?") == []  # common word, lowercase
     assert link.link("What does Diodes say about tariffs?") == ["company:DIOD"]
+
+
+def test_round_robin_baseline_alternates_named_filers():
+    from plexus.retrieve.graph_search import CompanyRoundRobinRetriever
+
+    class Base:
+        def retrieve(self, q, k):
+            ids = ["SLAB_10K#1", "SLAB_10K#2", "X_10K#1", "CRUS_10K#1", "SLAB_10K#3"]
+            return [Hit(i, i.split("#")[0], 0, 1, "s", 1.0, "t") for i in ids][:k]
+
+    rr = CompanyRoundRobinRetriever(Base(), EntityLinker(RES, ENTS))
+    out = rr.retrieve("What do Silicon Labs and Cirrus Logic say about TSMC?", 4)
+    assert [h.chunk_id for h in out] == ["SLAB_10K#1", "CRUS_10K#1", "SLAB_10K#2", "SLAB_10K#3"]
+    # fewer than two named filers: the hybrid list unchanged
+    assert rr.retrieve("What does Silicon Labs say?", 2)[0].chunk_id == "SLAB_10K#1"

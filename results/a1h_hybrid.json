@@ -27,7 +27,9 @@
       "rrf_k": 60,
       "bm25_k1": 1.2,
       "bm25_b": 0.75,
-      "rerank": null
+      "rerank": null,
+      "graph_dir": null,
+      "graph_max_edges": 12
     },
     "generation": {
       "provider": "ollama",
@@ -41,7 +43,7 @@
       "model": "gemini-3.6-flash"
     }
   },
-  "git_commit": "87f1c9b82a60be3b924ccc9a94c5796ff9a57107-dirty",
+  "git_commit": "0bee34f7a5304810107bf2ba93ba041179331125-dirty",
   "corpus_checksum": "f202efae8bc8f8150105f323ebe7a55a29cbc946d0677791adadd72e5b5c9cd5",
   "index": {
     "index_key": "semis-2025__p4__structured-200-1400-800-hdr1__BAAI_bge-small-en-v1.5",
@@ -169,8 +171,8 @@
         "n": 134
       },
       "retrieval_ms": {
-        "p50": 45.01,
-        "p95": 50.39
+        "p50": 51.75,
+        "p95": 63.82
       }
     },
     "local": {
@@ -265,8 +267,8 @@
         "n": 65
       },
       "retrieval_ms": {
-        "p50": 45.01,
-        "p95": 48.39
+        "p50": 52.59,
+        "p95": 72.49
       }
     },
     "multi_hop": {
@@ -361,8 +363,104 @@
         "n": 57
       },
       "retrieval_ms": {
-        "p50": 45.03,
-        "p95": 50.71
+        "p50": 49.61,
+        "p95": 56.19
+      }
+    },
+    "multi_hop:comparison": {
+      "recall@1": {
+        "mean": 0.2442,
+        "low": 0.1667,
+        "high": 0.3542,
+        "n": 43
+      },
+      "recall@5": {
+        "mean": 0.6512,
+        "low": 0.5379,
+        "high": 0.7935,
+        "n": 43
+      },
+      "recall@10": {
+        "mean": 0.7558,
+        "low": 0.6538,
+        "high": 0.878,
+        "n": 43
+      },
+      "recall@20": {
+        "mean": 0.8488,
+        "low": 0.7262,
+        "high": 0.9348,
+        "n": 43
+      },
+      "ndcg@10": {
+        "mean": 0.6141,
+        "low": 0.5071,
+        "high": 0.7542,
+        "n": 43
+      },
+      "mrr": {
+        "mean": 0.664,
+        "low": 0.5427,
+        "high": 0.819,
+        "n": 43
+      },
+      "complete@10": {
+        "mean": 0.6047,
+        "low": 0.463,
+        "high": 0.7805,
+        "n": 43
+      },
+      "complete@20": {
+        "mean": 0.7442,
+        "low": 0.5769,
+        "high": 0.878,
+        "n": 43
+      },
+      "strict_recall@10": {
+        "mean": 0.7326,
+        "low": 0.6364,
+        "high": 0.8393,
+        "n": 43
+      },
+      "context_words@10": {
+        "mean": 1635.1163,
+        "low": 1569.4201,
+        "high": 1674.5197,
+        "n": 43
+      },
+      "recall@500w": {
+        "mean": 0.5233,
+        "low": 0.4167,
+        "high": 0.68,
+        "n": 43
+      },
+      "recall@1000w": {
+        "mean": 0.6744,
+        "low": 0.5714,
+        "high": 0.8023,
+        "n": 43
+      },
+      "recall@2000w": {
+        "mean": 0.7791,
+        "low": 0.671,
+        "high": 0.9,
+        "n": 43
+      },
+      "recall@3000w": {
+        "mean": 0.8488,
+        "low": 0.7262,
+        "high": 0.9348,
+        "n": 43
+      },
+      "recall@5000w": {
+        "mean": 0.8837,
+        "low": 0.8049,
+        "high": 0.9531,
+        "n": 43
+      },
+      "retrieval_ms": {
+        "p50": 48.66,
+        "p95": 56.26
       }
     },
     "global": {
@@ -469,8 +567,104 @@
         "n": 12
       },
       "retrieval_ms": {
-        "p50": 44.95,
-        "p95": 48.17
+        "p50": 53.36,
+        "p95": 56.61
+      }
+    },
+    "multi_hop:bridge": {
+      "recall@1": {
+        "mean": 0.1429,
+        "low": 0.0417,
+        "high": 0.2727,
+        "n": 14
+      },
+      "recall@5": {
+        "mean": 0.25,
+        "low": 0.1154,
+        "high": 0.4545,
+        "n": 14
+      },
+      "recall@10": {
+        "mean": 0.4286,
+        "low": 0.2308,
+        "high": 0.6071,
+        "n": 14
+      },
+      "recall@20": {
+        "mean": 0.5714,
+        "low": 0.35,
+        "high": 0.75,
+        "n": 14
+      },
+      "ndcg@10": {
+        "mean": 0.3203,
+        "low": 0.1719,
+        "high": 0.505,
+        "n": 14
+      },
+      "mrr": {
+        "mean": 0.3935,
+        "low": 0.2181,
+        "high": 0.6391,
+        "n": 14
+      },
+      "complete@10": {
+        "mean": 0.2143,
+        "low": 0.0625,
+        "high": 0.4545,
+        "n": 14
+      },
+      "complete@20": {
+        "mean": 0.3571,
+        "low": 0.1538,
+        "high": 0.6154,
+        "n": 14
+      },
+      "strict_recall@10": {
+        "mean": 0.4286,
+        "low": 0.2308,
+        "high": 0.6071,
+        "n": 14
+      },
+      "context_words@10": {
+        "mean": 1567.3571,
+        "low": 1512.3079,
+        "high": 1633.5083,
+        "n": 14
+      },
+      "recall@500w": {
+        "mean": 0.2143,
+        "low": 0.1154,
+        "high": 0.35,
+        "n": 14
+      },
+      "recall@1000w": {
+        "mean": 0.25,
+        "low": 0.1154,
+        "high": 0.4545,
+        "n": 14
+      },
+      "recall@2000w": {
+        "mean": 0.5357,
+        "low": 0.3462,
+        "high": 0.7333,
+        "n": 14
+      },
+      "recall@3000w": {
+        "mean": 0.5357,
+        "low": 0.3462,
+        "high": 0.7333,
+        "n": 14
+      },
+      "recall@5000w": {
+        "mean": 0.7143,
+        "low": 0.6154,
+        "high": 0.85,
+        "n": 14
+      },
+      "retrieval_ms": {
+        "p50": 51.34,
+        "p95": 54.41
       }
     }
   },
@@ -479,8 +673,9 @@
     {
       "qid": "L-204fcb766a",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-204fcb766a",
-      "retrieval_ms": 164.7584359961911,
+      "retrieval_ms": 355.4948959936155,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -500,8 +695,9 @@
     {
       "qid": "L-7d894157f4",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-7d894157f4",
-      "retrieval_ms": 45.149543999286834,
+      "retrieval_ms": 74.72115800192114,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -521,8 +717,9 @@
     {
       "qid": "L-e4a0e66f7b",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-e4a0e66f7b",
-      "retrieval_ms": 44.847450000816025,
+      "retrieval_ms": 67.19418699503876,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -542,8 +739,9 @@
     {
       "qid": "L-1a79cd4f92",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-1a79cd4f92",
-      "retrieval_ms": 45.03118000138784,
+      "retrieval_ms": 75.9391610044986,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -563,8 +761,9 @@
     {
       "qid": "L-3b07b5f664",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-3b07b5f664",
-      "retrieval_ms": 45.014281997282524,
+      "retrieval_ms": 71.01318700006232,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -584,8 +783,9 @@
     {
       "qid": "L-5cd077cf0c",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-5cd077cf0c",
-      "retrieval_ms": 45.38985399994999,
+      "retrieval_ms": 58.624548008083366,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -605,8 +805,9 @@
     {
       "qid": "L-07ebaffcc3",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-07ebaffcc3",
-      "retrieval_ms": 44.65268900094088,
+      "retrieval_ms": 72.8571890067542,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -626,8 +827,9 @@
     {
       "qid": "L-e54d9ddab4",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-e54d9ddab4",
-      "retrieval_ms": 44.584137001947965,
+      "retrieval_ms": 62.890407993108965,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -647,8 +849,9 @@
     {
       "qid": "L-77ed32c36f",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-77ed32c36f",
-      "retrieval_ms": 45.4647959995782,
+      "retrieval_ms": 61.75541499396786,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -668,8 +871,9 @@
     {
       "qid": "L-47aef70f5a",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-47aef70f5a",
-      "retrieval_ms": 43.97636999783572,
+      "retrieval_ms": 53.39237100270111,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 1.0,
@@ -689,8 +893,9 @@
     {
       "qid": "L-e842919f48",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-e842919f48",
-      "retrieval_ms": 44.39214199373964,
+      "retrieval_ms": 51.11454500001855,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -710,8 +915,9 @@
     {
       "qid": "L-446992a76d",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-446992a76d",
-      "retrieval_ms": 44.701635000819806,
+      "retrieval_ms": 59.050373994978145,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -731,8 +937,9 @@
     {
       "qid": "L-c27afbbeb5",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-c27afbbeb5",
-      "retrieval_ms": 45.36695699789561,
+      "retrieval_ms": 51.80985100741964,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -752,8 +959,9 @@
     {
       "qid": "L-e5b33be7e2",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-e5b33be7e2",
-      "retrieval_ms": 45.308451997698285,
+      "retrieval_ms": 61.03085199720226,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -773,8 +981,9 @@
     {
       "qid": "L-701c0708f2",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-701c0708f2",
-      "retrieval_ms": 44.503124998300336,
+      "retrieval_ms": 51.62889799976256,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -794,8 +1003,9 @@
     {
       "qid": "L-551a0e423b",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-551a0e423b",
-      "retrieval_ms": 45.329284002946224,
+      "retrieval_ms": 47.58798799593933,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 1.0,
@@ -815,8 +1025,9 @@
     {
       "qid": "L-eab9a6091b",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-eab9a6091b",
-      "retrieval_ms": 44.49889399984386,
+      "retrieval_ms": 50.562678996357135,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -836,8 +1047,9 @@
     {
       "qid": "L-8ea56d0eec",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-8ea56d0eec",
-      "retrieval_ms": 44.91991900431458,
+      "retrieval_ms": 55.355737000354566,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -857,8 +1069,9 @@
     {
       "qid": "L-13ae2a142d",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-13ae2a142d",
-      "retrieval_ms": 44.72883800190175,
+      "retrieval_ms": 53.769685997394845,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -878,8 +1091,9 @@
     {
       "qid": "L-e7cba04788",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-e7cba04788",
-      "retrieval_ms": 50.601313007064164,
+      "retrieval_ms": 50.74771099316422,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -899,8 +1113,9 @@
     {
       "qid": "L-f0535b3144",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-f0535b3144",
-      "retrieval_ms": 45.65606099640718,
+      "retrieval_ms": 52.58546500408556,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -920,8 +1135,9 @@
     {
       "qid": "L-8f148a4aec",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-8f148a4aec",
-      "retrieval_ms": 45.48346099909395,
+      "retrieval_ms": 48.19286700512748,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -941,8 +1157,9 @@
     {
       "qid": "L-a2c00a9f8b",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-a2c00a9f8b",
-      "retrieval_ms": 45.00935800024308,
+      "retrieval_ms": 45.47038998862263,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -962,8 +1179,9 @@
     {
       "qid": "L-923b93519f",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-923b93519f",
-      "retrieval_ms": 45.94560799887404,
+      "retrieval_ms": 56.54545499419328,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -983,8 +1201,9 @@
     {
       "qid": "L-41dab0f0e5",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-41dab0f0e5",
-      "retrieval_ms": 45.89609200047562,
+      "retrieval_ms": 57.357255995157175,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 1.0,
@@ -1004,8 +1223,9 @@
     {
       "qid": "L-d950b1c9df",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-d950b1c9df",
-      "retrieval_ms": 44.84978599793976,
+      "retrieval_ms": 49.83179600094445,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1025,8 +1245,9 @@
     {
       "qid": "L-c294db17eb",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-c294db17eb",
-      "retrieval_ms": 45.00619800091954,
+      "retrieval_ms": 53.91932399652433,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1046,8 +1267,9 @@
     {
       "qid": "L-3a97a4fbfe",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-3a97a4fbfe",
-      "retrieval_ms": 44.9605409958167,
+      "retrieval_ms": 50.24633900029585,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1067,8 +1289,9 @@
     {
       "qid": "L-28673b1f56",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-28673b1f56",
-      "retrieval_ms": 45.390790997771546,
+      "retrieval_ms": 53.8093749928521,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1088,8 +1311,9 @@
     {
       "qid": "L-f0de3d22fc",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-f0de3d22fc",
-      "retrieval_ms": 44.867584998428356,
+      "retrieval_ms": 51.683896992472,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1109,8 +1333,9 @@
     {
       "qid": "L-a8da0ea627",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-a8da0ea627",
-      "retrieval_ms": 45.9107069982565,
+      "retrieval_ms": 55.551487996126525,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1130,8 +1355,9 @@
     {
       "qid": "L-e2b8c0ac65",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-e2b8c0ac65",
-      "retrieval_ms": 45.41720200359123,
+      "retrieval_ms": 52.13896799250506,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1151,8 +1377,9 @@
     {
       "qid": "L-22723db9ff",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-22723db9ff",
-      "retrieval_ms": 45.316859999729786,
+      "retrieval_ms": 58.60313100856729,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1172,8 +1399,9 @@
     {
       "qid": "L-afc82f56bf",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-afc82f56bf",
-      "retrieval_ms": 44.54455999803031,
+      "retrieval_ms": 51.43355600012001,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1193,8 +1421,9 @@
     {
       "qid": "L-8ab362f0e3",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-8ab362f0e3",
-      "retrieval_ms": 45.348174004175235,
+      "retrieval_ms": 57.0747269957792,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -1214,8 +1443,9 @@
     {
       "qid": "L-51c51e5707",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-51c51e5707",
-      "retrieval_ms": 45.66664300364209,
+      "retrieval_ms": 64.46958701417316,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1235,8 +1465,9 @@
     {
       "qid": "L-23ecce09ca",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-23ecce09ca",
-      "retrieval_ms": 45.04780799470609,
+      "retrieval_ms": 53.03862200526055,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1256,8 +1487,9 @@
     {
       "qid": "L-99426bab62",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-99426bab62",
-      "retrieval_ms": 44.145596999442205,
+      "retrieval_ms": 63.46631800988689,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1277,8 +1509,9 @@
     {
       "qid": "L-5c2f0c36e5",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-5c2f0c36e5",
-      "retrieval_ms": 44.88533100084169,
+      "retrieval_ms": 57.66536899318453,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1298,8 +1531,9 @@
     {
       "qid": "L-950416d079",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-950416d079",
-      "retrieval_ms": 44.8715979946428,
+      "retrieval_ms": 58.19454700394999,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1319,8 +1553,9 @@
     {
       "qid": "L-fa19df4328",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-fa19df4328",
-      "retrieval_ms": 45.13472200051183,
+      "retrieval_ms": 53.699509997386485,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1340,8 +1575,9 @@
     {
       "qid": "L-30f54538b9",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-30f54538b9",
-      "retrieval_ms": 44.46882599586388,
+      "retrieval_ms": 53.076912998221815,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1361,8 +1597,9 @@
     {
       "qid": "L-666b59cbb6",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-666b59cbb6",
-      "retrieval_ms": 44.609286000195425,
+      "retrieval_ms": 54.824587001348846,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.5,
@@ -1382,8 +1619,9 @@
     {
       "qid": "L-b3a85d4eda",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-b3a85d4eda",
-      "retrieval_ms": 44.8009380052099,
+      "retrieval_ms": 44.77971000596881,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1403,8 +1641,9 @@
     {
       "qid": "L-60504fa849",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-60504fa849",
-      "retrieval_ms": 45.14162700070301,
+      "retrieval_ms": 50.33684200316202,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1424,8 +1663,9 @@
     {
       "qid": "L-83be086895",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-83be086895",
-      "retrieval_ms": 44.22057800547918,
+      "retrieval_ms": 53.276518010534346,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1445,8 +1685,9 @@
     {
       "qid": "L-bbfc5e240c",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-bbfc5e240c",
-      "retrieval_ms": 45.07995700259926,
+      "retrieval_ms": 51.22428800677881,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1466,8 +1707,9 @@
     {
       "qid": "L-fa359783b6",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-fa359783b6",
-      "retrieval_ms": 48.598402994684875,
+      "retrieval_ms": 48.74308699800167,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1487,8 +1729,9 @@
     {
       "qid": "L-6ac3514931",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-6ac3514931",
-      "retrieval_ms": 45.695978005824145,
+      "retrieval_ms": 47.30872600339353,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1508,8 +1751,9 @@
     {
       "qid": "L-4e51f48592",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-4e51f48592",
-      "retrieval_ms": 47.20508400350809,
+      "retrieval_ms": 45.408143996610306,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1529,8 +1773,9 @@
     {
       "qid": "L-a4b3d7b618",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-a4b3d7b618",
-      "retrieval_ms": 46.11425199982477,
+      "retrieval_ms": 45.55846899165772,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1550,8 +1795,9 @@
     {
       "qid": "L-fa04780483",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-fa04780483",
-      "retrieval_ms": 47.567975998390466,
+      "retrieval_ms": 50.29478699725587,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1571,8 +1817,9 @@
     {
       "qid": "L-6c4a8e486c",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-6c4a8e486c",
-      "retrieval_ms": 50.06800099363318,
+      "retrieval_ms": 46.297446999233216,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1592,8 +1839,9 @@
     {
       "qid": "L-1cafa4e734",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-1cafa4e734",
-      "retrieval_ms": 44.83955699834041,
+      "retrieval_ms": 45.31574199791066,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1613,8 +1861,9 @@
     {
       "qid": "L-fc51eb033f",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-fc51eb033f",
-      "retrieval_ms": 44.826698998804204,
+      "retrieval_ms": 46.84393999923486,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1634,8 +1883,9 @@
     {
       "qid": "L-9207d5e22c",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-9207d5e22c",
-      "retrieval_ms": 44.35869099688716,
+      "retrieval_ms": 47.208175994455814,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1655,8 +1905,9 @@
     {
       "qid": "L-4ecb62cac2",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-4ecb62cac2",
-      "retrieval_ms": 43.82085600082064,
+      "retrieval_ms": 51.123124998412095,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1676,8 +1927,9 @@
     {
       "qid": "L-d8dc03abc2",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-d8dc03abc2",
-      "retrieval_ms": 44.74737599957734,
+      "retrieval_ms": 52.485328997136094,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1697,8 +1949,9 @@
     {
       "qid": "L-d445f5ab12",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-d445f5ab12",
-      "retrieval_ms": 44.30347299785353,
+      "retrieval_ms": 46.69840200222097,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1718,8 +1971,9 @@
     {
       "qid": "L-a18a1e01b3",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-a18a1e01b3",
-      "retrieval_ms": 44.5448039972689,
+      "retrieval_ms": 46.99193198757712,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1739,8 +1993,9 @@
     {
       "qid": "L-a96c0fbfdf",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-a96c0fbfdf",
-      "retrieval_ms": 45.63592500198865,
+      "retrieval_ms": 47.78711601102259,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1760,8 +2015,9 @@
     {
       "qid": "L-4aa4faa3cd",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-4aa4faa3cd",
-      "retrieval_ms": 44.94842699932633,
+      "retrieval_ms": 54.228410008363426,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1781,8 +2037,9 @@
     {
       "qid": "L-17cd146474",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-17cd146474",
-      "retrieval_ms": 44.79237400664715,
+      "retrieval_ms": 48.66722100996412,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1802,8 +2059,9 @@
     {
       "qid": "L-ef5160d7d0",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-ef5160d7d0",
-      "retrieval_ms": 45.03947000193875,
+      "retrieval_ms": 55.013436009176075,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1823,8 +2081,9 @@
     {
       "qid": "L-99a0cb2653",
       "qtype": "local",
+      "tags": [],
       "cluster": "L-99a0cb2653",
-      "retrieval_ms": 44.71318000287283,
+      "retrieval_ms": 51.536407991079614,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 1.0,
@@ -1844,8 +2103,11 @@
     {
       "qid": "M-64fa8028fc",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:tokyo electron",
-      "retrieval_ms": 44.91231899737613,
+      "retrieval_ms": 46.07942899747286,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1865,8 +2127,11 @@
     {
       "qid": "M-20b3651156",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:apple",
-      "retrieval_ms": 45.61241899500601,
+      "retrieval_ms": 47.581634993548505,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -1886,8 +2151,11 @@
     {
       "qid": "M-02157c08dd",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:huawei",
-      "retrieval_ms": 44.95925000082934,
+      "retrieval_ms": 57.85760500293691,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -1907,8 +2175,11 @@
     {
       "qid": "M-f8199de8b1",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:apple",
-      "retrieval_ms": 45.12768399581546,
+      "retrieval_ms": 48.655661987140775,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -1928,8 +2199,11 @@
     {
       "qid": "M-029431a3df",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:nvidia",
-      "retrieval_ms": 45.481369001208805,
+      "retrieval_ms": 54.919884001719765,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -1949,8 +2223,11 @@
     {
       "qid": "M-db8dfe3ed1",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 44.675553996057715,
+      "retrieval_ms": 53.63637799746357,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1970,8 +2247,11 @@
     {
       "qid": "M-74be6129e9",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:huawei",
-      "retrieval_ms": 46.13395500200568,
+      "retrieval_ms": 54.85765000048559,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1991,8 +2271,11 @@
     {
       "qid": "M-b09984ff8c",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 45.14862600626657,
+      "retrieval_ms": 54.079117995570414,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2012,8 +2295,11 @@
     {
       "qid": "M-581cb54ce2",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:smic",
-      "retrieval_ms": 44.509674997243565,
+      "retrieval_ms": 56.26815400319174,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2033,8 +2319,11 @@
     {
       "qid": "M-f1369e6713",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:tesla",
-      "retrieval_ms": 45.004817002336495,
+      "retrieval_ms": 47.809300987864845,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2054,8 +2343,11 @@
     {
       "qid": "M-ca7eab2723",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:synopsys",
-      "retrieval_ms": 45.18614900007378,
+      "retrieval_ms": 48.89131200616248,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2075,8 +2367,11 @@
     {
       "qid": "M-8a85f3b6b1",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:google",
-      "retrieval_ms": 44.90012799942633,
+      "retrieval_ms": 50.219137003296055,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2096,8 +2391,11 @@
     {
       "qid": "M-4d4d67b2e9",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:apple",
-      "retrieval_ms": 44.66053299984196,
+      "retrieval_ms": 56.40778299130034,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2117,8 +2415,11 @@
     {
       "qid": "M-3a9e7ec6a9",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:cadence",
-      "retrieval_ms": 44.66623600455932,
+      "retrieval_ms": 54.86015300266445,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2138,8 +2439,11 @@
     {
       "qid": "M-54482d18e1",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:amazon",
-      "retrieval_ms": 45.38941600185353,
+      "retrieval_ms": 53.1972190074157,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2159,8 +2463,11 @@
     {
       "qid": "M-fe7ab99e65",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:umc",
-      "retrieval_ms": 50.35293100081617,
+      "retrieval_ms": 56.17347500810865,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2180,8 +2487,11 @@
     {
       "qid": "M-725f6d6c79",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:broadcom",
-      "retrieval_ms": 44.23950699856505,
+      "retrieval_ms": 47.46145699755289,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -2201,8 +2511,11 @@
     {
       "qid": "M-e6c2023ca0",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 43.85075200116262,
+      "retrieval_ms": 47.37034499703441,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2222,8 +2535,11 @@
     {
       "qid": "M-5517238fa8",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:huawei",
-      "retrieval_ms": 44.41792499710573,
+      "retrieval_ms": 49.98902199440636,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2243,8 +2559,11 @@
     {
       "qid": "M-5dc8c32e7f",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:umc",
-      "retrieval_ms": 44.97586999787018,
+      "retrieval_ms": 52.966319999541156,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -2264,8 +2583,11 @@
     {
       "qid": "M-9d162a27d2",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:smic",
-      "retrieval_ms": 44.13344799831975,
+      "retrieval_ms": 49.61005299992394,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2285,8 +2607,11 @@
     {
       "qid": "M-81480ee57d",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 45.338300995354075,
+      "retrieval_ms": 48.38404699694365,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2306,8 +2631,11 @@
     {
       "qid": "M-4ef2df83e8",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 45.63331500685308,
+      "retrieval_ms": 51.268512004753575,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 1.0,
@@ -2327,8 +2655,11 @@
     {
       "qid": "M-e2c3874170",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:nvidia",
-      "retrieval_ms": 44.005961004586425,
+      "retrieval_ms": 47.02091398939956,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2348,8 +2679,11 @@
     {
       "qid": "M-67bb2be32d",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 45.6836689991178,
+      "retrieval_ms": 48.017674998845905,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -2369,8 +2703,11 @@
     {
       "qid": "M-8ad3fe0188",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:arm",
-      "retrieval_ms": 44.2562509997515,
+      "retrieval_ms": 48.16479799046647,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -2390,8 +2727,11 @@
     {
       "qid": "M-61fa7dee06",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:apple",
-      "retrieval_ms": 44.081873005779926,
+      "retrieval_ms": 48.511600005440414,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2411,8 +2751,11 @@
     {
       "qid": "M-283acbdb08",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 45.709254998655524,
+      "retrieval_ms": 47.503128997050226,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -2432,8 +2775,11 @@
     {
       "qid": "M-83e2e426cf",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:huawei",
-      "retrieval_ms": 45.12359999353066,
+      "retrieval_ms": 48.21765300584957,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2453,8 +2799,11 @@
     {
       "qid": "M-a32cfdd0dc",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 48.561689000052866,
+      "retrieval_ms": 48.39151199848857,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2474,8 +2823,11 @@
     {
       "qid": "M-03274ff886",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:umc",
-      "retrieval_ms": 44.66550800134428,
+      "retrieval_ms": 46.00986899458803,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2495,8 +2847,11 @@
     {
       "qid": "M-f6ccc8e8b7",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 43.886178995308,
+      "retrieval_ms": 47.58076700090896,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2516,8 +2871,11 @@
     {
       "qid": "M-b0acba683b",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:amazon",
-      "retrieval_ms": 44.63984000176424,
+      "retrieval_ms": 49.48485200293362,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2537,8 +2895,11 @@
     {
       "qid": "M-25b9262768",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 44.376219004334416,
+      "retrieval_ms": 46.91406700294465,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -2558,8 +2919,11 @@
     {
       "qid": "M-013c95c56d",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:qualcomm",
-      "retrieval_ms": 44.73708399746101,
+      "retrieval_ms": 46.94565199315548,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.5,
@@ -2579,8 +2943,11 @@
     {
       "qid": "M-73181cfc09",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:samsung",
-      "retrieval_ms": 44.73031999805244,
+      "retrieval_ms": 47.09961000480689,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2600,8 +2967,11 @@
     {
       "qid": "M-f0e475045c",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:arm",
-      "retrieval_ms": 44.19845499796793,
+      "retrieval_ms": 47.09543399803806,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2621,8 +2991,11 @@
     {
       "qid": "M-d2a2ce8d2b",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:samsung",
-      "retrieval_ms": 51.506318006431684,
+      "retrieval_ms": 47.374646994285285,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2642,8 +3015,11 @@
     {
       "qid": "M-accab1e0e6",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:qualcomm",
-      "retrieval_ms": 44.71401900082128,
+      "retrieval_ms": 46.68266199587379,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -2663,8 +3039,11 @@
     {
       "qid": "M-7531785032",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:apple",
-      "retrieval_ms": 45.36537600506563,
+      "retrieval_ms": 53.518884000368416,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.5,
@@ -2684,8 +3063,11 @@
     {
       "qid": "M-2c6e9e0188",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:umc",
-      "retrieval_ms": 45.69309400540078,
+      "retrieval_ms": 54.053769999882206,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2705,8 +3087,11 @@
     {
       "qid": "M-11ba8b1fd3",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:umc",
-      "retrieval_ms": 51.843929999449756,
+      "retrieval_ms": 54.659522997098975,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2726,8 +3111,11 @@
     {
       "qid": "M-785fbe2558",
       "qtype": "multi_hop",
+      "tags": [
+        "comparison"
+      ],
       "cluster": "entity:huawei",
-      "retrieval_ms": 45.76527700555744,
+      "retrieval_ms": 52.829804000793956,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2747,12 +3135,13 @@
     {
       "qid": "G-354b628368",
       "qtype": "global",
+      "tags": [],
       "cluster": "theme:climate",
       "theme": "climate",
       "n_relevant_companies": 35,
       "company_coverage@10": 0.6,
       "company_coverage@20": 0.45,
-      "retrieval_ms": 44.34460400079843,
+      "retrieval_ms": 50.43480099993758,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -2772,12 +3161,13 @@
     {
       "qid": "G-0be1c04db8",
       "qtype": "global",
+      "tags": [],
       "cluster": "theme:cyclical",
       "theme": "cyclical",
       "n_relevant_companies": 35,
       "company_coverage@10": 0.7,
       "company_coverage@20": 0.6,
-      "retrieval_ms": 44.547205994604155,
+      "retrieval_ms": 48.23401500470936,
       "recall@1": 0.0,
       "recall@5": 0.16666666666666666,
       "recall@10": 0.16666666666666666,
@@ -2797,12 +3187,13 @@
     {
       "qid": "G-951630b502",
       "qtype": "global",
+      "tags": [],
       "cluster": "theme:interest rate",
       "theme": "interest rate",
       "n_relevant_companies": 37,
       "company_coverage@10": 0.4,
       "company_coverage@20": 0.4,
-      "retrieval_ms": 45.22968899982516,
+      "retrieval_ms": 55.1789489982184,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -2822,12 +3213,13 @@
     {
       "qid": "G-0500f0c604",
       "qtype": "global",
+      "tags": [],
       "cluster": "theme:tariff",
       "theme": "tariff",
       "n_relevant_companies": 39,
       "company_coverage@10": 0.5,
       "company_coverage@20": 0.4,
-      "retrieval_ms": 50.44888200063724,
+      "retrieval_ms": 56.48295900027733,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -2847,12 +3239,13 @@
     {
       "qid": "G-9a28615079",
       "qtype": "global",
+      "tags": [],
       "cluster": "theme:artificial intelligence",
       "theme": "artificial intelligence",
       "n_relevant_companies": 32,
       "company_coverage@10": 0.2,
       "company_coverage@20": 0.15,
-      "retrieval_ms": 45.03449600451859,
+      "retrieval_ms": 56.770109993522055,
       "recall@1": 0.0,
       "recall@5": 0.2,
       "recall@10": 0.2,
@@ -2872,12 +3265,13 @@
     {
       "qid": "G-14a37c9367",
       "qtype": "global",
+      "tags": [],
       "cluster": "theme:customer concentration",
       "theme": "customer concentration",
       "n_relevant_companies": 33,
       "company_coverage@10": 0.3,
       "company_coverage@20": 0.25,
-      "retrieval_ms": 46.0005029963213,
+      "retrieval_ms": 49.01671700645238,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -2897,12 +3291,13 @@
     {
       "qid": "G-06cfa36669",
       "qtype": "global",
+      "tags": [],
       "cluster": "theme:export control",
       "theme": "export control",
       "n_relevant_companies": 37,
       "company_coverage@10": 0.6,
       "company_coverage@20": 0.45,
-      "retrieval_ms": 44.859052002721,
+      "retrieval_ms": 54.7917799995048,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -2922,12 +3317,13 @@
     {
       "qid": "G-821bc5e47e",
       "qtype": "global",
+      "tags": [],
       "cluster": "theme:single source",
       "theme": "single source",
       "n_relevant_companies": 33,
       "company_coverage@10": 0.6,
       "company_coverage@20": 0.5,
-      "retrieval_ms": 44.55703400162747,
+      "retrieval_ms": 52.829332009423524,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.3333333333333333,
@@ -2947,12 +3343,13 @@
     {
       "qid": "G-224713cd01",
       "qtype": "global",
+      "tags": [],
       "cluster": "theme:China",
       "theme": "China",
       "n_relevant_companies": 39,
       "company_coverage@10": 0.4,
       "company_coverage@20": 0.45,
-      "retrieval_ms": 46.29933300020639,
+      "retrieval_ms": 53.88546899484936,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -2972,12 +3369,13 @@
     {
       "qid": "G-7ba948b373",
       "qtype": "global",
+      "tags": [],
       "cluster": "theme:inventory",
       "theme": "inventory",
       "n_relevant_companies": 38,
       "company_coverage@10": 0.4,
       "company_coverage@20": 0.4,
-      "retrieval_ms": 45.309491993975826,
+      "retrieval_ms": 54.32891899545211,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -2997,12 +3395,13 @@
     {
       "qid": "G-861bc5b622",
       "qtype": "global",
+      "tags": [],
       "cluster": "theme:cybersecurity",
       "theme": "cybersecurity",
       "n_relevant_companies": 38,
       "company_coverage@10": 0.6,
       "company_coverage@20": 0.4,
-      "retrieval_ms": 44.68177400121931,
+      "retrieval_ms": 52.518082011374645,
       "recall@1": 0.0,
       "recall@5": 0.16666666666666666,
       "recall@10": 0.16666666666666666,
@@ -3022,12 +3421,13 @@
     {
       "qid": "G-44fef5ccc2",
       "qtype": "global",
+      "tags": [],
       "cluster": "theme:Taiwan",
       "theme": "Taiwan",
       "n_relevant_companies": 36,
       "company_coverage@10": 0.4,
       "company_coverage@20": 0.35,
-      "retrieval_ms": 44.73336899536662,
+      "retrieval_ms": 51.834261990734376,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3047,8 +3447,11 @@
     {
       "qid": "B-bf5d25e90c",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:cadence",
-      "retrieval_ms": 45.186050003394485,
+      "retrieval_ms": 54.77052700007334,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3068,8 +3471,11 @@
     {
       "qid": "B-bd576225ae",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:qualcomm",
-      "retrieval_ms": 45.391245002974756,
+      "retrieval_ms": 53.83143499784637,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -3089,8 +3495,11 @@
     {
       "qid": "B-caeac5ceae",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:smic",
-      "retrieval_ms": 44.39764199923957,
+      "retrieval_ms": 53.11054199410137,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3110,8 +3519,11 @@
     {
       "qid": "B-8a448465a7",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:huawei",
-      "retrieval_ms": 45.40459999407176,
+      "retrieval_ms": 52.59702600596938,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -3131,8 +3543,11 @@
     {
       "qid": "B-c778971a2b",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:tokyo electron",
-      "retrieval_ms": 44.96691599342739,
+      "retrieval_ms": 50.08740400080569,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3152,8 +3567,11 @@
     {
       "qid": "B-718f4063aa",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:samsung",
-      "retrieval_ms": 44.6610340004554,
+      "retrieval_ms": 52.529139997204766,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3173,8 +3591,11 @@
     {
       "qid": "B-5eb622f77b",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:google",
-      "retrieval_ms": 50.618631998077035,
+      "retrieval_ms": 47.83015498833265,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -3194,8 +3615,11 @@
     {
       "qid": "B-d9746d69e7",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 51.07800100086024,
+      "retrieval_ms": 50.07279299024958,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -3215,8 +3639,11 @@
     {
       "qid": "B-611217c7b6",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:tesla",
-      "retrieval_ms": 49.06125999696087,
+      "retrieval_ms": 54.212507006013766,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -3236,8 +3663,11 @@
     {
       "qid": "B-2fc851c6ef",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 44.80546100239735,
+      "retrieval_ms": 47.275113000068814,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.5,
@@ -3257,8 +3687,11 @@
     {
       "qid": "B-52b2b2ab82",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 45.66616600641282,
+      "retrieval_ms": 47.244072004104964,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.5,
@@ -3278,8 +3711,11 @@
     {
       "qid": "B-0192416a5a",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:arm",
-      "retrieval_ms": 45.56659999798285,
+      "retrieval_ms": 50.15992600237951,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -3299,8 +3735,11 @@
     {
       "qid": "B-5f50f7a6c2",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 45.02823599614203,
+      "retrieval_ms": 44.02651799318846,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3320,8 +3759,11 @@
     {
       "qid": "B-4c11b3e174",
       "qtype": "multi_hop",
+      "tags": [
+        "bridge"
+      ],
       "cluster": "entity:qualcomm",
-      "retrieval_ms": 45.70315899763955,
+      "retrieval_ms": 53.011209005489945,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.5,

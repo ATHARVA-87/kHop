@@ -142,6 +142,7 @@ def score_retrieval(
             {
                 "qid": q.qid,
                 "qtype": q.qtype,
+                "tags": list(q.tags),
                 "cluster": cluster_of(q, extra.get("theme")),
                 **extra,
                 "retrieval_ms": ms,
@@ -205,6 +206,8 @@ def aggregate(rows: list[dict], seed: int = 0) -> dict:
     groups: dict[str, list[dict]] = {"all": rows}
     for r in rows:
         groups.setdefault(r["qtype"], []).append(r)
+        for t in r.get("tags", []):  # e.g. multi_hop:bridge vs multi_hop:comparison
+            groups.setdefault(f"{r['qtype']}:{t}", []).append(r)
     out = {}
     for name, rs in groups.items():
         out[name] = {}

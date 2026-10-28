@@ -28,3 +28,16 @@ Scored on 40 gold-labelled 10-K passages (187 relations; AI labels, human confir
 - Gleaning raised recall mainly for products, segments and exposures, but company-company precision fell from 0.90 to 0.56; false company edges create false bridges for A4. Not adopted.
 - Kept: v5. Known v5 error class: `licenses_from` written where the filer licenses TO the object (5 of 15 bad edges in the quote calibration). Fixing it needs a stronger model or a rule, not more prompting.
 - Sample is small (20 company-company gold relations); CIs in `results/extraction_*.json`.
+
+## HippoRAG-style Personalized PageRank lost to simple edge rules (2026-10-28)
+PPR over an entity + evidence-chunk graph (seeded with the question's entities, fused with A2 by RRF), dev multi-hop complete@10:
+
+| variant | all multi-hop | bridge (14) | comparison (43) |
+| --- | --- | --- | --- |
+| A2-RR (no graph) | 0.597 | 0.357 | 0.674 |
+| **A4 edge rules** | **0.772** | **0.643** | **0.814** |
+| PPR, all edges, damping 0.5 or 0.85 | 0.596 | 0.571 | 0.605 |
+| PPR, company edges only | 0.649 | 0.714 | 0.628 |
+| graph weight 2 in RRF (any PPR variant) | 0.54–0.56 | | |
+
+PageRank mass leaks through hub nodes (NVIDIA has 126 edges; 1,041 exposure edges join most companies to shared risk nodes). The simple rules (edges between the named entities, or their common neighbours for bridge questions) are better and easier to explain. Removed PPR and weighted RRF; kept plain RRF.

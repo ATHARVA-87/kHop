@@ -140,6 +140,12 @@ def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:
         base = bm25 if r.type == "bm25" else HybridRetriever([dense(), bm25], r.candidates, r.rrf_k)
     if r.type == "graph_hybrid":
         base = _graph_hybrid(cfg, data_dir, path, base)
+    elif r.type == "hybrid_rr":
+        from plexus.extract.resolve import load_resolver
+        from plexus.retrieve.graph_search import CompanyRoundRobinRetriever, EntityLinker
+
+        linker = EntityLinker(load_resolver(data_dir, cfg.snapshot), [])
+        base = CompanyRoundRobinRetriever(base, linker)
     if r.rerank is None:
         return base
     from plexus.retrieve.rerank import CrossEncoderScorer, RerankingRetriever

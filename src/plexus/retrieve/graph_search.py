@@ -232,3 +232,40 @@ class GraphHybridRetriever:
 
 def load_entities(graph_dir: Path) -> list[dict]:
     return [json.loads(x) for x in (graph_dir / "entities.jsonl").read_text().splitlines()]
+
+
+class CompanyRoundRobinRetriever:
+    """A2-RR, the no-graph baseline for multi-company questions (reviewer, 2026-10-28): take
+    the hybrid list and alternate between the filers the question names (their best hit,
+    then their second best, ...), then the rest in hybrid order. Uses the same entity linker
+    as A4 but no graph edges, so A4 - A2-RR is the graph's own contribution."""
+
+    def __init__(self, base, linker: EntityLinker, depth: int = 100):
+        self.base = base
+        self.linker = linker
+        self.depth = depth
+
+    def retrieve(self, question: str, k: int) -> list[Hit]:
+        hits = self.base.retrieve(question, max(k, self.depth))
+        tickers = {eid.split(":")[1] for eid in self.linker.link(question)
+                   if eid in self.linker.tickers.values()}  # fmt: skip
+        if len(tickers) < 2:
+            return hits[:k]
+        order = [
+            t for t in (eid.split(":")[1] for eid in self.linker.link(question)) if t in tickers
+        ]
+        queues = {t: [h for h in hits if h.doc_id.split("_")[0] == t] for t in order}
+        out: list[Hit] = []
+        seen: set[str] = set()
+        while any(queues.values()) and len(out) < k:
+            for t in order:
+                if queues[t] and len(out) < k:
+                    h = queues[t].pop(0)
+                    seen.add(h.chunk_id)
+                    out.append(h)
+        out += [h for h in hits if h.chunk_id not in seen][: k - len(out)]
+        return out
+
+    def close(self) -> None:
+        if hasattr(self.base, "close"):
+            self.base.close()

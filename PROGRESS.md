@@ -161,6 +161,17 @@ Planned (by phase):
 - Result: relations kept 2,348 → 2,928; edges 1,992 → 2,413; junk company nodes gone; merges logged (Samsung Semiconductor → Samsung, Monolithic Power System → MPS).
 - **A4 on dev after steps 1–2:** multi-hop complete@10 0.772 (A2 0.509, +0.263 [+0.100, +0.417]); all recall@10 0.790. Still to compare against the no-graph round-robin baseline (step 4).
 
+- **Step 3, extraction P/R** (40 gold passages, AI labels pending human confirmation; family level): v5 P 0.67 R 0.18, company-company P 0.90 R 0.45. Prompt v6 (worked examples) and gleaning were measured and rejected (docs/failures.md). No re-extraction.
+- **Step 4, multi-hop, with the honest baseline (dev complete@10):**
+
+| config | all multi-hop (57) | bridge (14) | comparison (43) | all recall@10 |
+| --- | --- | --- | --- | --- |
+| A2 hybrid | 0.509 | 0.214 | 0.605 | 0.704 |
+| A2-RR (no graph, alternate named filers) | 0.597 | 0.357 | 0.674 | 0.730 |
+| **A4 graph edges + A2** | **0.772** | **0.643** | **0.814** | **0.790** |
+
+  A4 vs A2-RR: +0.175 [−0.020, +0.341] (cluster bootstrap by linking entity); comparison +0.140 [0.000, +0.262]; bridge +0.286 (n = 14, wide CI). HippoRAG-style PPR and weighted RRF lost and were removed (user rule: keep it explainable).
+
 ## Held-out test set (2026-10-27)
 - Same procedure as dev: Gemini drafts (user-style phrasing, dev passages and company pairs excluded) -> 3 AI reviewer agents -> human. You approved the AI pre-review as a whole ("most edits not required, same meaning"), so human/AI agreement is 100% by construction. Report it that way.
 - 130 candidates -> **91 verified** (37 local, 23 multi-hop: 14 comparison + 9 bridge, 31 global ≈ 2–3 angles × 12 themes). `data/golden/golden_test.jsonl`, built with `make golden-test`.
