@@ -138,7 +138,7 @@ def export_for_labelling(results: dict, out: Path, limit: int = 60, seed: int = 
     rng = random.Random(seed)
     by_type: dict[str, list[dict]] = {}
     for r in rows:
-        by_type.setdefault(r["qtype"], []).append(r)
+        by_type.setdefault(r.get("qtype", "all"), []).append(r)
     picked = []
     for _qtype, rs in sorted(by_type.items()):
         n = max(1, round(limit * len(rs) / len(rows)))
