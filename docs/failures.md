@@ -55,5 +55,15 @@ Agreement with 49 blind human correctness labels (38 correct / 10 partially corr
 
 The judge rated 7–9 of the 10 human "partially correct" answers (one of two named companies answered, or "not enough evidence" for half the question) as correct. Its correctness scores (0.94–0.97) are therefore NOT reported as results. On this sample the human labels give 38/49 = 0.78 fully correct. Next: RAGAS claim-level metrics in a separate env, scored against the same labels.
 
+### Checklist judge: better, still not accepted (2026-10-28)
+Research-recommended fix (CheckEval / TICK style): list the required parts of an answer, check each part ANSWERED / NOT_ANSWERED / CONTRADICTS, correct only if all are answered. Prompts and the acceptance bar (catch >= 70% of human not-correct answers AND pass >= 85% of human-correct answers) were committed before the run (f0198f9); one run, Groq `openai/gpt-oss-120b`, all 49 labels (`results/checklist_judge_a6_router.json`).
+
+| judge (binary: correct vs not) | catches not-correct (TPR, 95% Wilson) | passes correct (TNR) | binary kappa | Gwet AC1 |
+| --- | --- | --- | --- | --- |
+| single-verdict Gemini judge | 3/11 = 0.27 [0.10, 0.57] | 0.97 | 0.32 | 0.75 |
+| checklist judge | 4/11 = 0.36 [0.15, 0.65] | 0.95 | 0.37 | 0.74 |
+
+Not accepted: it still passed 7 of the 10 "partially correct" answers (4 local, 3 multi-hop). Per the protocol the prompts are not tuned on these labels. Headline answer quality stays the human number: 38/49 = 0.78 fully correct (Wilson 0.64–0.87). Automated judges are reported only as "agreement with human", never as answer accuracy.
+
 ## A7 company-coverage fix did not help (2026-10-28)
 Deterministic corrective step: if a company the question names had no passage in the writer's top 5, search that company's filings only and insert its best passage. Dev: 20 of 57 multi-hop questions lack both gold passages in the top 5, but the fix triggered on only 8 (the named company was usually present, with the wrong passage), and multi-hop complete@5 stayed 0.649 (top-10 +0.018, n.s.). Removed. The gap is relevance within a company, not coverage: complete@10 is 0.789 vs complete@5 0.649, so showing the writer 10 passages instead of 5 is the simpler lever (to be measured with a validated judge).
