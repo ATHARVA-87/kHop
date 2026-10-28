@@ -34,6 +34,8 @@ class DenseRetriever:
         self.index = index
 
     def retrieve(self, question: str, k: int, doc_ids: list[str] | None = None) -> list[Hit]:
+        if doc_ids is not None and not doc_ids:
+            return []  # an empty filter means "no filings", not "all filings"
         return self.index.search(self.embedder.embed_query(question), k, doc_ids)
 
     def close(self) -> None:
@@ -143,7 +145,10 @@ def _routed(cfg: ExperimentConfig, data_dir: Path, index_path: Path, hybrid: Ret
         "global": CompanyDiverseRetriever(hybrid, linker),
     }
     router = RuleRouter(linker) if r.router == "rules" else FixedRouter(r.router)
-    return RoutedRetriever(router, retrievers)
+    routed = RoutedRetriever(router, retrievers)
+    graph = retrievers["multi_hop"].graph_retriever.graph
+    routed.closables = [hybrid, graph]  # each shared resource closed exactly once
+    return routed
 
 
 def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:

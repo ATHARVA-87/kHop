@@ -1,0 +1,30 @@
+{"question": "what are the main risk factors for qualcomm", "expected": "local", "kind": "lowercase"}
+{"question": "nvidia gaming revenue trend", "expected": "local", "kind": "lowercase"}
+{"question": "how much cash does micron have", "expected": "local", "kind": "lowercase"}
+{"question": "What does TXN say about its 300mm fab ramp?", "expected": "local", "kind": "ticker"}
+{"question": "MCHP inventory write-downs this year?", "expected": "local", "kind": "ticker"}
+{"question": "How does Broadcom describe its VMware integration?", "expected": "local", "kind": "plain"}
+{"question": "What did Broadcom pay for the Seagate system-on-chip assets?", "expected": "local", "kind": "one filer + other company"}
+{"question": "What does Qualcomm say about Apple developing its own modems?", "expected": "local", "kind": "one filer + other company"}
+{"question": "How exposed is AMD to TSMC capacity constraints?", "expected": "local", "kind": "one filer + other company"}
+{"question": "Who are Lam Research's main competitors?", "expected": "local", "kind": "possessive"}
+{"question": "What does onsemi say about silicon carbide demand?", "expected": "local", "kind": "lowercase brand"}
+{"question": "What does TI say about its capital spending?", "expected": "local", "kind": "short alias"}
+{"question": "nvidia vs amd on data center gpus", "expected": "multi_hop", "kind": "lowercase vs"}
+{"question": "Compare Skyworks and Qorvo exposure to Apple", "expected": "local", "kind": "Qorvo not in corpus"}
+{"question": "How do Lam Research and KLA each describe export controls on China?", "expected": "multi_hop", "kind": "plain"}
+{"question": "Do AMD and Intel both rely on TSMC?", "expected": "multi_hop", "kind": "yes/no style"}
+{"question": "Which foundry do Silicon Labs and Cirrus Logic both use?", "expected": "multi_hop", "kind": "bridge"}
+{"question": "What do micron and sk hynix say about HBM?", "expected": "local", "kind": "SK hynix not in corpus"}
+{"question": "How do Entegris and Applied Materials describe customer concentration?", "expected": "multi_hop", "kind": "plain"}
+{"question": "MU vs WOLF on capex plans", "expected": "multi_hop", "kind": "tickers"}
+{"question": "Which companies depend on TSMC for their wafers?", "expected": "global", "kind": "sector cue + company"}
+{"question": "Which firms cite Samsung as a competitor?", "expected": "global", "kind": "sector cue + company"}
+{"question": "How do chipmakers describe tariff risk?", "expected": "global", "kind": "sector noun"}
+{"question": "What do semiconductor companies say about AI demand?", "expected": "global", "kind": "sector noun"}
+{"question": "industry-wide risks from export controls", "expected": "global", "kind": "industry-wide"}
+{"question": "How do the companies describe cybersecurity incidents?", "expected": "global", "kind": "no company"}
+{"question": "Which chip makers mention Taiwan geopolitical risk?", "expected": "global", "kind": "sector cue"}
+{"question": "How do peers describe inventory corrections?", "expected": "global", "kind": "sector cue"}
+{"question": "What new BIS export rules affect chip companies?", "expected": "global", "kind": "agency + sector noun"}
+{"question": "Across the sector, how is climate regulation described?", "expected": "global", "kind": "sector cue"}

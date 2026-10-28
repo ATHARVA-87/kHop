@@ -43,3 +43,27 @@ def test_short_all_caps_aliases_link_like_tickers():
     link = EntityLinker(res, [])
     assert link.link("What does TI say drives its revenue?") == ["company:TXN"]
     assert link.link("What is ti?") == []  # lowercase never links
+
+
+def test_non_filer_short_aliases_never_count_as_filers():
+    filers = {"NVDA": {"company": "NVIDIA CORP"}, "SWKS": {"company": "SKYWORKS SOLUTIONS, INC."}}
+    res = Resolver(
+        filers,
+        {"company": {"Amazon": ["AWS"], "U.S. Department of Commerce": ["DOC"]}},
+        filer_tokens={"skyworks": "SWKS"},
+    )  # as load_resolver builds it
+    link = EntityLinker(res, [])
+    assert link.filer_ids == {"company:NVDA", "company:SWKS"}
+    assert "DOC" not in link.tickers and "AWS" not in link.tickers
+    # Amazon is the linking entity, not a third filer
+    assert RuleRouter(link).route("How do NVIDIA and Skyworks each describe Amazon?") == "multi_hop"
+
+
+def test_sector_cue_and_lowercase_distinctive_names():
+    filers = {"QCOM": {"company": "QUALCOMM INC/DE"}}
+    res = Resolver(filers, {"company": {"TSMC": []}}, filer_tokens={"qualcomm": "QCOM"},
+                   token_caps={"qualcomm": 1.0})  # fmt: skip
+    r = RuleRouter(EntityLinker(res, []))
+    assert r.route("What are the main risks for qualcomm?") == "local"
+    assert r.route("Which companies depend on TSMC for wafers?") == "global"
+    assert r.route("What does Qualcomm say about TSMC?") == "local"

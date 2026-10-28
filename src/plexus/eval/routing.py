@@ -31,12 +31,39 @@ def confusion(pairs: list[tuple[str, str]]) -> dict:
     return {"accuracy": round(acc, 4), "n": len(pairs), "gold_x_predicted": table}
 
 
+def robustness(config: str) -> int:
+    """Router accuracy on ~30 hand-written paraphrases of DEV questions (lowercase names,
+    tickers, 'vs', 'which companies ...'). Written by the assistant, not the human: a
+    diagnostic of realistic phrasing, not a gold benchmark. CPU only, no retrieval."""
+    from plexus.retrieve.pipeline import make_linker
+    from plexus.retrieve.router import RuleRouter
+
+    s = Settings.load()
+    router = RuleRouter(make_linker(ExperimentConfig.load(config), s.data_dir))
+    rows = [
+        json.loads(x)
+        for x in (s.data_dir / "golden" / "routing_robustness.jsonl").read_text().splitlines()
+    ]
+    pairs = [(r["expected"], router.route(r["question"])) for r in rows]
+    res = confusion(pairs)
+    res["errors"] = [{"question": r["question"], "kind": r["kind"], "expected": g, "routed": p}
+                     for r, (g, p) in zip(rows, pairs, strict=True) if g != p]  # fmt: skip
+    out = REPO_ROOT / "results" / "routing_robustness.json"
+    out.write_text(json.dumps(res, indent=2) + "\n")
+    print(json.dumps(res, indent=2))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="configs/a6_router.yaml")
     ap.add_argument("--golden", type=Path, default=None)
     ap.add_argument("--results-dir", type=Path, default=REPO_ROOT / "results")
+    ap.add_argument("--robustness", action="store_true",
+                    help="only the router on data/golden/routing_robustness.jsonl (no retrieval)")  # fmt: skip
     a = ap.parse_args(argv)
+    if a.robustness:
+        return robustness(a.config)
     s = Settings.load()
     cfg = ExperimentConfig.load(a.config)
     queries = load_golden(a.golden or s.data_dir / "golden" / "golden.jsonl")

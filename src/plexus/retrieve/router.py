@@ -12,24 +12,36 @@ two-company ones (Phase 2), so it now runs on "local" only.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 
 from plexus.index.dense import Hit
 
 ROUTES = ("local", "multi_hop", "global")
 
+SECTOR_CUE = re.compile(
+    r"\b(which|what|how many|how do|do|across)\s+(the\s+|all\s+|other\s+)?"
+    r"(companies|firms|chipmakers|chip makers|semiconductor companies|manufacturers|filers|peers)\b"
+    r"|\b(industry|sector)[- ]wide\b|\bacross the (industry|sector)\b"
+    r"|\b(chip ?makers|chip companies|semiconductor companies)\b",
+    re.IGNORECASE,
+)
+
 
 class RuleRouter:
     def __init__(self, linker):
         self.linker = linker
-        self.filer_ids = set(linker.tickers.values())
+        self.filer_ids = linker.filer_ids
 
     def route(self, question: str) -> str:
         linked = self.linker.link(question)
-        if not linked:
-            return "global"
         filers = [e for e in linked if e in self.filer_ids]
-        return "multi_hop" if len(filers) >= 2 else "local"
+        if len(filers) >= 2:
+            return "multi_hop"
+        # "Which companies depend on TSMC?" names a company but asks across the sector
+        if not filers and (not linked or SECTOR_CUE.search(question)):
+            return "global"
+        return "local"
 
 
 class FixedRouter:
@@ -66,8 +78,7 @@ class RoutedRetriever:
         return self.retrievers[self.last_route].retrieve(question, k)
 
     def close(self) -> None:
-        seen = set()
-        for r in self.retrievers.values():
-            if id(r) not in seen and hasattr(r, "close"):
-                seen.add(id(r))
+        # the routes wrap ONE shared hybrid retriever: close it once (review 2026-10-28)
+        for r in getattr(self, "closables", None) or self.retrievers.values():
+            if hasattr(r, "close"):
                 r.close()
