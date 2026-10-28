@@ -57,6 +57,8 @@ class RetrievalConfig(_Strict):
     # A4 graph_hybrid: graph traversal hits fused with the hybrid list
     graph_dir: str | None = None  # default data/graph/<snapshot>
     graph_max_edges: int = 12
+    # A5: questions naming no company get one passage per company first
+    company_diverse: bool = False
 
 
 class GenerationConfig(_Strict):

@@ -269,3 +269,33 @@ class CompanyRoundRobinRetriever:
     def close(self) -> None:
         if hasattr(self.base, "close"):
             self.base.close()
+
+
+class CompanyDiverseRetriever:
+    """A5 (sector-wide questions): if the question names no company, keep the best passage
+    from each company first (in hybrid order), then the rest. One passage per company is
+    what a "how do all semiconductor companies ..." answer needs, and top-10 from plain
+    relevance ranking tends to repeat a few companies. Questions naming a company pass
+    through unchanged (to the wrapped retriever, e.g. A4)."""
+
+    def __init__(self, base, linker: EntityLinker, depth: int = 100):
+        self.base = base
+        self.linker = linker
+        self.depth = depth
+
+    def retrieve(self, question: str, k: int) -> list[Hit]:
+        hits = self.base.retrieve(question, max(k, self.depth))
+        if self.linker.link(question):
+            return hits[:k]
+        first: list[Hit] = []
+        rest: list[Hit] = []
+        seen: set[str] = set()
+        for h in hits:
+            company = h.doc_id.split("_")[0]
+            (rest if company in seen else first).append(h)
+            seen.add(company)
+        return (first + rest)[:k]
+
+    def close(self) -> None:
+        if hasattr(self.base, "close"):
+            self.base.close()

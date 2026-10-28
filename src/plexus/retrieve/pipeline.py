@@ -146,6 +146,13 @@ def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:
 
         linker = EntityLinker(load_resolver(data_dir, cfg.snapshot), [])
         base = CompanyRoundRobinRetriever(base, linker)
+    if r.company_diverse:
+        from plexus.extract.resolve import load_resolver
+        from plexus.retrieve.graph_search import CompanyDiverseRetriever, EntityLinker
+
+        base = CompanyDiverseRetriever(
+            base, EntityLinker(load_resolver(data_dir, cfg.snapshot), [])
+        )
     if r.rerank is None:
         return base
     from plexus.retrieve.rerank import CrossEncoderScorer, RerankingRetriever

@@ -111,3 +111,18 @@ def test_round_robin_baseline_alternates_named_filers():
     assert [h.chunk_id for h in out] == ["SLAB_10K#1", "CRUS_10K#1", "SLAB_10K#2", "SLAB_10K#3"]
     # fewer than two named filers: the hybrid list unchanged
     assert rr.retrieve("What does Silicon Labs say?", 2)[0].chunk_id == "SLAB_10K#1"
+
+
+def test_company_diverse_puts_one_passage_per_company_first():
+    from plexus.retrieve.graph_search import CompanyDiverseRetriever
+
+    class Base:
+        def retrieve(self, q, k):
+            ids = ["A_10K#1", "A_10K#2", "B_10K#1", "A_10K#3", "C_10K#1"]
+            return [Hit(i, i.split("#")[0], 0, 1, "s", 1.0, "t") for i in ids][:k]
+
+    d = CompanyDiverseRetriever(Base(), EntityLinker(RES, ENTS))
+    assert [h.chunk_id for h in d.retrieve("How do chip companies describe tariffs?", 4)] == [
+        "A_10K#1", "B_10K#1", "C_10K#1", "A_10K#2"]  # fmt: skip
+    # a named company: unchanged order
+    assert d.retrieve("What does Silicon Labs say about tariffs?", 2)[1].chunk_id == "A_10K#2"

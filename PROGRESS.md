@@ -172,6 +172,10 @@ Planned (by phase):
 
   A4 vs A2-RR: +0.175 [−0.020, +0.341] (cluster bootstrap by linking entity); comparison +0.140 [0.000, +0.262]; bridge +0.286 (n = 14, wide CI). HippoRAG-style PPR and weighted RRF lost and were removed (user rule: keep it explainable).
 
+- **Step 5, sector-wide questions (A5 = A4 + company-diverse ranking):** when a question names no company, the best passage of each company goes first, then the rest. Dev global company_coverage@10 0.475 → **0.892** (+0.417 [+0.317, +0.517]); @20 0.817. Other question types unchanged. Deviation from the brief's "A5 community search": the reviewer and the research scout both found that Leiden communities on this graph give industry peer groups, not risk themes, and this is far simpler. Caveat: coverage measures breadth (on-theme passage per company), not answer quality; n = 12 dev questions, so the test set (31) decides.
+
+**Phase 3 result (dev): A0 → A5 recall@10 0.276 → 0.791; multi-hop complete@10 0.018 → 0.772; global coverage@10 0.508 → 0.892.** Pending: human confirmation of the two AI-labelled extraction samples; one held-out test run of the final configs.
+
 ## Held-out test set (2026-10-27)
 - Same procedure as dev: Gemini drafts (user-style phrasing, dev passages and company pairs excluded) -> 3 AI reviewer agents -> human. You approved the AI pre-review as a whole ("most edits not required, same meaning"), so human/AI agreement is 100% by construction. Report it that way.
 - 130 candidates -> **91 verified** (37 local, 23 multi-hop: 14 comparison + 9 bridge, 31 global ≈ 2–3 angles × 12 themes). `data/golden/golden_test.jsonl`, built with `make golden-test`.
