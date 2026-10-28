@@ -36,3 +36,4 @@ ui/out/
 # experiment outputs (results/*.json are committed; logs are not)
 logs/
 *.log
+data/graph/
