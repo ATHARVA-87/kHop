@@ -79,6 +79,7 @@ class GenerationConfig(_Strict):
 class JudgeConfig(_Strict):
     provider: str = "gemini"
     model: str = "gemini-3.6-flash"  # 3.8-flash overloaded on 2026-10-27, ADR 0005
+    fallback_models: list[str] = ["gemini-3.5-flash-lite"]  # tried when the main one fails
 
 
 class ExperimentConfig(_Strict):

@@ -24,9 +24,10 @@ Rules:
 def format_context(hits: list[Hit]) -> str:
     blocks = []
     for i, h in enumerate(hits, start=1):
-        blocks.append(
-            f"[{i}] (source: {h.doc_id}, section: {h.section})\n<excerpt>\n{h.text}\n</excerpt>"
-        )
+        # the header names the company: filings say "we", so without it the model can credit
+        # one company's facts to another (seen in the first Phase 4 answers)
+        source = h.header or f"(source: {h.doc_id}, section: {h.section})"
+        blocks.append(f"[{i}] {source}\n<excerpt>\n{h.text}\n</excerpt>")
     return "\n\n".join(blocks)
 
 

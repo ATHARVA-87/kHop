@@ -32,6 +32,7 @@ from plexus.eval.metrics import (
     recall_at_k,
     retrieval_metrics,
 )
+from plexus.ingest.headers import index_text
 from plexus.settings import REPO_ROOT, Settings
 
 
@@ -267,8 +268,9 @@ def score_generation(
             generation_cached=ans.cached,
         )
         if judge is not None:
+            # excerpts WITH their company header, so the judge can catch wrong-company claims
             row["faithfulness"] = judge.faithfulness(
-                q.question, ans.text, [h.text for h in ans.hits]
+                q.question, ans.text, [index_text(h.header, h.text) for h in ans.hits]
             )
             verdict = judge.correctness(q.question, q.answer, ans.text)
             row["judge_verdict"] = verdict
@@ -359,7 +361,11 @@ def run(
     )
     generation = {}
     if generate or use_judge:
-        judge = Judge(llm, cfg.judge.provider, cfg.judge.model, cfg.seed) if use_judge else None
+        judge = (
+            Judge(llm, cfg.judge.provider, cfg.judge.model, cfg.seed, cfg.judge.fallback_models)
+            if use_judge
+            else None
+        )
         score_generation(queries, rows, pipeline, doc_texts, judge)
         generation = aggregate_generation(rows, seed=cfg.seed) if rows else {}
         generation["llm_usage"] = {
@@ -370,6 +376,8 @@ def run(
             "completion_tokens_uncached": llm.stats.completion_tokens,
             "by_provider": llm.stats.by_provider,
         }
+        if judge is not None:
+            generation["judge_models_used"] = dict(judge.used)
     if hasattr(retriever, "close"):
         retriever.close()
 

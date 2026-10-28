@@ -22,7 +22,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from plexus.llm import LLMClient, LLMRequest, Message
+from plexus.llm import LLMClient, LLMRequest, Message, ProviderError, StructuredOutputError
 
 Verdict = Literal["correct", "partially_correct", "incorrect"]
 VERDICT_SCORE = {"correct": 1.0, "partially_correct": 0.5, "incorrect": 0.0}
@@ -69,13 +69,28 @@ def correctness_prompt(question: str, reference: str, answer: str) -> str:
 
 
 class Judge:
-    def __init__(self, llm: LLMClient, provider: str, model: str, seed: int = 0):
+    def __init__(self, llm: LLMClient, provider: str, model: str, seed: int = 0,
+                 fallback_models: Sequence[str] = ()):  # fmt: skip
         self.llm, self.provider, self.model, self.seed = llm, provider, model, seed
+        self.models = [model, *fallback_models]
+        self.used: Counter = Counter()  # which model produced each verdict (reported)
 
-    def _req(self, prompt: str) -> LLMRequest:
+    def _json(self, prompt: str, schema):
+        """Main model first, then fallbacks (Gemini 3.6-flash is often overloaded)."""
+        last = None
+        for m in self.models:
+            try:
+                out = self.llm.complete_json(self._req(prompt, m), schema)
+                self.used[m] += 1
+                return out
+            except (ProviderError, StructuredOutputError) as exc:
+                last = exc
+        raise last  # type: ignore[misc]
+
+    def _req(self, prompt: str, model: str | None = None) -> LLMRequest:
         return LLMRequest(
             provider=self.provider,
-            model=self.model,
+            model=model or self.model,
             messages=(
                 Message(role="system", content=JUDGE_SYSTEM),
                 Message(role="user", content=prompt),
@@ -87,17 +102,13 @@ class Judge:
 
     def faithfulness(self, question: str, answer: str, excerpts: Sequence[str]) -> float | None:
         """None when the answer makes no claims (e.g. a refusal): not counted either way."""
-        out = self.llm.complete_json(
-            self._req(faithfulness_prompt(question, answer, excerpts)), FaithfulnessOut
-        )
+        out = self._json(faithfulness_prompt(question, answer, excerpts), FaithfulnessOut)
         if not out.claims:
             return None
         return sum(c.supported for c in out.claims) / len(out.claims)
 
     def correctness(self, question: str, reference: str, answer: str) -> Verdict:
-        out = self.llm.complete_json(
-            self._req(correctness_prompt(question, reference, answer)), CorrectnessOut
-        )
+        out = self._json(correctness_prompt(question, reference, answer), CorrectnessOut)
         return out.verdict
 
 
@@ -123,7 +134,16 @@ def export_for_labelling(results: dict, out: Path, limit: int = 60, seed: int = 
     import random
 
     rows = [r for r in results.get("per_query", []) if r.get("answer")]
-    rows = random.Random(seed).sample(rows, min(limit, len(rows)))  # not just the first N
+    # proportional to question type, so every type is checked, seeded (not just the first N)
+    rng = random.Random(seed)
+    by_type: dict[str, list[dict]] = {}
+    for r in rows:
+        by_type.setdefault(r["qtype"], []).append(r)
+    picked = []
+    for _qtype, rs in sorted(by_type.items()):
+        n = max(1, round(limit * len(rs) / len(rows)))
+        picked += rng.sample(rs, min(n, len(rs)))
+    rows = picked[:limit]
     with open(out, "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=LABEL_COLUMNS)
         w.writeheader()
