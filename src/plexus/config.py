@@ -47,7 +47,7 @@ class RerankConfig(_Strict):
 
 
 class RetrievalConfig(_Strict):
-    type: Literal["dense", "bm25", "hybrid", "graph_hybrid", "hybrid_rr"] = "dense"
+    type: Literal["dense", "bm25", "hybrid", "graph_hybrid", "hybrid_rr", "routed"] = "dense"
     top_k: int = 20
     candidates: int = 100  # hybrid: hits taken from each retriever before fusion
     rrf_k: int = 60  # reciprocal rank fusion constant (the paper's default)
@@ -59,6 +59,8 @@ class RetrievalConfig(_Strict):
     aliases_file: str | None = None  # default configs/entity_aliases.yaml (ablations only)
     graph_max_edges: int = 12
     graph_base: Literal["hybrid", "bm25"] = "hybrid"  # bm25: the CI gate (no torch in CI)
+    # A6 routed: "rules" = RuleRouter; a route name = always that route (gate baselines)
+    router: Literal["rules", "local", "multi_hop", "global"] = "rules"
     # A5: questions naming no company get one passage per company first
     company_diverse: bool = False
 

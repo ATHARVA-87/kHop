@@ -87,6 +87,11 @@ class EntityLinker:
                     self.names.setdefault(tuple(k.split()), e["id"])
         self.max_len = max((len(k) for k in self.names), default=1)
         self.tickers = {eid.split(":")[1]: eid for eid in resolver.filer_ids.values()}
+        # short all-caps aliases ("TI", "MPS", "ADI") match like tickers: exact, capitals only.
+        # Found on the held-out test: "What does TI say..." was routed as sector-wide.
+        for (etype, key), (eid, _canon) in resolver.index.items():
+            if etype == "company" and 2 <= len(key) <= 3 and key.isalpha():
+                self.tickers.setdefault(key.upper(), eid)
         self.words = {t: resolver.filer_ids[tk] for t, tk in resolver.filer_tokens.items()}
         self.caps = resolver.token_caps
 

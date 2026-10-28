@@ -121,6 +121,25 @@ def _graph_hybrid(cfg: ExperimentConfig, data_dir: Path, index_path: Path, base:
     return GraphHybridRetriever(graph, base, r.rrf_k)
 
 
+def _routed(cfg: ExperimentConfig, data_dir: Path, index_path: Path, hybrid: Retriever):
+    """A6: one hybrid retriever shared by three routes (one copy of the models on the GPU)."""
+    from plexus.retrieve.graph_search import CompanyDiverseRetriever
+    from plexus.retrieve.rerank import CrossEncoderScorer, RerankingRetriever
+    from plexus.retrieve.router import FixedRouter, RoutedRetriever, RuleRouter
+
+    r = cfg.retrieval
+    if r.rerank is None:
+        raise ValueError("routed retrieval needs retrieval.rerank (used on the local route)")
+    linker = make_linker(cfg, data_dir)
+    retrievers = {
+        "local": RerankingRetriever(hybrid, CrossEncoderScorer(r.rerank), r.rerank.candidates),
+        "multi_hop": _graph_hybrid(cfg, data_dir, index_path, hybrid),
+        "global": CompanyDiverseRetriever(hybrid, linker),
+    }
+    router = RuleRouter(linker) if r.router == "rules" else FixedRouter(r.router)
+    return RoutedRetriever(router, retrievers)
+
+
 def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:
     from plexus.index.build import index_dir
 
@@ -144,6 +163,8 @@ def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:
         bm25 = BM25Retriever.from_index_dir(path, r.bm25_k1, r.bm25_b)
         keyword_only = r.type == "bm25" or (r.type == "graph_hybrid" and r.graph_base == "bm25")
         base = bm25 if keyword_only else HybridRetriever([dense(), bm25], r.candidates, r.rrf_k)
+    if r.type == "routed":
+        return _routed(cfg, data_dir, path, base)
     if r.type == "graph_hybrid":
         base = _graph_hybrid(cfg, data_dir, path, base)
     elif r.type == "hybrid_rr":

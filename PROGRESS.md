@@ -8,7 +8,7 @@
 | 1. Harness | EDGAR snapshot, golden-set candidates, human verification, metrics, A0 | A0 scored with CIs | **Gate met 2026-10-27** (134 verified queries; A0 recall@10 0.276). Branch `phase1-harness`, PR #1 needs your review |
 | 2. Retrieval + CI gate | A1–A3, retrieval gate on PRs | A1–A3 recorded; gate blocks a planted regression | **Gate met 2026-10-27.** A2 hybrid + headers recall@10 0.704 (A0 0.276); CI gate blocks planted regression (run 40527190366). Branch `phase2-retrieval`, PR #2 needs your review |
 | 3. Graph | Extraction, resolution, Kuzu, Leiden, summaries, A4, A5 | Extraction P/R; A4, A5 recorded | — |
-| 4. Single-graph agent | Router, grade-and-rewrite, A6, A7 | Router vs always-local/global | — |
+| 4. Single-graph agent | Router, grade-and-rewrite, A6, A7 | Router vs always-local/global | **Gate met 2026-10-28** (A6 router beats always-X on dev and test; = oracle). A7 loop in progress |
 | 5. Multi-agent | 4 agents, guardrails, A9 | A9 vs A7 with latency/cost; guardrail metrics | — |
 | 6. Systems + UI | Semantic cache (A8), SSE, Phoenix, Next.js, Locust | p95, cache hit rate, cost/query | — |
 | 7. Ship | README, ADRs, demo Space, drift check, demo script | Definition of done | — |
@@ -193,6 +193,21 @@ Planned (by phase):
 6. For a sector-wide question naming no company: put one best passage per company first.
 
 - **CI green on `phase3-graph`: run 40637527821.** `lint-test` passes (graph extra installed) and `retrieval-gate` passes for both a1h_bm25 and a5_ci_bm25. The second rebuilds the graph from the published extractions and gates graph search + A5, with no torch.
+
+## Phase 4 (branch `phase4-router`): router + grade-and-rewrite
+Plan agreed 2026-10-28 (research scout: Adaptive-RAG, CRAG, IRCoT/Self-Ask, RAGAS/ARES, LangGraph advisories): route → retrieve (per type) → grade → at most 1 rewrite → generate with citations; LangGraph last, as wiring only.
+
+**Step 1, A6 rule router (gate met).** 0 companies named → global (A5 ranking); 2+ corpus filers → multi-hop (A4 graph); else local (hybrid + reranker, which helps local but hurt multi-hop in Phase 2). No LLM call.
+
+| | router accuracy | all R@10 | all both@10 | local R@10 | multi-hop both@10 | global cov@10 |
+| --- | --- | --- | --- | --- | --- | --- |
+| dev: always-local / multi-hop / global | | 0.684 / 0.794 / 0.706 | 0.560 / 0.739 / 0.619 | | | |
+| dev: **A6 router** (= oracle) | **1.000** (134) | **0.833** | **0.776** | 0.923 | 0.789 | 0.892 |
+| test: always-local / multi-hop / global | | 0.532 / 0.563 / 0.518 | 0.462 / 0.494 / 0.418 | | | |
+| test: **A6 router** (= oracle) | **0.978** (91) | **0.584** | **0.516** | 1.000 | 0.435 | 0.671 |
+
+- Caveat: the golden questions separate cleanly by how many companies they name; real user questions will not always. Both test misroutes were "TI" not linking, fixed after the test run (docs/ai_review_log.md); the 0.978 is pre-fix.
+- Also fixed at Phase 4 start: generation returned empty answers (qwen3.5 thinking), now `generation.think: false`.
 
 ## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
 `results/test/*.json`. No design decision was made on these numbers.
