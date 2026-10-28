@@ -192,6 +192,8 @@ Planned (by phase):
 5. For a question naming companies: find them in the graph, follow the links between them (or to a shared partner), and add those links' source passages to the results.
 6. For a sector-wide question naming no company: put one best passage per company first.
 
+- **CI green on `phase3-graph`: run 40637527821.** `lint-test` passes (graph extra installed) and `retrieval-gate` passes for both a1h_bm25 and a5_ci_bm25. The second rebuilds the graph from the published extractions and gates graph search + A5, with no torch.
+
 ## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
 `results/test/*.json`. No design decision was made on these numbers.
 
