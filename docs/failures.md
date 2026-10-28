@@ -44,3 +44,13 @@ PageRank mass leaks through hub nodes (NVIDIA has 126 edges; 1,041 exposure edge
 
 ## Per-company sub-queries did not beat the graph (2026-10-28)
 For questions naming 2+ filers: the hybrid search was run once per company, restricted to that company's filings, and the results interleaved (decomposition without an LLM; the research scout cited IRCoT / Self-Ask / least-to-most). Dev multi-hop complete@10: per-company search alone 0.561 (below the no-graph round-robin 0.597; bridge 0.214); graph alone (A6) 0.789; graph + per-company 0.807 (+0.018 [−0.059, +0.111], noise). The graph already retrieves the right passages for these questions. Removed; the per-filing filter is kept for the A7 corrective step ("a named company is missing: search its filings").
+
+## The Gemini judge is too lenient (2026-10-28)
+Agreement with 49 blind human correctness labels (38 correct / 10 partially correct / 1 incorrect) on dev A6 answers:
+
+| judge setup | raw agreement | Cohen's kappa |
+| --- | --- | --- |
+| original prompt (gemini-3.5-flash-lite in practice; 3.6-flash overloaded) | 0.776 | 0.064 |
+| prompt with the human's exact rubric (still flash-lite: 3.6-flash did not answer) | 0.755 | 0.133 |
+
+The judge rated 7–9 of the 10 human "partially correct" answers (one of two named companies answered, or "not enough evidence" for half the question) as correct. Its correctness scores (0.94–0.97) are therefore NOT reported as results. On this sample the human labels give 38/49 = 0.78 fully correct. Next: RAGAS claim-level metrics in a separate env, scored against the same labels.

@@ -263,6 +263,9 @@ def score_generation(
             answer=ans.text,
             refused=is_refusal(ans.text),
             n_citations=len(cited),
+            # what the writer saw (with company headers): lets external evaluators such as
+            # RAGAS score the same answers without re-running retrieval
+            contexts=[index_text(h.header, h.text) for h in ans.hits],
             citation_gold_precision=(sum(hits_gold) / len(cited)) if cited else None,
             generation_ms=ans.generation_ms,
             generation_cached=ans.cached,

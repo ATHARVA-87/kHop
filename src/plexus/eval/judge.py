@@ -62,8 +62,16 @@ def correctness_prompt(question: str, reference: str, answer: str) -> str:
     return (
         f"Question: {question}\n\nReference answer (verified by a human):\n{reference}\n\n"
         f"Candidate answer:\n<answer>\n{answer}\n</answer>\n\n"
-        "Is the candidate correct with respect to the reference? Extra correct detail is fine. "
-        "Missing a key part is partially_correct. Contradicting it is incorrect. "
+        "Is the candidate correct with respect to the reference? Use exactly this rubric, the "
+        "same one the human labeller used:\n"
+        "- correct: answers what the question asks as well as the reference does. Extra correct "
+        "detail is fine. For a sector-wide question (about all/many companies), naming a "
+        "different set of relevant companies than the reference is fine: the reference lists "
+        "examples, not every company.\n"
+        "- partially_correct: misses a key part of what the question asks, e.g. a company the "
+        "question NAMES is left out or not answered for, or the main point of the reference is "
+        "missing, or the answer answers part and says there is not enough evidence for the rest.\n"
+        "- incorrect: contradicts the reference, or refuses to answer.\n"
         'JSON: {"verdict": "correct"|"partially_correct"|"incorrect", "rationale": str}'
     )
 
