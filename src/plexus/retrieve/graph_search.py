@@ -145,12 +145,19 @@ class GraphRetriever:
                 if cues and not any(e.relation in cues for e in es):
                     continue
                 edges += es
-        elif linked:
-            mode = "single"
+        elif len(linked) >= 2:
+            # one filer + another named company the graph knows ("Apple and Qualcomm")
+            mode = "pair"
+            edges += self.graph.edges_between(linked[0], linked[1])
             rels = cues & COMPANY_RELATIONS
             if rels:
                 for e in linked[:2]:
                     edges += self.graph.edges_of(e, rels)
+        else:
+            # a single named company: the graph returned generic "competitors"/"suppliers"
+            # passages that displaced the specific one asked for (dev: local recall -0.20 on
+            # the 10 such questions), so single-entity questions use the hybrid list only
+            mode = "single_skipped" if linked else "none"
         # relation-matching edges first, then better-supported ones
         edges.sort(key=lambda e: (e.relation not in cues, -e.support))
         trace = {"linked": linked, "cues": sorted(cues), "mode": mode,

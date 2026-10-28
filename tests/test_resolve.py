@@ -42,7 +42,8 @@ def test_concepts_fold_plurals_and_types_never_mix():
 
 def test_fuzzy_merges_only_near_identical_same_first_word():
     ids = {"company": {"company:a": "wistron", "company:b": "wistron corporation x",
-                       "company:c": "wistronn", "company:d": "fabrinet", "company:e": "intelsat", "company:f": "intel"}}  # fmt: skip
+                       "company:c": "wistronn", "company:d": "fabrinet", "company:e": "intelsat", "company:f": "intel"},
+           "regulation": {"r:1": "country groups d1", "r:4": "country groups d4"}}  # fmt: skip
     remap = fuzzy_merges(ids)
     assert remap == {"company:c": ("company:a", remap["company:c"][1])}
 
@@ -68,3 +69,15 @@ def test_build_merges_variants_and_keeps_provenance(tmp_path):
         for x in (tmp_path / "g" / "entities.jsonl").read_text().splitlines()
     }
     assert ents["company:NVDA"]["ticker"] == "NVDA" and ents["company:tsmc"]["ticker"] is None
+
+
+def test_short_filer_names_resolve_to_the_filer():
+    from plexus.extract.resolve import short_key
+
+    assert short_key("skyworks solutions") == "skyworks"
+    assert short_key("nxp semiconductors") == "nxp"
+    assert short_key("micron technology") == "micron"
+    assert short_key("lam research") == ""  # nothing generic to drop
+    assert short_key("on semiconductor") == ""  # 'on' is too short to stand alone
+    r = Resolver({"SWKS": {"company": "SKYWORKS SOLUTIONS, INC."}}, {})
+    assert r.resolve_exact("Skyworks", "company")[0] == "company:SWKS"

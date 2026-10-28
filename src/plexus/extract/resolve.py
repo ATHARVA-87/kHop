@@ -54,6 +54,23 @@ def norm_key(name: str) -> str:
     return " ".join(re.findall(r"[a-z0-9]+", n.lower()))
 
 
+_GENERIC_TAIL = {"semiconductor", "semiconductors", "solutions", "technology", "technologies",
+                 "intertechnology", "systems"}  # fmt: skip
+
+
+def short_key(key: str) -> str:
+    """How people shorten a filer's name: 'skyworks solutions' -> 'skyworks', 'nxp
+    semiconductors' -> 'nxp', 'micron technology' -> 'micron'. Only generic trailing words go,
+    and only if a distinctive word (4+ letters, or an all-letter acronym like 'nxp') remains."""
+    toks = key.split()
+    while len(toks) > 1 and toks[-1] in _GENERIC_TAIL:
+        toks = toks[:-1]
+    short = " ".join(toks)
+    return (
+        short if short != key and (len(short) >= 4 or (len(short) == 3 and short.isalpha())) else ""
+    )
+
+
 def _slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
 
@@ -73,9 +90,11 @@ class Resolver:
             eid, canon = f"company:{ticker}", clean_company(m["company"])
             self.filer_ids[ticker] = eid
             names = {m["company"], canon, ticker, COMMON_NAMES.get(ticker, "")}
-            for n in names:
-                if n:
-                    self.index[("company", norm_key(n))] = (eid, canon)
+            keys = {norm_key(n) for n in names if n}
+            keys |= {short_key(k) for k in keys}
+            for k in keys:
+                if k:
+                    self.index[("company", k)] = (eid, canon)
         for etype, table in aliases.items():
             for canon, alts in table.items():
                 key = (
@@ -99,6 +118,11 @@ class Resolver:
         return f"{etype}:{_slug(ck)}", name, "normalised"
 
 
+def _codes(key: str) -> set[str]:
+    """Tokens that carry an identity in one character: numbers, and short letter+digit codes."""
+    return {t for t in key.split() if any(ch.isdigit() for ch in t) or len(t) == 1}
+
+
 def fuzzy_merges(ids_by_type: dict[str, dict[str, str]]) -> dict[str, tuple[str, float]]:
     """Map near-duplicate ids onto one representative (the most frequent spelling wins later).
     Conservative: same type, same first 4 letters (blocking), SequenceMatcher ratio >=
@@ -117,6 +141,8 @@ def fuzzy_merges(ids_by_type: dict[str, dict[str, str]]) -> dict[str, tuple[str,
                 for b in group[i + 1 :]:
                     if b in remap:
                         continue
+                    if _codes(ids[a]) != _codes(ids[b]):
+                        continue  # "country groups d1" vs "d4": codes and numbers must match
                     r = difflib.SequenceMatcher(None, ids[a], ids[b]).ratio()
                     if r >= FUZZY_RATIO:
                         remap[b] = (a, round(r, 3))

@@ -149,6 +149,12 @@ Planned (by phase):
 - Finding: the author email on the first 51 commits is a personal address, public in commit metadata. Future commits use the GitHub noreply address (repo-local git config). Rewriting history needs your decision.
 - New pre-commit hook `no-secrets` blocks API-key and token patterns and personal email addresses.
 
+## Phase 3 progress (2026-10-28)
+- Extraction v5, `make extract` (you ran it): 1,665 10-K passages in 91 min (3.3 s each), 0 failures. 3,513 relations proposed, 2,348 kept (67%). Drops: quote not found 588, quote length 202, type mismatch 148, generic entity 103, object not in quote 99. **Only 397 of 1,665 passages yielded any relation**; possible recall problem, to be measured by the P/R labelling.
+- Graph (`make graph`): 1,363 entities (292 companies, all 39 filers), 1,992 edges (exposed_to 1,041, competes_with 197, has_segment 194, makes_product 154, operates_in 119, supplied_by 63, sells_to 51, manufactured_by 48, acquired 38). Alias resolution covered 2,818 of 4,696 mentions; 11 fuzzy merges, all logged. A merge of "Country Groups D4/D5" into "D1" was caught in the log and fixed (codes must match).
+- **A4 (graph traversal + A2, RRF) on dev** vs A2: multi-hop complete@10 0.509 → **0.667** (+0.158 [+0.058, +0.246]), multi-hop recall@10 +0.140, all recall@10 0.704 → 0.764 (+0.060 [+0.014, +0.101]); local unchanged; global unchanged (A5's job).
+- Dev tuning (dev set only): (1) filer short names ("Skyworks", "NXP", "Lattice") were not linked, and mentions of Skyworks in other filings formed a second, disconnected node; fixed by `short_key`. (2) The graph is skipped for single-entity questions: it cost local recall −0.20 on the 10 such questions.
+
 ## Held-out test set (2026-10-27)
 - Same procedure as dev: Gemini drafts (user-style phrasing, dev passages and company pairs excluded) -> 3 AI reviewer agents -> human. You approved the AI pre-review as a whole ("most edits not required, same meaning"), so human/AI agreement is 100% by construction. Report it that way.
 - 130 candidates -> **91 verified** (37 local, 23 multi-hop: 14 comparison + 9 bridge, 31 global ≈ 2–3 angles × 12 themes). `data/golden/golden_test.jsonl`, built with `make golden-test`.
