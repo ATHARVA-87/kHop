@@ -207,6 +207,10 @@ Plan agreed 2026-10-28 (research scout: Adaptive-RAG, CRAG, IRCoT/Self-Ask, RAGA
 | test: **A6 router** (= oracle) | **0.978** (91) | **0.584** | **0.516** | 1.000 | 0.435 | 0.671 |
 
 - Caveat: the golden questions separate cleanly by how many companies they name; real user questions will not always. Both test misroutes were "TI" not linking, fixed after the test run (docs/ai_review_log.md); the 0.978 is pre-fix.
+- **Honest reading (router review, 2026-10-28):** A6 differs from A5 only on single-company questions (dev 5 of 65 changed, test 2 of 37), where the reranker now runs. The gain over A5 is "+reranker on local questions"; the router is the explainable switch that makes it possible. "Router = oracle" holds by construction, because golden questions were generated per type with 0 / 1 / 2+ filers named.
+- **Router review fixes:** non-filer short aliases (Amazon, Arm, DOC, BIS) had leaked into the filer set and silently lowered six dev multi-hop rankings. Fixed, and all dev configs re-run at clean commit 35b6498 (multi-hop nDCG@10 0.726 again). Lowercase names now link when the filings capitalise them ≥ 90% ("amd" 0.995, "on" 0.06), and "which companies / chip companies / industry-wide" route to global.
+- **Routing on realistic phrasings** (`data/golden/routing_robustness.jsonl`: 30 assistant-written paraphrases of dev questions with lowercase names, tickers, "vs", sector cues): 0.933 before the last two general fixes, 1.000 after. Small and self-written: a diagnostic, not a benchmark. The test set is spent for linker tuning (the "TI" fix came from it).
+- **Step 2, per-company sub-queries:** measured and removed (docs/failures.md). The per-filing search filter is kept for the A7 corrective step.
 - Also fixed at Phase 4 start: generation returned empty answers (qwen3.5 thinking), now `generation.think: false`.
 
 ## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
