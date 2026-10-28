@@ -45,8 +45,12 @@ def _norm(text: str) -> str:
 
 
 def is_refusal(text: str) -> bool:
-    """The answer declines for lack of evidence (tolerant of punctuation/case)."""
-    return _norm(NOT_ENOUGH) in _norm(strip_thinking(text))
+    """The answer declines for lack of evidence: it opens with the refusal sentence, or is
+    little more than it. An answer that gives facts and adds "not enough evidence" about one
+    detail is an answer, not a refusal (first Phase 4 run counted those: 15 "refusals",
+    most of them full answers)."""
+    norm, ref = _norm(strip_thinking(text)), _norm(NOT_ENOUGH)
+    return norm.startswith(ref) or (ref in norm and len(norm.split()) <= len(ref.split()) + 15)
 
 
 @dataclass

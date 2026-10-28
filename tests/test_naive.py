@@ -74,3 +74,14 @@ def test_ollama_requests_turn_thinking_off(tmp_path):
     rag = _rag(tmp_path, lambda r: "ok [1]")
     req = rag.build_request("q", HITS[:2])
     assert req.params == {"think": False}  # qwen3.5 otherwise returns empty answers
+
+
+def test_refusal_means_declining_not_a_caveat():
+    from plexus.baseline.naive import is_refusal
+
+    assert is_refusal(NOT_ENOUGH)
+    assert is_refusal("Not enough evidence in the filings to answer this. Sorry.")
+    long_answer = (
+        "Wolfspeed's liquidity came from cash and marketable securities [1]. " * 4
+    ) + NOT_ENOUGH
+    assert not is_refusal(long_answer)

@@ -74,18 +74,26 @@ class Judge:
         self.llm, self.provider, self.model, self.seed = llm, provider, model, seed
         self.models = [model, *fallback_models]
         self.used: Counter = Counter()  # which model produced each verdict (reported)
+        self.failures: Counter = Counter()  # consecutive failures per model
 
     def _json(self, prompt: str, schema):
         """Main model first, then fallbacks (Gemini 3.6-flash is often overloaded)."""
         last = None
-        for m in self.models:
+        live = [m for m in self.models if self.failures[m] < self.MAX_FAILURES] or self.models[-1:]
+        for m in live:
             try:
                 out = self.llm.complete_json(self._req(prompt, m), schema)
                 self.used[m] += 1
+                self.failures[m] = 0
                 return out
             except (ProviderError, StructuredOutputError) as exc:
+                self.failures[m] += 1
                 last = exc
         raise last  # type: ignore[misc]
+
+    # circuit breaker: after this many failures in a row, a model is skipped for the run
+    # (an overloaded model otherwise costs a timeout on every call; failures are not cached)
+    MAX_FAILURES = 3
 
     def _req(self, prompt: str, model: str | None = None) -> LLMRequest:
         return LLMRequest(
@@ -189,12 +197,13 @@ def main(argv: list[str] | None = None) -> int:
     e = sub.add_parser("export")
     e.add_argument("--results", type=Path, required=True)
     e.add_argument("--out", type=Path, default=Path("data/golden/judge_labels.csv"))
+    e.add_argument("--limit", type=int, default=50)
     a = sub.add_parser("agreement")
     a.add_argument("--labels", type=Path, default=Path("data/golden/judge_labels.csv"))
     a.add_argument("--results", type=Path, required=True)
     args = ap.parse_args(argv)
     if args.cmd == "export":
-        n = export_for_labelling(json.loads(args.results.read_text()), args.out)
+        n = export_for_labelling(json.loads(args.results.read_text()), args.out, args.limit)
         print(
             f"wrote {n} answers to {args.out}: fill human_verdict (correct/partially_correct/incorrect)"
         )
