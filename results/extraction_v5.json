@@ -1,6 +1,6 @@
 {
   "pred": "extractions_validated.jsonl",
-  "gold": "ai_relation_labels.jsonl",
+  "gold": "relation_labels.jsonl",
   "missing_pred_passages": 0,
   "passages": 40,
   "strict": {

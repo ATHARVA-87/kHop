@@ -161,7 +161,7 @@ Planned (by phase):
 - Result: relations kept 2,348 → 2,928; edges 1,992 → 2,413; junk company nodes gone; merges logged (Samsung Semiconductor → Samsung, Monolithic Power System → MPS).
 - **A4 on dev after steps 1–2:** multi-hop complete@10 0.772 (A2 0.509, +0.263 [+0.100, +0.417]); all recall@10 0.790. Still to compare against the no-graph round-robin baseline (step 4).
 
-- **Step 3, extraction P/R** (40 gold passages, AI labels pending human confirmation; family level): v5 P 0.67 R 0.18, company-company P 0.90 R 0.45. Prompt v6 (worked examples) and gleaning were measured and rejected (docs/failures.md). No re-extraction.
+- **Step 3, extraction P/R** (40 gold passages, human-confirmed labels; family level): v5 P 0.67 R 0.18, company-company P 0.90 R 0.45. Prompt v6 (worked examples) and gleaning were measured and rejected (docs/failures.md). No re-extraction.
 - **Step 4, multi-hop, with the honest baseline (dev complete@10):**
 
 | config | all multi-hop (57) | bridge (14) | comparison (43) | all recall@10 |
