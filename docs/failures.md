@@ -41,3 +41,6 @@ PPR over an entity + evidence-chunk graph (seeded with the question's entities, 
 | graph weight 2 in RRF (any PPR variant) | 0.54–0.56 | | |
 
 PageRank mass leaks through hub nodes (NVIDIA has 126 edges; 1,041 exposure edges join most companies to shared risk nodes). The simple rules (edges between the named entities, or their common neighbours for bridge questions) are better and easier to explain. Removed PPR and weighted RRF; kept plain RRF.
+
+## Per-company sub-queries did not beat the graph (2026-10-28)
+For questions naming 2+ filers: the hybrid search was run once per company, restricted to that company's filings, and the results interleaved (decomposition without an LLM; the research scout cited IRCoT / Self-Ask / least-to-most). Dev multi-hop complete@10: per-company search alone 0.561 (below the no-graph round-robin 0.597; bridge 0.214); graph alone (A6) 0.789; graph + per-company 0.807 (+0.018 [−0.059, +0.111], noise). The graph already retrieves the right passages for these questions. Removed; the per-filing filter is kept for the A7 corrective step ("a named company is missing: search its filings").

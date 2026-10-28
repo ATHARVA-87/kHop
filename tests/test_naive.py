@@ -16,7 +16,7 @@ class StubIndex:
     def __init__(self, hits):
         self.hits = hits
 
-    def search(self, vector, k):
+    def search(self, vector, k, doc_ids=None):
         return self.hits[:k]
 
 

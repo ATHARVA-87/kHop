@@ -13,6 +13,8 @@ import time
 from pathlib import Path
 from typing import Protocol
 
+import numpy as np
+
 from plexus.config import ExperimentConfig
 from plexus.index.dense import Hit
 from plexus.ingest.headers import index_text
@@ -31,8 +33,8 @@ class DenseRetriever:
         self.embedder = embedder
         self.index = index
 
-    def retrieve(self, question: str, k: int) -> list[Hit]:
-        return self.index.search(self.embedder.embed_query(question), k)
+    def retrieve(self, question: str, k: int, doc_ids: list[str] | None = None) -> list[Hit]:
+        return self.index.search(self.embedder.embed_query(question), k, doc_ids)
 
     def close(self) -> None:
         if hasattr(self.index, "close"):
@@ -66,9 +68,13 @@ class BM25Retriever:
             log.info("built BM25 over %d chunks in %.1fs", len(chunks), time.perf_counter() - t0)
         return cls(chunks, index)
 
-    def retrieve(self, question: str, k: int) -> list[Hit]:
+    def retrieve(self, question: str, k: int, doc_ids: list[str] | None = None) -> list[Hit]:
+        allowed = None
+        if doc_ids is not None:
+            keep = set(doc_ids)
+            allowed = np.array([c["doc_id"] in keep for c in self.chunks])
         out = []
-        for i, score in self.index.search(question, k):
+        for i, score in self.index.search(question, k, allowed):
             c = self.chunks[i]
             fields = {f: c[f] for f in ("chunk_id", "doc_id", "start", "end", "section", "text")}
             parent = {
@@ -86,9 +92,9 @@ class HybridRetriever:
         self.candidates = candidates
         self.rrf_k = rrf_k
 
-    def retrieve(self, question: str, k: int) -> list[Hit]:
+    def retrieve(self, question: str, k: int, doc_ids: list[str] | None = None) -> list[Hit]:
         n = max(k, self.candidates)
-        return rrf([r.retrieve(question, n) for r in self.retrievers], self.rrf_k)[:k]
+        return rrf([r.retrieve(question, n, doc_ids) for r in self.retrievers], self.rrf_k)[:k]
 
     def close(self) -> None:
         for r in self.retrievers:

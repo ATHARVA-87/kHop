@@ -85,7 +85,7 @@ def test_hybrid_fuses_candidate_pools():
         def __init__(self, ids):
             self.ids = ids
 
-        def retrieve(self, q, k):
+        def retrieve(self, q, k, doc_ids=None):
             return [_hit(i) for i in self.ids[:k]]
 
     h = HybridRetriever([Fixed(["a", "b", "c"]), Fixed(["c", "d"])], candidates=3)
@@ -144,3 +144,14 @@ def test_bm25_cache_rejected_when_tokenizer_source_differs(tmp_path, monkeypatch
     assert BM25Index.load(tmp_path / "b.pkl") is not None
     monkeypatch.setattr(bm, "_fingerprint", lambda: "1:other-source")
     assert BM25Index.load(tmp_path / "b.pkl") is None
+
+
+def test_bm25_retriever_restricts_to_given_filings(tmp_path):
+    chunks = [
+        {"chunk_id": "A#s0", "doc_id": "A_10K", "start": 0, "end": 1, "section": "s", "text": "TSMC makes our wafers"},
+        {"chunk_id": "B#s0", "doc_id": "B_10K", "start": 0, "end": 1, "section": "s", "text": "TSMC makes our wafers too"},
+    ]  # fmt: skip
+    (tmp_path / "chunks.jsonl").write_text("\n".join(json.dumps(c) for c in chunks) + "\n")
+    r = BM25Retriever.from_index_dir(tmp_path)
+    assert {h.doc_id for h in r.retrieve("TSMC wafers", 5)} == {"A_10K", "B_10K"}
+    assert [h.doc_id for h in r.retrieve("TSMC wafers", 5, doc_ids=["B_10K"])] == ["B_10K"]
