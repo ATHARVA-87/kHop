@@ -25,6 +25,7 @@ import json
 import math
 import subprocess
 import sys
+import time
 from collections import Counter
 from pathlib import Path
 from typing import Literal
@@ -98,14 +99,21 @@ class ChecklistJudge:
                              messages=(Message(role="system", content=SYSTEM),
                                        Message(role="user", content=prompt)),
                              temperature=0.0, max_tokens=4096, seed=0)  # fmt: skip
-            try:
-                out = self.llm.complete_json(req, schema)
-                self.failures[m] = 0
-                self.used[m] += 1
-                return out
-            except (ProviderError, StructuredOutputError) as exc:
-                self.failures[m] += 1
-                last = exc
+            for attempt in range(4):
+                try:
+                    out = self.llm.complete_json(req, schema)
+                    self.failures[m] = 0
+                    self.used[m] += 1
+                    return out
+                except (ProviderError, StructuredOutputError) as exc:
+                    last = exc
+                    # a rate limit is temporary (Groq free tier: ~8K tokens/minute): wait and
+                    # retry the SAME model instead of tripping the breaker
+                    if "rate" in str(exc).lower() and attempt < 3:
+                        time.sleep(30)
+                        continue
+                    self.failures[m] += 1
+                    break
         raise last  # type: ignore[misc]
 
     def _provider(self, m: str) -> str:
@@ -171,7 +179,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--results", type=Path, required=True)
     ap.add_argument("--labels", type=Path, default=REPO_ROOT / "data/golden/judge_labels.csv")
     ap.add_argument("--provider", default="groq")
-    ap.add_argument("--models", default="openai/gpt-oss-120b,gemini:gemini-3.5-flash-lite")
+    ap.add_argument(
+        "--models",
+        default="openai/gpt-oss-120b",
+        help="one judge model for the whole validation (mixing models muddies it)",
+    )
+    ap.add_argument(
+        "--pace", type=float, default=20.0, help="seconds between answers (rate limits)"
+    )
     a = ap.parse_args(argv)
     res = json.loads(a.results.read_text())
     rows = {r["qid"]: r for r in res["per_query"] if r.get("answer")}
@@ -184,6 +199,8 @@ def main(argv: list[str] | None = None) -> int:
     per = []
     for qid in sorted(human):
         r = rows[qid]
+        if per:
+            time.sleep(a.pace)
         try:
             out = judge.judge(r["question"], r["reference"], r["answer"])
         except (ProviderError, StructuredOutputError) as exc:
