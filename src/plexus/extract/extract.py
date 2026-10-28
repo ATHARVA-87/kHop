@@ -35,7 +35,7 @@ from plexus.extract.schema import (
 from plexus.ingest.headers import COMMON_NAMES, clean_company
 from plexus.ingest.process import iter_docs
 from plexus.llm import LLMClient, LLMRequest, Message, ProviderError, StructuredOutputError
-from plexus.settings import Settings
+from plexus.settings import REPO_ROOT, Settings
 
 log = logging.getLogger("plexus.extract")
 
@@ -289,6 +289,23 @@ def split_passage(p: Passage) -> list[Passage]:
     ]
 
 
+GLEAN = """Relations already extracted from this passage:
+{found}
+Read the passage again. List ONLY relations the passage states that are MISSING above, with
+the same rules (named entities only, exact quotes). Reply {{"relations": [...]}}, or
+{{"relations": []}} if nothing is missing."""
+
+
+def glean_request(p: Passage, provider: str, model: str, found: list[dict]) -> LLMRequest:
+    """GraphRAG-style gleaning: one more pass that asks only for what was missed."""
+    req = build_request(p, provider, model)
+    listed = (
+        "\n".join(f"- {r['subject']} {r['relation']} {r['object']}" for r in found) or "- (none)"
+    )
+    msgs = (*req.messages, Message(role="user", content=GLEAN.format(found=listed)))
+    return req.model_copy(update={"messages": msgs})
+
+
 def extract_one(llm: LLMClient, p: Passage, provider: str, model: str) -> tuple[dict, Counter]:
     try:
         ex = llm.complete_json(build_request(p, provider, model), Extraction)
@@ -391,6 +408,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--model", default="qwen3.5:4b")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--pilot", type=int, default=0, help="stratified sample of N passages")
+    ap.add_argument("--sample", action="store_true",
+                    help="only the 40 gold-labelled passages (data/golden/extraction)")  # fmt: skip
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--revalidate", action="store_true",
                     help="re-check stored relations with current rules (no LLM)")  # fmt: skip
@@ -409,7 +428,12 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(summary, indent=2))
         return 0
     passages = load_passages(s.data_dir, cfg)
-    if args.pilot:
+    if args.sample:
+        ids = {json.loads(x)["passage_id"] for x in
+               (REPO_ROOT / "data/golden/extraction/relation_sample.jsonl").read_text().splitlines()}  # fmt: skip
+        passages = [p for p in passages if p.passage_id in ids]
+        out = args.out or graph_dir / f"sample_v{PROMPT_VERSION}_{args.provider}.jsonl"
+    elif args.pilot:
         passages = pilot_sample(passages, args.pilot)
         out = args.out or graph_dir / f"pilot_v{PROMPT_VERSION}_{args.provider}.jsonl"
     else:

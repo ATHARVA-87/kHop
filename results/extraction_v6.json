@@ -1,0 +1,81 @@
+{
+  "pred": "sample_v6_ollama.jsonl",
+  "gold": "ai_relation_labels.jsonl",
+  "missing_pred_passages": 0,
+  "passages": 40,
+  "strict": {
+    "precision": 0.136,
+    "precision_ci": [
+      0.0,
+      0.353
+    ],
+    "recall": 0.059,
+    "recall_ci": [
+      0.0,
+      0.129
+    ],
+    "f1": 0.082,
+    "n_pred": 81,
+    "n_gold": 187
+  },
+  "family": {
+    "precision": 0.321,
+    "precision_ci": [
+      0.146,
+      0.575
+    ],
+    "recall": 0.139,
+    "recall_ci": [
+      0.056,
+      0.238
+    ],
+    "f1": 0.194,
+    "n_pred": 81,
+    "n_gold": 187
+  },
+  "relaxed": {
+    "precision": 0.333,
+    "precision_ci": [
+      0.155,
+      0.604
+    ],
+    "recall": 0.144,
+    "recall_ci": [
+      0.06,
+      0.245
+    ],
+    "f1": 0.201,
+    "n_pred": 81,
+    "n_gold": 187
+  },
+  "company_strict": {
+    "precision": 0.364,
+    "precision_ci": [
+      0.0,
+      1.0
+    ],
+    "recall": 0.2,
+    "recall_ci": [
+      0.0,
+      0.4
+    ],
+    "f1": 0.258,
+    "n_pred": 11,
+    "n_gold": 20
+  },
+  "company_family": {
+    "precision": 0.455,
+    "precision_ci": [
+      0.0,
+      1.0
+    ],
+    "recall": 0.25,
+    "recall_ci": [
+      0.0,
+      0.5
+    ],
+    "f1": 0.323,
+    "n_pred": 11,
+    "n_gold": 20
+  }
+}

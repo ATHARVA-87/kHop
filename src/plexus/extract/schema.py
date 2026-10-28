@@ -33,6 +33,7 @@ RelationType = Literal[
     "competes_with",
     "partners_with",  # alliances, joint development, ecosystem partners (named)
     "licenses_from",  # subject licenses technology/IP from object
+    "licenses_to",  # subject licenses its technology/IP to object (v6: Rambus-style licensors)
     "acquired",  # subject acquired object (company, business or product line)
     "sold_business_to",  # subject sold a business/asset to object (buyer); qualifier = what
     "has_segment",  # reporting segment or end market
@@ -54,6 +55,7 @@ RELATION_SIGNATURES: dict[str, tuple[set[str], set[str]]] = {
     "competes_with": ({"company"}, {"company"}),
     "partners_with": ({"company"}, {"company"}),
     "licenses_from": ({"company"}, {"company"}),
+    "licenses_to": ({"company"}, {"company"}),
     "acquired": ({"company"}, {"company", "product", "segment"}),
     "sold_business_to": ({"company"}, {"company"}),
     "has_segment": ({"company"}, {"segment"}),

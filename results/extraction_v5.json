@@ -1,0 +1,81 @@
+{
+  "pred": "extractions_validated.jsonl",
+  "gold": "ai_relation_labels.jsonl",
+  "missing_pred_passages": 0,
+  "passages": 40,
+  "strict": {
+    "precision": 0.314,
+    "precision_ci": [
+      0.07,
+      0.556
+    ],
+    "recall": 0.086,
+    "recall_ci": [
+      0.014,
+      0.172
+    ],
+    "f1": 0.134,
+    "n_pred": 51,
+    "n_gold": 187
+  },
+  "family": {
+    "precision": 0.667,
+    "precision_ci": [
+      0.5,
+      0.784
+    ],
+    "recall": 0.182,
+    "recall_ci": [
+      0.083,
+      0.287
+    ],
+    "f1": 0.286,
+    "n_pred": 51,
+    "n_gold": 187
+  },
+  "relaxed": {
+    "precision": 0.686,
+    "precision_ci": [
+      0.533,
+      0.8
+    ],
+    "recall": 0.187,
+    "recall_ci": [
+      0.087,
+      0.294
+    ],
+    "f1": 0.294,
+    "n_pred": 51,
+    "n_gold": 187
+  },
+  "company_strict": {
+    "precision": 0.8,
+    "precision_ci": [
+      0.0,
+      1.0
+    ],
+    "recall": 0.4,
+    "recall_ci": [
+      0.0,
+      0.692
+    ],
+    "f1": 0.533,
+    "n_pred": 10,
+    "n_gold": 20
+  },
+  "company_family": {
+    "precision": 0.9,
+    "precision_ci": [
+      0.667,
+      1.0
+    ],
+    "recall": 0.45,
+    "recall_ci": [
+      0.1,
+      0.769
+    ],
+    "f1": 0.6,
+    "n_pred": 10,
+    "n_gold": 20
+  }
+}
