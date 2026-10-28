@@ -20,7 +20,7 @@ Outputs in data/graph/<snapshot>/: entities.jsonl, edges.jsonl, resolution_log.j
 from __future__ import annotations
 
 import argparse
-import difflib
+import contextlib
 import json
 import re
 import sys
@@ -28,6 +28,8 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 import yaml
+from cleanco import basename
+from rapidfuzz import fuzz
 
 from plexus.extract.schema import is_anonymous, strip_article
 from plexus.ingest.headers import COMMON_NAMES, clean_company
@@ -39,14 +41,18 @@ _LEGAL_TAIL = re.compile(
     r"llc|gmbh|holdings?|group|technolog(?:y|ies))\.?$",
     re.I,
 )
-FUZZY_RATIO = 0.92
+FUZZY_RATIO = 92.0  # rapidfuzz token_sort_ratio, 0-100
+_EDGAR_STATE = re.compile(r"\s*/[A-Z]{2,}/?\s*$")  # "QUALCOMM INC/DE", "ARM HOLDINGS PLC /UK"
 
 
 def norm_key(name: str) -> str:
     """'The Microsoft Corporation' -> 'microsoft'; 'Hon Hai Precision Industry Co., Ltd.' ->
     'hon hai precision industry'. Only TRAILING legal words are removed, so
     'ON Semiconductor' keeps 'semiconductor'."""
-    n = strip_article(" ".join(name.split()))
+    n = _EDGAR_STATE.sub("", strip_article(" ".join(name.split())))
+    # cleanco: the standard legal-suffix stripper ("Technologies A.G.", "Co., Ltd.")
+    with contextlib.suppress(Exception):  # odd strings: keep the name as it was
+        n = basename(basename(n)) or n
     prev = None
     while prev != n:
         prev = n
@@ -118,6 +124,7 @@ class Resolver:
         aliases: dict[str, dict[str, list[str]]],
         filer_tokens: dict[str, str] | None = None,
         token_caps: dict[str, float] | None = None,
+        sec: dict[str, tuple[str, str]] | None = None,
     ):
         # key -> (entity id, canonical name, method)
         self.index: dict[tuple[str, str], tuple[str, str]] = {}
@@ -127,6 +134,8 @@ class Resolver:
         self.filer_tokens = filer_tokens or {}
         # share of capitalised uses per name word; < 0.9 means also a common word ("diodes")
         self.token_caps = token_caps or {}
+        # SEC registrant list: normalised name -> (ticker, official title)
+        self.sec = sec or {}
         for ticker, m in filers.items():
             eid, canon = f"company:{ticker}", clean_company(m["company"])
             self.filer_ids[ticker] = eid
@@ -141,7 +150,10 @@ class Resolver:
                 key = (
                     ("company", norm_key(canon)) if etype == "company" else (etype, norm_key(canon))
                 )
-                eid, canon_name = self.index.get(key, (f"{etype}:{_slug(canon)}", canon))
+                default = (f"{etype}:{_slug(canon)}", canon)
+                if etype == "company" and key[1] in self.sec:  # e.g. Apple -> company:AAPL
+                    default = (f"company:{self.sec[key[1]][0]}", canon)
+                eid, canon_name = self.index.get(key, default)
                 for n in [canon, *alts]:
                     self.index.setdefault((etype, norm_key(n)), (eid, canon_name))
 
@@ -163,6 +175,9 @@ class Resolver:
             ):
                 tk = owners.pop()
                 return self.filer_ids[tk], self.filer_canon[tk], "filer_token"
+        if etype == "company" and key in self.sec:
+            ticker, title = self.sec[key]
+            return f"company:{ticker}", clean_company(title), "sec"
         if etype in ("company", "person", "geography", "regulation"):
             return f"{etype}:{_slug(key)}", name, "normalised"
         ck = concept_key(name)
@@ -174,29 +189,69 @@ def _codes(key: str) -> set[str]:
     return {t for t in key.split() if any(ch.isdigit() for ch in t) or len(t) == 1}
 
 
-def fuzzy_merges(ids_by_type: dict[str, dict[str, str]]) -> dict[str, tuple[str, float]]:
-    """Map near-duplicate ids onto one representative (the most frequent spelling wins later).
-    Conservative: same type, same first 4 letters (blocking), SequenceMatcher ratio >=
-    FUZZY_RATIO, so typos merge ("wistronn") but "intel" / "intelsat" (0.77) do not."""
+def _subset_generic(a: str, b: str) -> bool:
+    """Same name apart from generic words: 'samsung semiconductor' ~ 'samsung',
+    'monolithic power system' ~ 'monolithic power systems' (after plural folding)."""
+    ta = {s_stem(t) for t in a.split()}
+    tb = {s_stem(t) for t in b.split()}
+    small, big = (ta, tb) if len(ta) <= len(tb) else (tb, ta)
+    generic = {s_stem(t) for t in GENERIC_NAME_WORDS}
+    return small <= big and (big - small) <= generic and bool(small - generic)
+
+
+def fuzzy_merges(
+    ids_by_type: dict[str, dict[str, str]],
+    anchors_by_type: dict[str, list[tuple[str, str]]] | None = None,
+) -> dict[str, tuple[str, float]]:
+    """Map near-duplicate ids onto one representative.
+
+    Candidates share a type and their first 4 letters (blocking). They merge when
+    (a) rapidfuzz token_sort_ratio >= FUZZY_RATIO, or (b) they are the same name apart from
+    generic words (`_subset_generic`); in both cases codes and numbers must match
+    ("country groups d1" vs "d4" never merge). Anchors (filers, alias-table and SEC entities)
+    are merge TARGETS only, so "Monolithic Power System" joins the MPS filer node."""
     remap: dict[str, tuple[str, float]] = {}
-    for _etype, ids in ids_by_type.items():
-        by_first: dict[str, list[str]] = defaultdict(list)
+    anchors_by_type = anchors_by_type or {}
+
+    def similar(x: str, y: str) -> float:
+        if _codes(x) != _codes(y):
+            return 0.0
+        r = fuzz.token_sort_ratio(x, y)
+        if r >= FUZZY_RATIO:
+            return r
+        return 100.0 if _subset_generic(x, y) else 0.0
+
+    for etype, ids in ids_by_type.items():
+        block_anchor: dict[str, list[tuple[str, str]]] = defaultdict(list)
+        for aid, key in anchors_by_type.get(etype, []):  # one entry per known name variant
+            if key:
+                block_anchor[key[:4]].append((aid, key))
+        by_block: dict[str, list[str]] = defaultdict(list)
         for eid, key in ids.items():
             if key:
-                by_first[key[:4]].append(eid)
-        for group in by_first.values():
+                by_block[key[:4]].append(eid)
+        for block, group in by_block.items():
             group.sort()
-            for i, a in enumerate(group):
+            for eid in group:  # first: join a known entity if one matches
+                best = max(((similar(ids[eid], k), a) for a, k in block_anchor.get(block, [])),
+                           default=(0.0, ""))  # fmt: skip
+                if best[0] > 0 and best[1] != eid:
+                    remap[eid] = (best[1], round(best[0], 1))
+            rest = [e for e in group if e not in remap]
+            for i, a in enumerate(rest):  # then: merge unresolved variants with each other
                 if a in remap:
                     continue
-                for b in group[i + 1 :]:
+                for b in rest[i + 1 :]:
                     if b in remap:
                         continue
-                    if _codes(ids[a]) != _codes(ids[b]):
-                        continue  # "country groups d1" vs "d4": codes and numbers must match
-                    r = difflib.SequenceMatcher(None, ids[a], ids[b]).ratio()
-                    if r >= FUZZY_RATIO:
-                        remap[b] = (a, round(r, 3))
+                    r = similar(ids[a], ids[b])
+                    if r > 0:
+                        # the shorter (more general) name is the representative
+                        _keep, drop = (a, b) if len(ids[a]) <= len(ids[b]) else (b, a)
+                        if drop == a:
+                            remap[a] = (b, round(r, 1))
+                            break
+                        remap[b] = (a, round(r, 1))
     return remap
 
 
@@ -218,7 +273,8 @@ def build(extraction_files: list[Path], resolver: Resolver, out_dir: Path) -> di
                     mentions[eid] += 1
                     names[eid][canon] += 1
                     etypes[eid] = t
-                    keys.setdefault(eid, norm_key(canon) if how != "alias" else "")
+                    # resolved names are canonical already; only "normalised" ones get merged
+                    keys.setdefault(eid, norm_key(canon) if how == "normalised" else "")
                     ends.append(eid)
                 raw_edges.append((ends[0], r["relation"], ends[1], r, rec))
     # fuzzy pass over ids that did not come from the alias table (those are already canonical)
@@ -226,7 +282,13 @@ def build(extraction_files: list[Path], resolver: Resolver, out_dir: Path) -> di
     for eid, k in keys.items():
         if k and not eid.startswith("company:anon:"):
             by_type[etypes[eid]][eid] = k
-    remap = fuzzy_merges(by_type)
+    anchors: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    for (etype, key), (aid, _canon) in resolver.index.items():
+        anchors[etype].append((aid, key))
+    for eid, how_key in keys.items():  # SEC / filer-word entities seen in this corpus
+        if not how_key and not eid.startswith("company:anon:"):
+            anchors[etypes[eid]].append((eid, norm_key(names[eid].most_common(1)[0][0])))
+    remap = fuzzy_merges(by_type, anchors)
 
     def final(eid: str) -> str:
         while eid in remap:
@@ -284,7 +346,22 @@ def load_resolver(data_dir: Path, snapshot: str) -> Resolver:
     aliases = yaml.safe_load((REPO_ROOT / "configs" / "entity_aliases.yaml").read_text())
     stats = _name_word_stats(data_dir, snapshot, filers)
     caps = {t: (c / n if n else 0.0) for t, (n, c) in stats.items()}
-    return Resolver(filers, aliases, distinctive_filer_tokens(filers, stats), caps)
+    return Resolver(filers, aliases, distinctive_filer_tokens(filers, stats), caps,
+                    load_sec_gazetteer(data_dir))  # fmt: skip
+
+
+def load_sec_gazetteer(data_dir: Path) -> dict[str, tuple[str, str]]:
+    """data/reference/sec_company_tickers.json (fetched with checksum, see .meta.json):
+    normalised registrant name -> (ticker, title). First entry wins for share classes."""
+    path = data_dir / "reference" / "sec_company_tickers.json"
+    if not path.exists():
+        return {}
+    out: dict[str, tuple[str, str]] = {}
+    for row in json.loads(path.read_text()).values():
+        k = norm_key(row["title"])
+        if len(k) >= 3:
+            out.setdefault(k, (row["ticker"].upper(), row["title"]))
+    return out
 
 
 def _name_word_stats(

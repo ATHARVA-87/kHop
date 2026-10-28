@@ -49,3 +49,16 @@ def test_small_wording_slips_pass_but_invented_text_fails():
     assert (
         best_score("We compete aggressively with Intel and AMD in data center GPUs", PASSAGE) < 80
     )
+
+
+def test_ordered_match_accepts_quotes_that_skip_list_items():
+    from plexus.extract.quotes import ordered_match
+
+    a = align_quote("Our customers include Apple and Samsung, among others", PASSAGE)
+    assert a is not None
+    # the stored span is the filing's own list, skipped names included
+    assert (
+        PASSAGE[a.start : a.end]
+        == "customers include Apple, Dell, HP, Lenovo and Samsung, among others"
+    )
+    assert ordered_match("Samsung and Apple are among our customers today", PASSAGE) is None

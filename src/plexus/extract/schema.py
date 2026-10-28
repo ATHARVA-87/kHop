@@ -118,13 +118,50 @@ def is_anonymous(name: str) -> bool:
     return bool(_ANON_CUSTOMER.match(strip_article(name)))
 
 
+# Places and nationalities: "China" or "Chinese OEMs" typed as a company is a group/place.
+PLACE_NAMES = {
+    "china", "taiwan", "japan", "korea", "south korea", "united states", "us", "u s", "usa",
+    "u s a", "america", "europe", "european union", "eu", "asia", "germany", "india",
+    "singapore", "malaysia", "vietnam", "philippines", "thailand", "israel", "mexico", "canada",
+    "united kingdom", "uk", "u k", "france", "netherlands", "ireland", "hong kong", "russia",
+    "ukraine", "middle east", "greater china", "mainland china", "prc",
+}  # fmt: skip
+DEMONYMS = {"chinese", "taiwanese", "japanese", "korean", "american", "european", "asian",
+            "german", "indian", "israeli", "domestic", "foreign", "international", "global"}  # fmt: skip
+# words that make a "company" name a group of companies or a non-company
+GROUP_WORDS = {
+    "customers", "customer", "suppliers", "supplier", "oems", "odms", "distributors",
+    "government", "governments", "agencies", "agency", "companies", "competitors",
+    "manufacturers", "vendors", "partners", "foundries", "facility", "facilities", "factories",
+    "plants", "providers", "operators", "makers", "entities", "authorities", "regulators",
+}  # fmt: skip
+
+
+def is_group_or_place(name: str) -> bool:
+    """'China', 'Chinese OEMs', 'China-based customers', 'U.S. government', 'AMPI Facility'."""
+    words = re.findall(r"[a-z0-9]+", strip_article(name).lower())
+    joined = " ".join(words)
+    if not words:
+        return True
+    return (
+        joined in PLACE_NAMES
+        or words[0] in DEMONYMS
+        or "based" in words
+        or bool(set(words) & GROUP_WORDS)
+    )
+
+
 def is_generic(name: str, etype: str) -> bool:
-    """True for a group/pronoun rather than a named organisation or person."""
+    """True for a group/pronoun/place rather than a named organisation or person."""
     name = strip_article(name)
     low = name.lower()
     if low in GENERIC_NAMES:
         return True
     if etype not in ("company", "person") or low in LOWERCASE_NAMES:
         return False
+    # anonymised names ("Customer A", namespaced "NVDA Customer A") are kept on purpose
+    anonymous = re.search(r"\b(?:customer|distributor) [a-z]$", low) is not None
+    if etype == "company" and not anonymous and is_group_or_place(name):
+        return True
     # named organisations and people start with a capital letter or a digit ("3M")
     return not (name[:1].isupper() or name[:1].isdigit())

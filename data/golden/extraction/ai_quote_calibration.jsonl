@@ -1,0 +1,80 @@
+{"id": "QC-000", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "Cryptography is a target customer market, not a Rambus segment."}
+{"id": "QC-001", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "Object 'EU regulation' is generic; passage names RoHS, not a specific 'EU regulation' entity."}
+{"id": "QC-002", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "Fragment 'wearables and mobile devices' is an R&D context and says nothing about a Consumer segment."}
+{"id": "QC-003", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Passage lists ISG as one of ON's three reportable segments."}
+{"id": "QC-004", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "HikRobot is in the listed autonomous-mobile-robot competitors; '...' skips list items."}
+{"id": "QC-005", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Tower is named as one of Allegro's wafer foundries (supplier direction correct)."}
+{"id": "QC-006", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Infineon is listed among MOSFET competitors; only bullet formatting differs."}
+{"id": "QC-007", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Passage cites the Israel-Hamas war as raising Cirrus's cyber risk; note object_type 'regulation' is wrong."}
+{"id": "QC-008", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Verbatim except commas/periods in company names; Semtech is in the competitor list."}
+{"id": "QC-009", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Alien is in Impinj's endpoint IC competitor list; only bullet formatting differs."}
+{"id": "QC-010", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Robotics is one of Teradyne's product groups that are its reportable segments."}
+{"id": "QC-011", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "Quote about management strategy has nothing to do with Lisa Su."}
+{"id": "QC-012", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "AMH is a former segment merged into APS; it is not a current Entegris segment."}
+{"id": "QC-013", "ai_supported": "no", "ai_quote_faithful": "no", "ai_relation_stated": "yes", "ai_notes": "Quote rewrites 'or other similar natural disasters' and drops 'droughts'; droughts is in the real text, but not in the quote."}
+{"id": "QC-014", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Texas Instruments is in the list; quote silently drops 'Kyocera' (no ellipsis)."}
+{"id": "QC-015", "ai_supported": "unsure", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Germany is listed but quote silently drops 'Japan'; it is contractor fabs, so it's unclear whether operates_in should cover them."}
+{"id": "QC-016", "ai_supported": "unsure", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Taiwan is listed but Canada/Malaysia are silently dropped; these are third-party contractors, so operates_in semantics are unclear."}
+{"id": "QC-017", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "Wrong direction: CXMT licenses Rambus patents (Rambus licenses_to CXMT)."}
+{"id": "QC-018", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Only the trademark symbol is missing; AMD offers Radeon PRO V products."}
+{"id": "QC-019", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Plexus is a Teradyne contract manufacturer; quote just drops '(\"Plexus\")'."}
+{"id": "QC-020", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "ASE is named as a primary assembly/test house (filer says 'The Company's')."}
+{"id": "QC-021", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "AMD name normalized ('Advanced Micro Devices, Inc. (AMD)'); the competition is stated."}
+{"id": "QC-022", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "NXP is in AMD's ASSP competitor list; only punctuation differs."}
+{"id": "QC-023", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "MACOM says it is subject to GDPR; quote drops '(\"GDPR\")'."}
+{"id": "QC-024", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "'products businesses' text says nothing about a PC segment."}
+{"id": "QC-025", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "MPS describes GDPR obligations; quote drops '(\"EU\")'."}
+{"id": "QC-026", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Only the trademark symbol is missing; AMD launched 5th Gen EPYC."}
+{"id": "QC-027", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "OBBBA modifies FDII rules affecting KLA's taxes; quote drops '(\"GILTI\")'."}
+{"id": "QC-028", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Israel is listed; quote silently drops 'Germany,' at the front of the list."}
+{"id": "QC-029", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Taiwan is listed for military-service risk; quote silently drops 'Ukraine,'."}
+{"id": "QC-030", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "Wrong direction: NVIDIA licenses Rambus patents."}
+{"id": "QC-031", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Antitrust is listed; quote silently drops 'anti-corruption,'."}
+{"id": "QC-032", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Samsung subcontracts assembly/test to STATS ChipPAC as stated; note the subject is not the filer."}
+{"id": "QC-033", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Fabrinet is listed as an NVIDIA contract manufacturer; quote silently drops Hon Hai and Wistron."}
+{"id": "QC-034", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "SiTime bought assets and a license from Aura; it did not acquire the company."}
+{"id": "QC-035", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Amkor is in the assembly/test house list; '...' skips items."}
+{"id": "QC-036", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "Wrong direction: Samsung licenses Rambus patents."}
+{"id": "QC-037", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Marvell is in MACOM's competitor list; quote silently skips earlier names."}
+{"id": "QC-038", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "Wrong direction: Toshiba licenses Rambus patents."}
+{"id": "QC-039", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Hana is named as a ceramic-packaging supplier; '...' skips items."}
+{"id": "QC-040", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "OBBBA tax changes are discussed for Micron; quote drops '(\"OBBBA\")'."}
+{"id": "QC-041", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "Wrong direction: Micron licenses Rambus patents."}
+{"id": "QC-042", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Mersen is in Entegris's notable-competitors table; quote skips other table cells."}
+{"id": "QC-043", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Executive table lists Erin E. Hagen as SVP & CHRO; 'is our' is a small grammar addition."}
+{"id": "QC-044", "ai_supported": "no", "ai_quote_faithful": "yes", "ai_relation_stated": "no", "ai_notes": "Apollo bought 49% of Ireland SCIP; it is an investor, not a supplier."}
+{"id": "QC-045", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Bosch is in the SiC power competitor list; quote silently skips earlier names."}
+{"id": "QC-046", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Rohm Co. Ltd. is in the SiC power competitor list; quote silently skips earlier names."}
+{"id": "QC-047", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Semtech is in MACOM's competitor list; quote silently skips earlier names."}
+{"id": "QC-048", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Diodes Incorporated is in SiTime's competitor list; quote silently skips earlier names."}
+{"id": "QC-049", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "FY2024 sales were 18% China; quote's 'approximately' is moved from the 75% figure, so only a slight change."}
+{"id": "QC-050", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Bourns is listed under Resistors; quote skips earlier bullets."}
+{"id": "QC-051", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Synergie CAD is in FormFactor's probe-card competitor list; quote silently skips earlier names."}
+{"id": "QC-052", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Text says AMD faces competition from Qualcomm Incorporated and NVIDIA."}
+{"id": "QC-053", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Power Integrations is in MPS's primary competitor list; quote silently skips earlier names."}
+{"id": "QC-054", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "NXP is subject to health and safety laws; quote drops a parenthetical and 'regulations'."}
+{"id": "QC-055", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Text names ongoing conflicts in Ukraine and Israel as a risk; 'Ukraine and' is silently dropped."}
+{"id": "QC-056", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Singapore is among KLA's largest subsidiary/branch locations; quote silently skips earlier names."}
+{"id": "QC-057", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Teledyne in Canada is named as a primary foundry; quote drops Bosch/TSMC and '(\"Teledyne\")'."}
+{"id": "QC-058", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Microchip is in MACOM's competitor list; quote silently skips earlier names."}
+{"id": "QC-059", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "AMSW is a row in Semtech's net-sales-by-reportable-segment table."}
+{"id": "QC-060", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "ST Microelectronics N.V. is in the SiC power competitor list; quote silently skips earlier names."}
+{"id": "QC-061", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "SiCrystal GmbH is named among increased competitors; quote silently drops Coherent."}
+{"id": "QC-062", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "ROHM Semiconductor is in MPS's primary competitor list; quote silently skips earlier names."}
+{"id": "QC-063", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "STMicroelectronics is in MPS's primary competitor list; quote silently skips earlier names."}
+{"id": "QC-064", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Skyworks is in MACOM's competitor list; quote silently skips earlier names."}
+{"id": "QC-065", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "MACOM cites CCPA compliance costs; quote drops '(\"CCPA\") and the CPRA', which strains the grammar."}
+{"id": "QC-066", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Robotics is a row in Teradyne's reportable-segment revenue table."}
+{"id": "QC-067", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Hana is named as an assembly/test/packaging contractor (name lightly altered); OSAT counts as a contract manufacturer."}
+{"id": "QC-068", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Panasonic is listed under Inductors; quote skips earlier bullets."}
+{"id": "QC-069", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "MediaTek is in SiLabs' competitor list; quote silently skips earlier names."}
+{"id": "QC-070", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Amkor has factories in the Philippines; quote silently skips earlier countries."}
+{"id": "QC-071", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Carsem in Malaysia is named as a packaging/assembly/test contractor; quote drops the '(M) Sdn Bhd.' name parts."}
+{"id": "QC-072", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "TDK-EPCOS is listed under Resistors; quote skips earlier bullets."}
+{"id": "QC-073", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Synaptics Incorporated is in Cirrus's principal competitor list; quote silently skips earlier names."}
+{"id": "QC-074", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Technoprobe S.p.A is in FormFactor's competitor list; quote silently skips earlier names."}
+{"id": "QC-075", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "HiSilicon is in Ambarella's IoT competitor list; quote silently skips earlier names."}
+{"id": "QC-076", "ai_supported": "no", "ai_quote_faithful": "no", "ai_relation_stated": "no", "ai_notes": "Empty quote, so there is nothing to ground the edge."}
+{"id": "QC-077", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Telink is in SiLabs' competitor list; quote silently skips earlier names."}
+{"id": "QC-078", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Panasonic is listed under Capacitors; quote skips earlier bullets."}
+{"id": "QC-079", "ai_supported": "yes", "ai_quote_faithful": "yes", "ai_relation_stated": "yes", "ai_notes": "Ingenic is in Ambarella's IoT competitor list; quote silently skips earlier names."}

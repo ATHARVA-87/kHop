@@ -53,9 +53,46 @@ def normalise(text: str) -> tuple[str, list[int]]:
     return "".join(out), idx
 
 
+_FUNCTION_WORDS = {"a", "an", "the", "and", "or", "of", "to", "in", "on", "for", "with", "by",
+                   "as", "at", "our", "we", "its", "is", "are", "be", "that", "which", "such"}  # fmt: skip
+
+
+def ordered_match(quote: str, passage: str, slack: float = 3.0) -> Alignment | None:
+    """Every content word of the quote appears in the passage IN ORDER, within a window of
+    `slack` x the quote's length (+30 words). This accepts quotes that silently skip list
+    items ("our competitors include, among others, Marvell" when the filing lists eight
+    names before Marvell): calibration showed those are real edges that score low on
+    character alignment."""
+    q = [t for t in normalise(quote)[0].split() if t not in _FUNCTION_WORDS]
+    if len(q) < 3:
+        return None
+    norm_p, idx = normalise(passage)
+    toks = [(m.group(), m.start(), m.end()) for m in re.finditer(r"\S+", norm_p)]
+    window = int(len(q) * slack) + 30
+    for i, (t, _, _) in enumerate(toks):
+        if t != q[0]:
+            continue
+        j, k = i, 0
+        while j < len(toks) and j - i <= window and k < len(q):
+            if toks[j][0] == q[k]:
+                k += 1
+            j += 1
+        if k == len(q):
+            s, e = toks[i][1], toks[j - 1][2]
+            return Alignment(idx[s], idx[e - 1] + 1, 100.0 * len(q) / (j - i), 1)
+    return None
+
+
 def align_quote(
     quote: str, passage: str, cutoff: float = DEFAULT_CUTOFF, max_gap: int = 300
 ) -> Alignment | None:
+    """Fuzzy span alignment of the quote's '...'-separated pieces; if that fails, an
+    in-order word match (`ordered_match`)."""
+    al = _align_pieces(quote, passage, cutoff, max_gap)
+    return al if al is not None else ordered_match(quote, passage)
+
+
+def _align_pieces(quote: str, passage: str, cutoff: float, max_gap: int) -> Alignment | None:
     norm_p, idx = normalise(passage)
     pieces = [normalise(p)[0] for p in _ELLIPSIS.split(quote)]
     pieces = [p for p in pieces if len(p.split()) >= 3]
@@ -83,5 +120,5 @@ def align_quote(
 
 def best_score(quote: str, passage: str) -> float:
     """Diagnostic: the alignment score with no cutoff (for calibrating the cutoff)."""
-    a = align_quote(quote, passage, cutoff=0.0, max_gap=10**9)
+    a = _align_pieces(quote, passage, cutoff=0.0, max_gap=10**9)
     return a.score if a else 0.0

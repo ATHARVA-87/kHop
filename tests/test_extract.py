@@ -116,3 +116,19 @@ def test_pilot_sample_is_stratified_and_skips_tuning_company():
     for sec in ("business", "risk_factors", "mdna"):  # one passage per company per section
         tick = [p.ticker for p in out if p.section == sec]
         assert len(tick) == len(set(tick))
+
+
+def test_groups_places_and_nationalities_are_not_companies():
+    for junk in ["China", "Chinese OEMs", "China-based customers", "Taiwanese suppliers",
+                 "U.S. government", "AMPI Facility", "the United States"]:  # fmt: skip
+        assert is_generic(junk, "company"), junk
+    for real in [
+        "TSMC",
+        "Samsung Electronics",
+        "NVDA Customer A",
+        "Customer B",
+        "Hon Hai",
+        "onsemi",
+    ]:
+        assert not is_generic(real, "company"), real
+    assert not is_generic("China", "geography")  # fine as a geography
