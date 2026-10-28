@@ -23,8 +23,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install core + dev deps from the lockfile
-        run: uv sync --frozen --extra dev
+      - name: Install core + dev + graph deps from the lockfile
+        run: uv sync --frozen --extra dev --extra graph
       - name: Lint
         run: |
           uv run ruff check src tests

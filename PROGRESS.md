@@ -192,6 +192,25 @@ Planned (by phase):
 5. For a question naming companies: find them in the graph, follow the links between them (or to a shared partner), and add those links' source passages to the results.
 6. For a sector-wide question naming no company: put one best passage per company first.
 
+## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
+`results/test/*.json`. No design decision was made on these numbers.
+
+| config | all R@10 | local R@10 | multi-hop R@10 | multi-hop both@10 | bridge | comparison | global coverage@10 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| A0 naive | 0.179 | 0.324 | 0.130 | 0.000 | 0.000 | 0.000 | 0.442 |
+| A2 hybrid + headers | 0.519 | 0.946 | 0.500 | 0.130 | 0.000 | 0.214 | 0.394 |
+| A2-RR (no graph) | 0.541 | 0.946 | 0.587 | 0.348 | 0.222 | 0.429 | 0.394 |
+| A3 reranker | 0.532 | 1.000 | 0.457 | 0.217 | 0.111 | 0.286 | 0.397 |
+| A4 graph | 0.563 | 0.946 | 0.674 | 0.435 | 0.222 | 0.571 | 0.394 |
+| **A5 (final)** | **0.561** | **0.946** | **0.674** | **0.435** | 0.222 | 0.571 | **0.671** |
+
+Honest reading:
+- Clear on test: A5 vs A0 all recall@10 +0.383 [+0.260, +0.499]; local +0.62; multi-hop both@10 0.000 → 0.435; A5's company diversity +0.277 [+0.188, +0.362] over A4.
+- **Not established on test:** the graph's own gain over the no-graph baseline. A4 vs A2-RR multi-hop both@10 +0.087 [−0.273, +0.297] (n = 23, cluster bootstrap by linking entity). On dev it was +0.192. Direction is consistent, the size is not.
+- **Dev → test drop on multi-hop** (A4 both@10 0.789 → 0.435). The test questions are paraphrased user-style and their links are not dev links, and dev drove the rule design. That gap is the overfitting the held-out set exists to show.
+- A5 global coverage 0.671 is below the 0.93 base rate for any 10 different companies; it measures diversity, not answer quality.
+- The reranker made local recall@10 1.000 on test (+0.054 [0.000, +0.135]).
+
 ## Held-out test set (2026-10-27)
 - Same procedure as dev: Gemini drafts (user-style phrasing, dev passages and company pairs excluded) -> 3 AI reviewer agents -> human. You approved the AI pre-review as a whole ("most edits not required, same meaning"), so human/AI agreement is 100% by construction. Report it that way.
 - 130 candidates -> **91 verified** (37 local, 23 multi-hop: 14 comparison + 9 bridge, 31 global ≈ 2–3 angles × 12 themes). `data/golden/golden_test.jsonl`, built with `make golden-test`.

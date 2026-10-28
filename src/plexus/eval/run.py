@@ -404,10 +404,12 @@ def main(argv: list[str] | None = None) -> int:
         "--generate", action="store_true", help="also generate answers (LLM calls, cached)"
     )
     ap.add_argument("--judge", action="store_true", help="also judge answers (implies --generate)")
+    ap.add_argument("--results-dir", type=Path, default=None, help="default results/")
     args = ap.parse_args(argv)
     res = run(
         ExperimentConfig.load(args.config),
         args.golden,
+        results_dir=args.results_dir,
         generate=args.generate,
         use_judge=args.judge,
     )
