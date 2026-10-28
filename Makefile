@@ -74,11 +74,14 @@ judge-agreement: ## Cohen's kappa between the judge and your labels
 	$(PY) -m plexus.eval.judge agreement --results results/$${NAME:-a0_naive}.json
 
 gate: ## retrieval regression gate vs committed results (full set; needs GPU models)
-	$(PY) -m plexus.eval.gate --config configs/a1h_bm25.yaml --config configs/a1h_hybrid.yaml --config configs/a3h_rerank.yaml
+	$(PY) -m plexus.eval.gate --config configs/a1h_bm25.yaml --config configs/a1h_hybrid.yaml --config configs/a3h_rerank.yaml --config configs/a5_diverse.yaml
 
-gate-ci: ## the CI subset of the gate: BM25 path only, no torch (needs data/processed)
+gate-ci: ## CI gate, no torch: BM25, and graph + A5 on BM25 (needs data/processed + graph extractions)
 	$(PY) -m plexus.index.build --config configs/a1h_bm25.yaml --chunks-only
-	$(PY) -m plexus.eval.gate --config configs/a1h_bm25.yaml
+	$(PY) -m plexus.extract.extract --revalidate
+	$(PY) -m plexus.extract.resolve
+	$(PY) -m plexus.index.graph build
+	$(PY) -m plexus.eval.gate --config configs/a1h_bm25.yaml --config configs/a5_ci_bm25.yaml
 
 compare: ## paired bootstrap of B vs A on the same queries: make compare A=a0_naive B=a0_bm25
 	$(PY) -m plexus.eval.compare results/$(A).json results/$(B).json

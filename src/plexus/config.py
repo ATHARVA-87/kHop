@@ -58,6 +58,7 @@ class RetrievalConfig(_Strict):
     graph_dir: str | None = None  # default data/graph/<snapshot>
     aliases_file: str | None = None  # default configs/entity_aliases.yaml (ablations only)
     graph_max_edges: int = 12
+    graph_base: Literal["hybrid", "bm25"] = "hybrid"  # bm25: the CI gate (no torch in CI)
     # A5: questions naming no company get one passage per company first
     company_diverse: bool = False
 

@@ -142,7 +142,8 @@ def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:
         base = dense()
     else:
         bm25 = BM25Retriever.from_index_dir(path, r.bm25_k1, r.bm25_b)
-        base = bm25 if r.type == "bm25" else HybridRetriever([dense(), bm25], r.candidates, r.rrf_k)
+        keyword_only = r.type == "bm25" or (r.type == "graph_hybrid" and r.graph_base == "bm25")
+        base = bm25 if keyword_only else HybridRetriever([dense(), bm25], r.candidates, r.rrf_k)
     if r.type == "graph_hybrid":
         base = _graph_hybrid(cfg, data_dir, path, base)
     elif r.type == "hybrid_rr":
