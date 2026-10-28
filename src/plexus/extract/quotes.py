@@ -79,8 +79,37 @@ def ordered_match(quote: str, passage: str, slack: float = 3.0) -> Alignment | N
             j += 1
         if k == len(q):
             s, e = toks[i][1], toks[j - 1][2]
-            return Alignment(idx[s], idx[e - 1] + 1, 100.0 * len(q) / (j - i), 1)
+            start, end = idx[s], idx[e - 1] + 1
+            before = {t for t, _, _ in toks[max(0, i - 3) : i]}
+            negated_quote = bool(_NEGATION & set(normalise(quote)[0].split()))
+            if (before & _NEGATION) and not negated_quote:
+                continue  # "we do NOT currently license ..." quoted without the "not"
+            if _plausible(passage[start:end], toks[i:j], q):
+                return Alignment(start, end, 100.0 * len(q) / (j - i), 1)
     return None
+
+
+_NEGATION = {"not", "no", "never", "neither", "nor", "without", "except", "cannot", "none"}
+_SENTENCE_END = re.compile(r"[.!?;]\s+[A-Z(]")
+
+
+def _plausible(span: str, window: list[tuple[str, int, int]], q: list[str]) -> bool:
+    """Guards for the in-order match (review 2026-10-28): the matched words must sit in ONE
+    sentence, no skipped word may be a negation ("does not supply"), and a loose match (most
+    words skipped) is only accepted when the skipped text is a list (commas / "and")."""
+    if _SENTENCE_END.search(span):
+        return False
+    remaining = list(q)
+    skipped = []
+    for t, _, _ in window:
+        if remaining and t == remaining[0]:
+            remaining.pop(0)
+        else:
+            skipped.append(t)
+    if _NEGATION & set(skipped):
+        return False
+    density = len(q) / max(len(window), 1)
+    return density >= 0.6 or span.count(",") >= 2 or "and" in skipped
 
 
 def align_quote(

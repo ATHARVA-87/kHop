@@ -62,3 +62,14 @@ def test_ordered_match_accepts_quotes_that_skip_list_items():
         == "customers include Apple, Dell, HP, Lenovo and Samsung, among others"
     )
     assert ordered_match("Samsung and Apple are among our customers today", PASSAGE) is None
+
+
+def test_ordered_match_rejects_cross_sentence_and_negation():
+    from plexus.extract.quotes import ordered_match
+
+    text = "Samsung, a competitor, manufactures memory. We source wafers from TSMC and UMC."
+    assert ordered_match("Samsung manufactures our wafers", text) is None  # spans two sentences
+    neg = "We do not currently license any technology from Arm for our controllers."
+    assert (
+        ordered_match("We currently license technology from Arm for our controllers", neg) is None
+    )

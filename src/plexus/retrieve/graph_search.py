@@ -20,6 +20,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from plexus.extract.resolve import Resolver, norm_key
+from plexus.extract.schema import LOWERCASE_NAMES
 from plexus.index.dense import Hit
 from plexus.index.graph import Edge, GraphStore
 from plexus.retrieve.fusion import rrf
@@ -48,6 +49,15 @@ def relation_cues(question: str) -> set[str]:
         if rx.search(question):
             out |= rels
     return out
+
+
+def _proper(word: str) -> bool:
+    """A single word counts as a name only when written like one: capitalised ("Arm",
+    "Skyworks") or containing a digit ("3M"). Review 2026-10-28: "arm's length" linked Arm and
+    "flex capacity" linked Flex. Trade-off: an all-lowercase "nvidia" no longer links."""
+    if word.lower() in LOWERCASE_NAMES:  # brands written in lower case: onsemi, imec
+        return True
+    return word[:1].isupper() or any(ch.isdigit() for ch in word)
 
 
 class EntityLinker:
@@ -90,12 +100,12 @@ class EntityLinker:
                 eid = self.names.get(key)
                 if eid is None:
                     continue
-                if n == 1 and self.caps.get(key[0], 1.0) < 0.9 and not toks[i][0][0].isupper():
-                    continue  # "diodes" the product, not Diodes Inc
+                if n == 1 and not _proper(toks[i][0]):
+                    continue  # one lowercase word ("arm's length", "diodes") is not a name
                 cands.append((self.FULL, i, i + n, eid))
             if toks[i][0] in self.tickers:
                 cands.append((self.TICKER, i, i + 1, self.tickers[toks[i][0]]))
-            if low[i] in self.words:
+            if low[i] in self.words and _proper(toks[i][0]):
                 cands.append((self.WORD, i, i + 1, self.words[low[i]]))
         # keep the best match per span: higher score, then longer
         cands.sort(key=lambda c: (-c[0], -(c[2] - c[1]), c[1]))

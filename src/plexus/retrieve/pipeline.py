@@ -96,23 +96,28 @@ class HybridRetriever:
                 r.close()
 
 
-def _graph_hybrid(cfg: ExperimentConfig, data_dir: Path, index_path: Path, base: Retriever):
+def make_linker(cfg: ExperimentConfig, data_dir: Path):
+    """One entity linker for A2-RR, A4 and A5: alias table + SEC/filer names + graph entities
+    (when the graph exists), so all three see the same companies in a question."""
     from plexus.extract.resolve import load_resolver
+    from plexus.retrieve.graph_search import EntityLinker, load_entities
+
+    r = cfg.retrieval
+    gdir = Path(r.graph_dir) if r.graph_dir else data_dir / "graph" / cfg.snapshot
+    ents = load_entities(gdir) if (gdir / "entities.jsonl").exists() else []
+    return EntityLinker(load_resolver(data_dir, cfg.snapshot), ents)
+
+
+def _graph_hybrid(cfg: ExperimentConfig, data_dir: Path, index_path: Path, base: Retriever):
     from plexus.index.graph import LadybugGraph
-    from plexus.retrieve.graph_search import (
-        EntityLinker,
-        GraphHybridRetriever,
-        GraphRetriever,
-        load_entities,
-    )
+    from plexus.retrieve.graph_search import GraphHybridRetriever, GraphRetriever
 
     r = cfg.retrieval
     gdir = Path(r.graph_dir) if r.graph_dir else data_dir / "graph" / cfg.snapshot
     if not (gdir / "graph.lbug").exists():
         raise FileNotFoundError(f"no graph at {gdir}: run `make graph` first")
-    linker = EntityLinker(load_resolver(data_dir, cfg.snapshot), load_entities(gdir))
-    graph = GraphRetriever(LadybugGraph(gdir / "graph.lbug"), linker, load_chunks(index_path),
-                           r.graph_max_edges)  # fmt: skip
+    graph = GraphRetriever(LadybugGraph(gdir / "graph.lbug"), make_linker(cfg, data_dir),
+                           load_chunks(index_path), r.graph_max_edges)  # fmt: skip
     return GraphHybridRetriever(graph, base, r.rrf_k)
 
 
@@ -141,18 +146,13 @@ def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:
     if r.type == "graph_hybrid":
         base = _graph_hybrid(cfg, data_dir, path, base)
     elif r.type == "hybrid_rr":
-        from plexus.extract.resolve import load_resolver
-        from plexus.retrieve.graph_search import CompanyRoundRobinRetriever, EntityLinker
+        from plexus.retrieve.graph_search import CompanyRoundRobinRetriever
 
-        linker = EntityLinker(load_resolver(data_dir, cfg.snapshot), [])
-        base = CompanyRoundRobinRetriever(base, linker)
+        base = CompanyRoundRobinRetriever(base, make_linker(cfg, data_dir))
     if r.company_diverse:
-        from plexus.extract.resolve import load_resolver
-        from plexus.retrieve.graph_search import CompanyDiverseRetriever, EntityLinker
+        from plexus.retrieve.graph_search import CompanyDiverseRetriever
 
-        base = CompanyDiverseRetriever(
-            base, EntityLinker(load_resolver(data_dir, cfg.snapshot), [])
-        )
+        base = CompanyDiverseRetriever(base, make_linker(cfg, data_dir))
     if r.rerank is None:
         return base
     from plexus.retrieve.rerank import CrossEncoderScorer, RerankingRetriever

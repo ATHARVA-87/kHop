@@ -3,6 +3,18 @@
 # common name), so only non-filer counterparties and odd spellings live here.
 # General knowledge only: not tuned to the golden questions. Extend when a resolution
 # spot-check finds a missed merge.
+# Short names for FILERS (ticker -> names), beyond the legal name, ticker and the common name in
+# ingest/headers.py. Added after the Phase 3 review found "Monolithic Power" and "on semi" missed.
+filers:
+  MPWR: [Monolithic Power, Monolithic Power System, MPS]
+  ON: [ON Semi, on semi, onsemi, ON Semiconductor]
+  TXN: [Texas Instruments, TI]
+  ADI: [Analog Devices]
+  AMAT: [Applied Materials]
+  SLAB: [Silicon Labs, Silicon Laboratories]
+  MTSI: [MACOM]
+  POWI: [Power Integrations]
+  AMD: [AMD, Advanced Micro Devices]
 company:
   TSMC: [Taiwan Semiconductor Manufacturing Company, Taiwan Semiconductor Manufacturing,
          Taiwan Semiconductor Manufacturing Co, Taiwan Semiconductor, TSMC Limited]

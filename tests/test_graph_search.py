@@ -126,3 +126,11 @@ def test_company_diverse_puts_one_passage_per_company_first():
         "A_10K#1", "B_10K#1", "C_10K#1", "A_10K#2"]  # fmt: skip
     # a named company: unchanged order
     assert d.retrieve("What does Silicon Labs say about tariffs?", 2)[1].chunk_id == "A_10K#2"
+
+
+def test_lowercase_common_words_do_not_link():
+    filers = {"FLEX": {"company": "FLEX LTD."}}
+    link = EntityLinker(Resolver(filers, {"company": {"Arm": ["Arm Holdings"]}}), [])
+    assert link.link("Do they deal at arm's length?") == []
+    assert link.link("How do they use flex capacity?") == []
+    assert link.link("How does Arm license its cores?") == ["company:arm"]

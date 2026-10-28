@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import hashlib
 import json
 import re
 import sys
@@ -58,6 +59,23 @@ def norm_key(name: str) -> str:
         prev = n
         n = _LEGAL_TAIL.sub("", n).strip(" ,.")
     return " ".join(re.findall(r"[a-z0-9]+", n.lower()))
+
+
+_PURE_LEGAL = {"inc", "incorporated", "corp", "corporation", "co", "company", "ltd", "limited",
+               "plc", "llc", "lp", "l", "p", "sa", "s", "a", "nv", "n", "v", "ag", "se", "pte",
+               "gmbh", "bv", "the"}  # fmt: skip
+
+
+def sec_key(name: str) -> str:
+    """Key for the SEC gazetteer: the FULL name minus only pure legal words ("Inc", "Corp",
+    "Ltd", EDGAR "/DE"). Unlike norm_key it keeps "Technologies", "Group", "Holdings", so
+    "STAr Technologies" never matches "Star Group" and "Merck KGaA" never matches "Merck & Co"
+    (review 2026-10-28). Keys shorter than two words are not used ("Target", "Global")."""
+    n = _EDGAR_STATE.sub("", strip_article(" ".join(name.split())))
+    toks = re.findall(r"[a-z0-9]+", n.lower())
+    while toks and toks[-1] in _PURE_LEGAL:
+        toks.pop()
+    return " ".join(toks) if len(toks) >= 2 else ""
 
 
 def _slug(text: str) -> str:
@@ -145,14 +163,24 @@ class Resolver:
             for k in keys:
                 if k:
                     self.index[("company", k)] = (eid, canon)
+        for ticker, alts in (aliases.get("filers") or {}).items():
+            if ticker in self.filer_ids:  # short names people use for a filer
+                for n in alts:
+                    self.index[("company", norm_key(n))] = (
+                        self.filer_ids[ticker],
+                        self.filer_canon[ticker],
+                    )
         for etype, table in aliases.items():
+            if etype == "filers":
+                continue
             for canon, alts in table.items():
                 key = (
                     ("company", norm_key(canon)) if etype == "company" else (etype, norm_key(canon))
                 )
                 default = (f"{etype}:{_slug(canon)}", canon)
-                if etype == "company" and key[1] in self.sec:  # e.g. Apple -> company:AAPL
-                    default = (f"company:{self.sec[key[1]][0]}", canon)
+                sk = sec_key(canon) if etype == "company" else ""
+                if sk and sk in self.sec:  # e.g. "Applied Materials" -> company:AMAT
+                    default = (f"company:{self.sec[sk][0]}", canon)
                 eid, canon_name = self.index.get(key, default)
                 for n in [canon, *alts]:
                     self.index.setdefault((etype, norm_key(n)), (eid, canon_name))
@@ -175,8 +203,9 @@ class Resolver:
             ):
                 tk = owners.pop()
                 return self.filer_ids[tk], self.filer_canon[tk], "filer_token"
-        if etype == "company" and key in self.sec:
-            ticker, title = self.sec[key]
+        sk = sec_key(name) if etype == "company" else ""
+        if sk and sk in self.sec:
+            ticker, title = self.sec[sk]
             return f"company:{ticker}", clean_company(title), "sec"
         if etype in ("company", "person", "geography", "regulation"):
             return f"{etype}:{_slug(key)}", name, "normalised"
@@ -354,12 +383,17 @@ def load_sec_gazetteer(data_dir: Path) -> dict[str, tuple[str, str]]:
     """data/reference/sec_company_tickers.json (fetched with checksum, see .meta.json):
     normalised registrant name -> (ticker, title). First entry wins for share classes."""
     path = data_dir / "reference" / "sec_company_tickers.json"
+    meta = data_dir / "reference" / "sec_company_tickers.meta.json"
     if not path.exists():
-        return {}
+        raise FileNotFoundError(f"{path} missing: run `python -m plexus.ingest.sec_reference`")
+    raw = path.read_bytes()
+    want = json.loads(meta.read_text())["sha256"]
+    if hashlib.sha256(raw).hexdigest() != want:
+        raise ValueError(f"{path} does not match the sha256 in {meta.name}")
     out: dict[str, tuple[str, str]] = {}
-    for row in json.loads(path.read_text()).values():
-        k = norm_key(row["title"])
-        if len(k) >= 3:
+    for row in json.loads(raw).values():
+        k = sec_key(row["title"])
+        if k:
             out.setdefault(k, (row["ticker"].upper(), row["title"]))
     return out
 

@@ -44,7 +44,7 @@
       "model": "gemini-3.6-flash"
     }
   },
-  "git_commit": "fbda17f420a186a7452b32d7b6468e035f830d92-dirty",
+  "git_commit": "d8bf11626365791474e5e194f79fa08af917696f-dirty",
   "corpus_checksum": "f202efae8bc8f8150105f323ebe7a55a29cbc946d0677791adadd72e5b5c9cd5",
   "index": {
     "index_key": "semis-2025__p4__structured-200-1400-800-hdr1__BAAI_bge-small-en-v1.5",
@@ -70,21 +70,21 @@
   "retrieval": {
     "all": {
       "recall@1": {
-        "mean": 0.347,
-        "low": 0.2794,
-        "high": 0.4231,
+        "mean": 0.3545,
+        "low": 0.2868,
+        "high": 0.4306,
         "n": 134
       },
       "recall@5": {
-        "mean": 0.7219,
-        "low": 0.6399,
-        "high": 0.7929,
+        "mean": 0.7256,
+        "low": 0.6419,
+        "high": 0.7966,
         "n": 134
       },
       "recall@10": {
-        "mean": 0.7915,
-        "low": 0.7146,
-        "high": 0.8565,
+        "mean": 0.7953,
+        "low": 0.7158,
+        "high": 0.8609,
         "n": 134
       },
       "recall@20": {
@@ -94,21 +94,21 @@
         "n": 134
       },
       "ndcg@10": {
-        "mean": 0.632,
-        "low": 0.5578,
-        "high": 0.6953,
+        "mean": 0.637,
+        "low": 0.5622,
+        "high": 0.6999,
         "n": 134
       },
       "mrr": {
-        "mean": 0.6204,
-        "low": 0.5396,
-        "high": 0.6878,
+        "mean": 0.6245,
+        "low": 0.5428,
+        "high": 0.6924,
         "n": 134
       },
       "complete@10": {
-        "mean": 0.7313,
-        "low": 0.6434,
-        "high": 0.8072,
+        "mean": 0.7388,
+        "low": 0.6466,
+        "high": 0.8154,
         "n": 134
       },
       "complete@20": {
@@ -136,21 +136,21 @@
         "n": 12
       },
       "context_words@10": {
-        "mean": 1645.7687,
-        "low": 1620.74,
-        "high": 1668.4034,
+        "mean": 1644.9104,
+        "low": 1619.1182,
+        "high": 1667.5377,
         "n": 134
       },
       "recall@500w": {
-        "mean": 0.5612,
-        "low": 0.4809,
-        "high": 0.6452,
+        "mean": 0.5649,
+        "low": 0.4839,
+        "high": 0.6463,
         "n": 134
       },
       "recall@1000w": {
-        "mean": 0.7294,
-        "low": 0.6483,
-        "high": 0.7979,
+        "mean": 0.7331,
+        "low": 0.6505,
+        "high": 0.8012,
         "n": 134
       },
       "recall@2000w": {
@@ -172,15 +172,15 @@
         "n": 134
       },
       "retrieval_ms": {
-        "p50": 45.46,
-        "p95": 53.8
+        "p50": 47.21,
+        "p95": 54.23
       }
     },
     "local": {
       "recall@1": {
-        "mean": 0.4615,
-        "low": 0.3462,
-        "high": 0.5769,
+        "mean": 0.4769,
+        "low": 0.3615,
+        "high": 0.5923,
         "n": 65
       },
       "recall@5": {
@@ -202,15 +202,15 @@
         "n": 65
       },
       "ndcg@10": {
-        "mean": 0.6583,
-        "low": 0.5693,
-        "high": 0.7449,
+        "mean": 0.664,
+        "low": 0.574,
+        "high": 0.7502,
         "n": 65
       },
       "mrr": {
-        "mean": 0.608,
-        "low": 0.5097,
-        "high": 0.7023,
+        "mean": 0.6157,
+        "low": 0.5163,
+        "high": 0.7094,
         "n": 65
       },
       "complete@10": {
@@ -232,9 +232,9 @@
         "n": 65
       },
       "context_words@10": {
-        "mean": 1657.9692,
-        "low": 1623.7677,
-        "high": 1694.0323,
+        "mean": 1655.5538,
+        "low": 1620.8604,
+        "high": 1691.6031,
         "n": 65
       },
       "recall@500w": {
@@ -268,8 +268,8 @@
         "n": 65
       },
       "retrieval_ms": {
-        "p50": 44.66,
-        "p95": 49.99
+        "p50": 45.14,
+        "p95": 48.61
       }
     },
     "multi_hop": {
@@ -280,15 +280,15 @@
         "n": 57
       },
       "recall@5": {
-        "mean": 0.7982,
-        "low": 0.7075,
-        "high": 0.9048,
+        "mean": 0.807,
+        "low": 0.7128,
+        "high": 0.9054,
         "n": 57
       },
       "recall@10": {
-        "mean": 0.8772,
-        "low": 0.7857,
-        "high": 0.9445,
+        "mean": 0.886,
+        "low": 0.7872,
+        "high": 0.95,
         "n": 57
       },
       "recall@20": {
@@ -298,21 +298,21 @@
         "n": 57
       },
       "ndcg@10": {
-        "mean": 0.7202,
-        "low": 0.6327,
-        "high": 0.8192,
+        "mean": 0.7255,
+        "low": 0.6365,
+        "high": 0.8193,
         "n": 57
       },
       "mrr": {
-        "mean": 0.738,
-        "low": 0.6365,
+        "mean": 0.7389,
+        "low": 0.638,
         "high": 0.8522,
         "n": 57
       },
       "complete@10": {
-        "mean": 0.7719,
-        "low": 0.6286,
-        "high": 0.8906,
+        "mean": 0.7895,
+        "low": 0.6337,
+        "high": 0.902,
         "n": 57
       },
       "complete@20": {
@@ -328,21 +328,21 @@
         "n": 57
       },
       "context_words@10": {
-        "mean": 1617.7368,
+        "mean": 1618.4737,
         "low": 1565.6726,
-        "high": 1648.364,
+        "high": 1649.4153,
         "n": 57
       },
       "recall@500w": {
-        "mean": 0.5702,
-        "low": 0.4622,
+        "mean": 0.5789,
+        "low": 0.4745,
         "high": 0.721,
         "n": 57
       },
       "recall@1000w": {
-        "mean": 0.8158,
-        "low": 0.7391,
-        "high": 0.9082,
+        "mean": 0.8246,
+        "low": 0.7449,
+        "high": 0.9084,
         "n": 57
       },
       "recall@2000w": {
@@ -364,8 +364,8 @@
         "n": 57
       },
       "retrieval_ms": {
-        "p50": 50.14,
-        "p95": 54.35
+        "p50": 51.12,
+        "p95": 54.77
       }
     },
     "multi_hop:comparison": {
@@ -376,15 +376,15 @@
         "n": 43
       },
       "recall@5": {
-        "mean": 0.814,
-        "low": 0.7059,
-        "high": 0.9265,
+        "mean": 0.8256,
+        "low": 0.7166,
+        "high": 0.9286,
         "n": 43
       },
       "recall@10": {
-        "mean": 0.8953,
-        "low": 0.8,
-        "high": 0.9667,
+        "mean": 0.907,
+        "low": 0.8065,
+        "high": 0.9722,
         "n": 43
       },
       "recall@20": {
@@ -394,21 +394,21 @@
         "n": 43
       },
       "ndcg@10": {
-        "mean": 0.7423,
-        "low": 0.6556,
+        "mean": 0.7475,
+        "low": 0.6624,
         "high": 0.8515,
         "n": 43
       },
       "mrr": {
-        "mean": 0.755,
-        "low": 0.6484,
+        "mean": 0.7562,
+        "low": 0.6506,
         "high": 0.8917,
         "n": 43
       },
       "complete@10": {
-        "mean": 0.814,
-        "low": 0.6799,
-        "high": 0.9375,
+        "mean": 0.8372,
+        "low": 0.6923,
+        "high": 0.9444,
         "n": 43
       },
       "complete@20": {
@@ -424,9 +424,9 @@
         "n": 43
       },
       "context_words@10": {
-        "mean": 1630.0698,
-        "low": 1568.2789,
-        "high": 1669.2294,
+        "mean": 1632.0,
+        "low": 1568.2844,
+        "high": 1672.3501,
         "n": 43
       },
       "recall@500w": {
@@ -436,9 +436,9 @@
         "n": 43
       },
       "recall@1000w": {
-        "mean": 0.8372,
-        "low": 0.75,
-        "high": 0.9306,
+        "mean": 0.8488,
+        "low": 0.7589,
+        "high": 0.9318,
         "n": 43
       },
       "recall@2000w": {
@@ -460,8 +460,8 @@
         "n": 43
       },
       "retrieval_ms": {
-        "p50": 49.15,
-        "p95": 54.0
+        "p50": 49.2,
+        "p95": 54.05
       }
     },
     "global": {
@@ -568,8 +568,8 @@
         "n": 12
       },
       "retrieval_ms": {
-        "p50": 44.95,
-        "p95": 45.47
+        "p50": 45.2,
+        "p95": 49.63
       }
     },
     "multi_hop:bridge": {
@@ -598,9 +598,9 @@
         "n": 14
       },
       "ndcg@10": {
-        "mean": 0.6523,
-        "low": 0.4999,
-        "high": 0.7637,
+        "mean": 0.6581,
+        "low": 0.5014,
+        "high": 0.7696,
         "n": 14
       },
       "mrr": {
@@ -628,15 +628,15 @@
         "n": 14
       },
       "context_words@10": {
-        "mean": 1579.8571,
-        "low": 1530.4975,
-        "high": 1618.7324,
+        "mean": 1576.9286,
+        "low": 1528.6183,
+        "high": 1617.9097,
         "n": 14
       },
       "recall@500w": {
-        "mean": 0.4643,
-        "low": 0.3077,
-        "high": 0.6333,
+        "mean": 0.5,
+        "low": 0.3462,
+        "high": 0.6364,
         "n": 14
       },
       "recall@1000w": {
@@ -664,8 +664,8 @@
         "n": 14
       },
       "retrieval_ms": {
-        "p50": 51.48,
-        "p95": 54.3
+        "p50": 52.47,
+        "p95": 55.47
       }
     }
   },
@@ -676,7 +676,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-204fcb766a",
-      "retrieval_ms": 172.3592290072702,
+      "retrieval_ms": 170.18819200166035,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -698,7 +698,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-7d894157f4",
-      "retrieval_ms": 45.58969101344701,
+      "retrieval_ms": 46.19243000342976,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -720,7 +720,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-e4a0e66f7b",
-      "retrieval_ms": 45.9008920006454,
+      "retrieval_ms": 46.59448898746632,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -742,7 +742,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-1a79cd4f92",
-      "retrieval_ms": 45.49483901064377,
+      "retrieval_ms": 48.052847996586934,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -764,7 +764,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-3b07b5f664",
-      "retrieval_ms": 45.51457200432196,
+      "retrieval_ms": 46.52216099202633,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -786,7 +786,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-5cd077cf0c",
-      "retrieval_ms": 44.65693299425766,
+      "retrieval_ms": 46.64499100181274,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -808,7 +808,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-07ebaffcc3",
-      "retrieval_ms": 44.6736789890565,
+      "retrieval_ms": 46.28316299931612,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -830,7 +830,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-e54d9ddab4",
-      "retrieval_ms": 44.71832899434958,
+      "retrieval_ms": 46.50643699278589,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -852,7 +852,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-77ed32c36f",
-      "retrieval_ms": 44.29090299527161,
+      "retrieval_ms": 46.60363600123674,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -874,7 +874,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-47aef70f5a",
-      "retrieval_ms": 45.0351149920607,
+      "retrieval_ms": 46.02823800814804,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 1.0,
@@ -896,7 +896,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-e842919f48",
-      "retrieval_ms": 45.064600999467075,
+      "retrieval_ms": 47.20924700086471,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -918,7 +918,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-446992a76d",
-      "retrieval_ms": 44.56858499906957,
+      "retrieval_ms": 46.42896099539939,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -940,7 +940,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-c27afbbeb5",
-      "retrieval_ms": 44.84983198926784,
+      "retrieval_ms": 46.235001005697995,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -962,7 +962,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-e5b33be7e2",
-      "retrieval_ms": 45.71415900136344,
+      "retrieval_ms": 46.12756401184015,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -984,7 +984,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-701c0708f2",
-      "retrieval_ms": 44.91394000069704,
+      "retrieval_ms": 46.10504499578383,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1006,7 +1006,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-551a0e423b",
-      "retrieval_ms": 45.344992002355866,
+      "retrieval_ms": 46.53265500382986,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 1.0,
@@ -1028,7 +1028,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-eab9a6091b",
-      "retrieval_ms": 45.06046199821867,
+      "retrieval_ms": 46.656630001962185,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1050,7 +1050,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-8ea56d0eec",
-      "retrieval_ms": 45.39691600075457,
+      "retrieval_ms": 46.10403600963764,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1072,7 +1072,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-13ae2a142d",
-      "retrieval_ms": 44.96910399757326,
+      "retrieval_ms": 46.45871699904092,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1094,7 +1094,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-e7cba04788",
-      "retrieval_ms": 73.51488199492451,
+      "retrieval_ms": 75.53188799647614,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1116,7 +1116,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-f0535b3144",
-      "retrieval_ms": 51.01091499091126,
+      "retrieval_ms": 49.38034201040864,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1138,7 +1138,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-8f148a4aec",
-      "retrieval_ms": 44.680567996692844,
+      "retrieval_ms": 47.20208600338083,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1160,7 +1160,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-a2c00a9f8b",
-      "retrieval_ms": 44.647675997111946,
+      "retrieval_ms": 46.861946990247816,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1182,7 +1182,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-923b93519f",
-      "retrieval_ms": 45.02702600439079,
+      "retrieval_ms": 46.73316399566829,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1204,7 +1204,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-41dab0f0e5",
-      "retrieval_ms": 44.42276900226716,
+      "retrieval_ms": 47.152801998890936,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 1.0,
@@ -1226,7 +1226,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-d950b1c9df",
-      "retrieval_ms": 44.80601799150463,
+      "retrieval_ms": 45.41004399652593,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1248,7 +1248,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-c294db17eb",
-      "retrieval_ms": 44.71159400418401,
+      "retrieval_ms": 44.31928199483082,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1270,7 +1270,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-3a97a4fbfe",
-      "retrieval_ms": 43.83681999752298,
+      "retrieval_ms": 44.26189600781072,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1292,7 +1292,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-28673b1f56",
-      "retrieval_ms": 45.09264598891605,
+      "retrieval_ms": 44.7283109970158,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1314,7 +1314,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-f0de3d22fc",
-      "retrieval_ms": 44.0252279950073,
+      "retrieval_ms": 44.37698199762963,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1336,7 +1336,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-a8da0ea627",
-      "retrieval_ms": 44.06896300497465,
+      "retrieval_ms": 44.197823997819796,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1358,7 +1358,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-e2b8c0ac65",
-      "retrieval_ms": 45.33612300292589,
+      "retrieval_ms": 44.514858003822155,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1380,7 +1380,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-22723db9ff",
-      "retrieval_ms": 45.417771994834766,
+      "retrieval_ms": 44.45187500095926,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1402,7 +1402,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-afc82f56bf",
-      "retrieval_ms": 44.02681298961397,
+      "retrieval_ms": 44.485122998594306,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1424,7 +1424,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-8ab362f0e3",
-      "retrieval_ms": 44.20766999828629,
+      "retrieval_ms": 44.33852099464275,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -1446,7 +1446,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-51c51e5707",
-      "retrieval_ms": 44.436537005822174,
+      "retrieval_ms": 45.43301201192662,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1468,7 +1468,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-23ecce09ca",
-      "retrieval_ms": 45.18911399645731,
+      "retrieval_ms": 45.55291800352279,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1490,7 +1490,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-99426bab62",
-      "retrieval_ms": 43.8948579976568,
+      "retrieval_ms": 44.07500800152775,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1512,7 +1512,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-5c2f0c36e5",
-      "retrieval_ms": 43.98568900069222,
+      "retrieval_ms": 44.91691400471609,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1534,7 +1534,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-950416d079",
-      "retrieval_ms": 44.69166899798438,
+      "retrieval_ms": 44.73622000659816,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1556,7 +1556,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-fa19df4328",
-      "retrieval_ms": 43.934986999374814,
+      "retrieval_ms": 45.43124699557666,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1578,7 +1578,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-30f54538b9",
-      "retrieval_ms": 44.81404900434427,
+      "retrieval_ms": 45.14090399607085,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1600,7 +1600,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-666b59cbb6",
-      "retrieval_ms": 45.0709690048825,
+      "retrieval_ms": 44.87250199599657,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.5,
@@ -1622,7 +1622,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-b3a85d4eda",
-      "retrieval_ms": 43.933212000411004,
+      "retrieval_ms": 44.57120499864686,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1644,7 +1644,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-60504fa849",
-      "retrieval_ms": 44.43560499930754,
+      "retrieval_ms": 44.480411990662105,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1666,7 +1666,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-83be086895",
-      "retrieval_ms": 44.020330999046564,
+      "retrieval_ms": 43.962922994978726,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1688,7 +1688,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-bbfc5e240c",
-      "retrieval_ms": 44.345721005811356,
+      "retrieval_ms": 44.54649399849586,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1710,7 +1710,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-fa359783b6",
-      "retrieval_ms": 44.41407400008757,
+      "retrieval_ms": 48.7539080058923,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1732,17 +1732,17 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-6ac3514931",
-      "retrieval_ms": 54.58143800206017,
-      "recall@1": 0.0,
+      "retrieval_ms": 44.63573600514792,
+      "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
       "recall@20": 1.0,
       "complete@10": 1.0,
       "complete@20": 1.0,
-      "ndcg@10": 0.6309297535714575,
-      "mrr": 0.5,
+      "ndcg@10": 1.0,
+      "mrr": 1.0,
       "strict_recall@10": 1.0,
-      "context_words@10": 1705.0,
+      "context_words@10": 1548.0,
       "recall@500w": 1.0,
       "recall@1000w": 1.0,
       "recall@2000w": 1.0,
@@ -1754,7 +1754,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-4e51f48592",
-      "retrieval_ms": 44.14623600314371,
+      "retrieval_ms": 44.97228800028097,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1776,7 +1776,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-a4b3d7b618",
-      "retrieval_ms": 44.82967399235349,
+      "retrieval_ms": 44.936156991752796,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1798,7 +1798,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-fa04780483",
-      "retrieval_ms": 44.31724899041001,
+      "retrieval_ms": 47.35123900172766,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1820,7 +1820,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-6c4a8e486c",
-      "retrieval_ms": 43.75827498733997,
+      "retrieval_ms": 44.26532100478653,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1842,7 +1842,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-1cafa4e734",
-      "retrieval_ms": 44.37932699511293,
+      "retrieval_ms": 44.66065400629304,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1864,7 +1864,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-fc51eb033f",
-      "retrieval_ms": 45.151083992095664,
+      "retrieval_ms": 45.28936100541614,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1886,7 +1886,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-9207d5e22c",
-      "retrieval_ms": 44.08040500129573,
+      "retrieval_ms": 44.503562996396795,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1908,7 +1908,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-4ecb62cac2",
-      "retrieval_ms": 43.894064001506194,
+      "retrieval_ms": 44.795925001380965,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -1930,7 +1930,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-d8dc03abc2",
-      "retrieval_ms": 43.670026992913336,
+      "retrieval_ms": 43.87094399135094,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1952,7 +1952,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-d445f5ab12",
-      "retrieval_ms": 44.4382370042149,
+      "retrieval_ms": 44.245598997804336,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1974,7 +1974,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-a18a1e01b3",
-      "retrieval_ms": 43.939754003076814,
+      "retrieval_ms": 44.48015498928726,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -1996,7 +1996,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-a96c0fbfdf",
-      "retrieval_ms": 44.630409000092186,
+      "retrieval_ms": 44.723375991452485,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2018,7 +2018,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-4aa4faa3cd",
-      "retrieval_ms": 44.11558000720106,
+      "retrieval_ms": 44.00738899130374,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2040,7 +2040,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-17cd146474",
-      "retrieval_ms": 44.20999799913261,
+      "retrieval_ms": 44.31012300483417,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2062,7 +2062,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-ef5160d7d0",
-      "retrieval_ms": 44.17959500278812,
+      "retrieval_ms": 44.385863991919905,
       "recall@1": 1.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2084,7 +2084,7 @@
       "qtype": "local",
       "tags": [],
       "cluster": "L-99a0cb2653",
-      "retrieval_ms": 44.64803099108394,
+      "retrieval_ms": 44.42761398968287,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 1.0,
@@ -2108,7 +2108,7 @@
         "comparison"
       ],
       "cluster": "entity:tokyo electron",
-      "retrieval_ms": 48.92489800113253,
+      "retrieval_ms": 54.026786994654685,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2132,7 +2132,7 @@
         "comparison"
       ],
       "cluster": "entity:apple",
-      "retrieval_ms": 52.23022798600141,
+      "retrieval_ms": 47.892791000776924,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2156,7 +2156,7 @@
         "comparison"
       ],
       "cluster": "entity:huawei",
-      "retrieval_ms": 47.74016799638048,
+      "retrieval_ms": 50.18058299901895,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -2180,7 +2180,7 @@
         "comparison"
       ],
       "cluster": "entity:apple",
-      "retrieval_ms": 50.8464640006423,
+      "retrieval_ms": 49.149069003760815,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2204,7 +2204,7 @@
         "comparison"
       ],
       "cluster": "entity:nvidia",
-      "retrieval_ms": 53.673503003665246,
+      "retrieval_ms": 54.754394994233735,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2228,7 +2228,7 @@
         "comparison"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 48.7647029949585,
+      "retrieval_ms": 49.19955700461287,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2252,7 +2252,7 @@
         "comparison"
       ],
       "cluster": "entity:huawei",
-      "retrieval_ms": 47.94873399077915,
+      "retrieval_ms": 48.74460000428371,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2276,7 +2276,7 @@
         "comparison"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 47.79065201000776,
+      "retrieval_ms": 49.0184279915411,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2300,7 +2300,7 @@
         "comparison"
       ],
       "cluster": "entity:smic",
-      "retrieval_ms": 52.27885799831711,
+      "retrieval_ms": 49.01404399424791,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2324,7 +2324,7 @@
         "comparison"
       ],
       "cluster": "entity:tesla",
-      "retrieval_ms": 47.90806099481415,
+      "retrieval_ms": 47.54652199335396,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2348,7 +2348,7 @@
         "comparison"
       ],
       "cluster": "entity:synopsys",
-      "retrieval_ms": 54.03700099850539,
+      "retrieval_ms": 52.47471599432174,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2372,7 +2372,7 @@
         "comparison"
       ],
       "cluster": "entity:google",
-      "retrieval_ms": 48.455836993525736,
+      "retrieval_ms": 51.96557199815288,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2396,7 +2396,7 @@
         "comparison"
       ],
       "cluster": "entity:apple",
-      "retrieval_ms": 48.84799801220652,
+      "retrieval_ms": 51.15374599699862,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -2420,7 +2420,7 @@
         "comparison"
       ],
       "cluster": "entity:cadence",
-      "retrieval_ms": 48.289502010447904,
+      "retrieval_ms": 49.22135600645561,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2444,7 +2444,7 @@
         "comparison"
       ],
       "cluster": "entity:amazon",
-      "retrieval_ms": 51.76188499899581,
+      "retrieval_ms": 48.5239069967065,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2468,7 +2468,7 @@
         "comparison"
       ],
       "cluster": "entity:umc",
-      "retrieval_ms": 48.564078999334015,
+      "retrieval_ms": 48.80592900735792,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2492,7 +2492,7 @@
         "comparison"
       ],
       "cluster": "entity:broadcom",
-      "retrieval_ms": 57.205442994018085,
+      "retrieval_ms": 52.25966600119136,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2516,7 +2516,7 @@
         "comparison"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 52.71428800188005,
+      "retrieval_ms": 51.775225991150364,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2540,7 +2540,7 @@
         "comparison"
       ],
       "cluster": "entity:huawei",
-      "retrieval_ms": 50.14112300705165,
+      "retrieval_ms": 51.69754799862858,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -2564,7 +2564,7 @@
         "comparison"
       ],
       "cluster": "entity:umc",
-      "retrieval_ms": 47.88692599686328,
+      "retrieval_ms": 48.60062099760398,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2588,7 +2588,7 @@
         "comparison"
       ],
       "cluster": "entity:smic",
-      "retrieval_ms": 49.756186999729834,
+      "retrieval_ms": 48.46775899932254,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2612,7 +2612,7 @@
         "comparison"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 49.399679992347956,
+      "retrieval_ms": 49.109436993603595,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2636,7 +2636,7 @@
         "comparison"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 52.24388500209898,
+      "retrieval_ms": 49.202902999240905,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2660,7 +2660,7 @@
         "comparison"
       ],
       "cluster": "entity:nvidia",
-      "retrieval_ms": 50.169834998087026,
+      "retrieval_ms": 51.666259998455644,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2684,19 +2684,19 @@
         "comparison"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 60.79487199895084,
+      "retrieval_ms": 49.377450995962135,
       "recall@1": 0.0,
-      "recall@5": 0.5,
+      "recall@5": 1.0,
       "recall@10": 1.0,
       "recall@20": 1.0,
       "complete@10": 1.0,
       "complete@20": 1.0,
-      "ndcg@10": 0.45560514958746035,
-      "mrr": 0.2,
+      "ndcg@10": 0.5012658353418871,
+      "mrr": 0.25,
       "strict_recall@10": 0.5,
-      "context_words@10": 1743.0,
+      "context_words@10": 1784.0,
       "recall@500w": 0.0,
-      "recall@1000w": 0.5,
+      "recall@1000w": 1.0,
       "recall@2000w": 1.0,
       "recall@3000w": 1.0,
       "recall@5000w": 1.0
@@ -2708,7 +2708,7 @@
         "comparison"
       ],
       "cluster": "entity:arm",
-      "retrieval_ms": 49.74339700129349,
+      "retrieval_ms": 51.21818200859707,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -2732,7 +2732,7 @@
         "comparison"
       ],
       "cluster": "entity:apple",
-      "retrieval_ms": 47.34893899876624,
+      "retrieval_ms": 48.522334996960126,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -2756,7 +2756,7 @@
         "comparison"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 48.91306698846165,
+      "retrieval_ms": 49.229771000682376,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -2780,7 +2780,7 @@
         "comparison"
       ],
       "cluster": "entity:huawei",
-      "retrieval_ms": 47.88290699070785,
+      "retrieval_ms": 49.0324860002147,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2804,7 +2804,7 @@
         "comparison"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 49.14547000953462,
+      "retrieval_ms": 51.120361997163855,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2828,7 +2828,7 @@
         "comparison"
       ],
       "cluster": "entity:umc",
-      "retrieval_ms": 52.17016600363422,
+      "retrieval_ms": 48.713016003603116,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2852,17 +2852,17 @@
         "comparison"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 52.91512199619319,
+      "retrieval_ms": 49.0626029932173,
       "recall@1": 0.5,
       "recall@5": 0.5,
-      "recall@10": 0.5,
+      "recall@10": 1.0,
       "recall@20": 1.0,
-      "complete@10": 0.0,
+      "complete@10": 1.0,
       "complete@20": 1.0,
-      "ndcg@10": 0.6131471927654584,
+      "ndcg@10": 0.7903864795495061,
       "mrr": 1.0,
       "strict_recall@10": 0.5,
-      "context_words@10": 1687.0,
+      "context_words@10": 1729.0,
       "recall@500w": 0.5,
       "recall@1000w": 0.5,
       "recall@2000w": 1.0,
@@ -2876,7 +2876,7 @@
         "comparison"
       ],
       "cluster": "entity:amazon",
-      "retrieval_ms": 48.271891006152146,
+      "retrieval_ms": 49.02767100429628,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2900,7 +2900,7 @@
         "comparison"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 49.33332699874882,
+      "retrieval_ms": 54.050054008257575,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2924,7 +2924,7 @@
         "comparison"
       ],
       "cluster": "entity:qualcomm",
-      "retrieval_ms": 51.81435600388795,
+      "retrieval_ms": 54.87253399041947,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2948,7 +2948,7 @@
         "comparison"
       ],
       "cluster": "entity:samsung",
-      "retrieval_ms": 49.04153700044844,
+      "retrieval_ms": 53.204167998046614,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -2972,7 +2972,7 @@
         "comparison"
       ],
       "cluster": "entity:arm",
-      "retrieval_ms": 48.01596900506411,
+      "retrieval_ms": 49.00402600469533,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -2996,7 +2996,7 @@
         "comparison"
       ],
       "cluster": "entity:samsung",
-      "retrieval_ms": 48.041750997072086,
+      "retrieval_ms": 48.79209400678519,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -3020,7 +3020,7 @@
         "comparison"
       ],
       "cluster": "entity:qualcomm",
-      "retrieval_ms": 50.558885995997116,
+      "retrieval_ms": 52.51331900944933,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -3044,7 +3044,7 @@
         "comparison"
       ],
       "cluster": "entity:apple",
-      "retrieval_ms": 48.09558500710409,
+      "retrieval_ms": 48.550334002356976,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.5,
@@ -3068,7 +3068,7 @@
         "comparison"
       ],
       "cluster": "entity:umc",
-      "retrieval_ms": 48.43480300041847,
+      "retrieval_ms": 48.594385996693745,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -3092,7 +3092,7 @@
         "comparison"
       ],
       "cluster": "entity:umc",
-      "retrieval_ms": 48.905313000432216,
+      "retrieval_ms": 50.14201899757609,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -3116,7 +3116,7 @@
         "comparison"
       ],
       "cluster": "entity:huawei",
-      "retrieval_ms": 49.38891000347212,
+      "retrieval_ms": 52.679872009321116,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -3142,7 +3142,7 @@
       "n_relevant_companies": 35,
       "company_coverage@10": 0.8,
       "company_coverage@20": 0.8,
-      "retrieval_ms": 44.36366999289021,
+      "retrieval_ms": 47.764620001544245,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3168,7 +3168,7 @@
       "n_relevant_companies": 35,
       "company_coverage@10": 1.0,
       "company_coverage@20": 0.9,
-      "retrieval_ms": 44.792753004003316,
+      "retrieval_ms": 45.85460999805946,
       "recall@1": 0.0,
       "recall@5": 0.16666666666666666,
       "recall@10": 0.16666666666666666,
@@ -3194,7 +3194,7 @@
       "n_relevant_companies": 37,
       "company_coverage@10": 0.9,
       "company_coverage@20": 0.85,
-      "retrieval_ms": 45.10257299989462,
+      "retrieval_ms": 44.947805989068,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3220,7 +3220,7 @@
       "n_relevant_companies": 39,
       "company_coverage@10": 1.0,
       "company_coverage@20": 1.0,
-      "retrieval_ms": 45.02451700682286,
+      "retrieval_ms": 51.91515199840069,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3246,7 +3246,7 @@
       "n_relevant_companies": 32,
       "company_coverage@10": 0.9,
       "company_coverage@20": 0.75,
-      "retrieval_ms": 44.97107600036543,
+      "retrieval_ms": 45.4941019997932,
       "recall@1": 0.0,
       "recall@5": 0.4,
       "recall@10": 0.4,
@@ -3272,7 +3272,7 @@
       "n_relevant_companies": 33,
       "company_coverage@10": 0.5,
       "company_coverage@20": 0.4,
-      "retrieval_ms": 45.07515700242948,
+      "retrieval_ms": 45.070867010508664,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.16666666666666666,
@@ -3298,7 +3298,7 @@
       "n_relevant_companies": 37,
       "company_coverage@10": 1.0,
       "company_coverage@20": 0.95,
-      "retrieval_ms": 44.92296000535134,
+      "retrieval_ms": 45.129974008887075,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3324,7 +3324,7 @@
       "n_relevant_companies": 33,
       "company_coverage@10": 0.7,
       "company_coverage@20": 0.65,
-      "retrieval_ms": 44.37261699058581,
+      "retrieval_ms": 45.2664820040809,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.16666666666666666,
@@ -3350,7 +3350,7 @@
       "n_relevant_companies": 39,
       "company_coverage@10": 1.0,
       "company_coverage@20": 0.85,
-      "retrieval_ms": 45.26954999892041,
+      "retrieval_ms": 44.935801008250564,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3376,7 +3376,7 @@
       "n_relevant_companies": 38,
       "company_coverage@10": 1.0,
       "company_coverage@20": 0.9,
-      "retrieval_ms": 45.71354200015776,
+      "retrieval_ms": 47.37957900215406,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3402,7 +3402,7 @@
       "n_relevant_companies": 38,
       "company_coverage@10": 1.0,
       "company_coverage@20": 0.95,
-      "retrieval_ms": 44.73191099532414,
+      "retrieval_ms": 44.70921499887481,
       "recall@1": 0.0,
       "recall@5": 0.16666666666666666,
       "recall@10": 0.16666666666666666,
@@ -3428,7 +3428,7 @@
       "n_relevant_companies": 36,
       "company_coverage@10": 0.9,
       "company_coverage@20": 0.8,
-      "retrieval_ms": 44.55901500477921,
+      "retrieval_ms": 44.98790801153518,
       "recall@1": 0.0,
       "recall@5": 0.0,
       "recall@10": 0.0,
@@ -3452,7 +3452,7 @@
         "bridge"
       ],
       "cluster": "entity:cadence",
-      "retrieval_ms": 51.633880008012056,
+      "retrieval_ms": 52.32472000352573,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -3476,7 +3476,7 @@
         "bridge"
       ],
       "cluster": "entity:qualcomm",
-      "retrieval_ms": 55.61917299928609,
+      "retrieval_ms": 52.48852299700957,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -3500,7 +3500,7 @@
         "bridge"
       ],
       "cluster": "entity:smic",
-      "retrieval_ms": 50.9547089895932,
+      "retrieval_ms": 54.85585400310811,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -3524,7 +3524,7 @@
         "bridge"
       ],
       "cluster": "entity:huawei",
-      "retrieval_ms": 50.843652003095485,
+      "retrieval_ms": 51.661637000506744,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -3548,7 +3548,7 @@
         "bridge"
       ],
       "cluster": "entity:tokyo electron",
-      "retrieval_ms": 52.503079001326114,
+      "retrieval_ms": 51.92226299550384,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -3572,7 +3572,7 @@
         "bridge"
       ],
       "cluster": "entity:samsung",
-      "retrieval_ms": 49.86098999506794,
+      "retrieval_ms": 52.12386399216484,
       "recall@1": 0.0,
       "recall@5": 1.0,
       "recall@10": 1.0,
@@ -3596,7 +3596,7 @@
         "bridge"
       ],
       "cluster": "entity:google",
-      "retrieval_ms": 51.1195239960216,
+      "retrieval_ms": 50.678768995567225,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -3620,7 +3620,7 @@
         "bridge"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 51.17816699203104,
+      "retrieval_ms": 56.613180990098044,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -3644,7 +3644,7 @@
         "bridge"
       ],
       "cluster": "entity:tesla",
-      "retrieval_ms": 51.32591100118589,
+      "retrieval_ms": 52.90022099507041,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -3668,18 +3668,18 @@
         "bridge"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 50.406444002874196,
+      "retrieval_ms": 52.189890993759036,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
       "recall@20": 1.0,
       "complete@10": 1.0,
       "complete@20": 1.0,
-      "ndcg@10": 0.9197207891481876,
+      "ndcg@10": 1.0,
       "mrr": 1.0,
       "strict_recall@10": 0.5,
-      "context_words@10": 1436.0,
-      "recall@500w": 0.5,
+      "context_words@10": 1395.0,
+      "recall@500w": 1.0,
       "recall@1000w": 1.0,
       "recall@2000w": 1.0,
       "recall@3000w": 1.0,
@@ -3692,7 +3692,7 @@
         "bridge"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 53.1691630021669,
+      "retrieval_ms": 52.44840199884493,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 1.0,
@@ -3716,7 +3716,7 @@
         "bridge"
       ],
       "cluster": "entity:arm",
-      "retrieval_ms": 52.9316820029635,
+      "retrieval_ms": 54.16766900452785,
       "recall@1": 0.0,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -3740,7 +3740,7 @@
         "bridge"
       ],
       "cluster": "entity:tsmc",
-      "retrieval_ms": 53.58261500077788,
+      "retrieval_ms": 52.79028799850494,
       "recall@1": 0.5,
       "recall@5": 0.5,
       "recall@10": 0.5,
@@ -3764,7 +3764,7 @@
         "bridge"
       ],
       "cluster": "entity:qualcomm",
-      "retrieval_ms": 52.20490200736094,
+      "retrieval_ms": 54.332722997060046,
       "recall@1": 0.5,
       "recall@5": 1.0,
       "recall@10": 1.0,
