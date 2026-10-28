@@ -172,9 +172,25 @@ Planned (by phase):
 
   A4 vs A2-RR: +0.175 [−0.020, +0.341] (cluster bootstrap by linking entity); comparison +0.140 [0.000, +0.262]; bridge +0.286 (n = 14, wide CI). HippoRAG-style PPR and weighted RRF lost and were removed (user rule: keep it explainable).
 
-- **Step 5, sector-wide questions (A5 = A4 + company-diverse ranking):** when a question names no company, the best passage of each company goes first, then the rest. Dev global company_coverage@10 0.475 → **0.892** (+0.417 [+0.317, +0.517]); @20 0.817. Other question types unchanged. Deviation from the brief's "A5 community search": the reviewer and the research scout both found that Leiden communities on this graph give industry peer groups, not risk themes, and this is far simpler. Caveat: coverage measures breadth (on-theme passage per company), not answer quality; n = 12 dev questions, so the test set (31) decides.
+- **Step 5, sector-wide questions (A5 = A4 + company-diverse ranking):** when a question names no company, the best passage of each company goes first. Dev global company_coverage@10 0.475 → 0.892. **Honest reading (Phase 3 review):** the base rate for ANY 10 different companies is 0.923, because most themes apply to 32–39 of 39 companies. So A5's gain is diversity: it makes the top 10 span 10 companies. Whether those passages answer the question is left to the Phase 4 answer judge. Deviation from the brief's "A5 community search": Leiden communities give peer groups, not themes (reviewer and research scout).
 
-**Phase 3 result (dev): A0 → A5 recall@10 0.276 → 0.791; multi-hop complete@10 0.018 → 0.772; global coverage@10 0.508 → 0.892.** Pending: human confirmation of the two AI-labelled extraction samples; one held-out test run of the final configs.
+### Phase 3 review fixes (2026-10-28; user: "fix all 7, then test")
+1. A5 coverage reported against its base rate (`coverage_base_rate` in results), and the claim reworded as above.
+2. **Alias ablation:** graph and linker rebuilt without the hand-listed aliases of the 17 dev multi-hop linking entities (SEC list kept). Multi-hop complete@10: A2-RR 0.597 / **A4 without those aliases 0.737** / A4 full 0.789; bridge 0.643 either way. About three quarters of the graph's gain does not depend on the hand-listed aliases.
+3. SEC gazetteer matches full names only (≥ 2 words, pure legal suffixes removed). This fixed Merck KGaA → MRK, STAr Technologies → Star Group, "Target" → TGT. sha256 checked on load; `python -m plexus.ingest.sec_reference` re-fetches.
+4. In-order quote match: one sentence only, no skipped or preceding negation, low density only for lists.
+5. Single-word company mentions must be capitalised ("arm's length" no longer links Arm); filer short-name aliases; one shared linker for A2-RR/A4/A5.
+6. (see below)
+7. Unused igraph/leidenalg removed.
+- After fixes: A4/A5 multi-hop complete@10 **0.789** (bridge 0.643, comparison 0.837), all recall@10 0.795.
+
+**How the system works, in 6 steps (for interviews):**
+1. Split each filing into sections and passages, and label each passage with company, form and section.
+2. Search two ways, by keywords (BM25) and by meaning (embeddings), and merge the rankings (RRF).
+3. Offline, a small local LLM lists company relationships in each passage ("AMD is manufactured by TSMC"); a relationship is kept only if its quote is found in the filing.
+4. Spellings of a company ("TSMC", "Taiwan Semiconductor") are merged with an alias list and the SEC company list, giving a graph.
+5. For a question naming companies: find them in the graph, follow the links between them (or to a shared partner), and add those links' source passages to the results.
+6. For a sector-wide question naming no company: put one best passage per company first.
 
 ## Held-out test set (2026-10-27)
 - Same procedure as dev: Gemini drafts (user-style phrasing, dev passages and company pairs excluded) -> 3 AI reviewer agents -> human. You approved the AI pre-review as a whole ("most edits not required, same meaning"), so human/AI agreement is 100% by construction. Report it that way.

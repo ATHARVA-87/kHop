@@ -367,12 +367,13 @@ def build(extraction_files: list[Path], resolver: Resolver, out_dir: Path) -> di
     return {k: v for k, v in log.items() if k != "fuzzy_merges"} | {"fuzzy_merges": len(remap)}
 
 
-def load_resolver(data_dir: Path, snapshot: str) -> Resolver:
+def load_resolver(data_dir: Path, snapshot: str, aliases_file: str | None = None) -> Resolver:
     filers = {}
     for line in (data_dir / "snapshots" / f"{snapshot}.manifest.jsonl").read_text().splitlines():
         m = json.loads(line)
         filers.setdefault(m["ticker"], m)
-    aliases = yaml.safe_load((REPO_ROOT / "configs" / "entity_aliases.yaml").read_text())
+    path = REPO_ROOT / (aliases_file or "configs/entity_aliases.yaml")
+    aliases = yaml.safe_load(path.read_text())
     stats = _name_word_stats(data_dir, snapshot, filers)
     caps = {t: (c / n if n else 0.0) for t, (n, c) in stats.items()}
     return Resolver(filers, aliases, distinctive_filer_tokens(filers, stats), caps,
@@ -424,13 +425,17 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--snapshot", default="semis-2025")
     ap.add_argument("--extractions", type=Path, nargs="*", default=None)
     ap.add_argument("--out", type=Path, default=None)
+    ap.add_argument(
+        "--aliases", default=None, help="alias table (default configs/entity_aliases.yaml)"
+    )
     a = ap.parse_args(argv)
     s = Settings.load()
     gdir = s.data_dir / "graph" / a.snapshot
     # validated output (current rules, `extract --revalidate`) if present, else the raw run
     validated = gdir / "extractions_validated.jsonl"
     files = a.extractions or [validated if validated.exists() else gdir / "extractions.jsonl"]
-    print(json.dumps(build(files, load_resolver(s.data_dir, a.snapshot), a.out or gdir), indent=2))
+    resolver = load_resolver(s.data_dir, a.snapshot, a.aliases)
+    print(json.dumps(build(files, resolver, a.out or gdir), indent=2))
     return 0
 
 

@@ -133,6 +133,11 @@ def score_retrieval(
         if kw and theme_labels and theme_labels.get(kw):
             extra["theme"] = kw
             extra["n_relevant_companies"] = len(theme_labels[kw])
+            # what ANY k different companies would score if each passage were on-theme: most
+            # themes apply to 32-39 of 39 companies, so coverage near this is diversity, not
+            # retrieval skill (Phase 3 review)
+            n_companies = len({d.split("_")[0] for d in doc_texts})
+            extra["coverage_base_rate"] = len(theme_labels[kw]) / max(n_companies, 1)
             for kk in (10, 20):
                 if kk <= k:
                     extra[f"company_coverage@{kk}"] = company_coverage(
@@ -197,7 +202,7 @@ BUDGET_DEPTH = 60  # hits fetched so a 5,000-word budget fills even with ~160-wo
 METRICS = [
     "recall@1", "recall@5", "recall@10", "recall@20", "ndcg@10", "mrr",
     "complete@10", "complete@20", "strict_recall@10",
-    "company_coverage@10", "company_coverage@20", "context_words@10",
+    "company_coverage@10", "company_coverage@20", "coverage_base_rate", "context_words@10",
     *(f"recall@{b}w" for b in WORD_BUDGETS),
 ]  # fmt: skip
 

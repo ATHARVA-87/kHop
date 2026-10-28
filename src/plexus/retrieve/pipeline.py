@@ -105,7 +105,7 @@ def make_linker(cfg: ExperimentConfig, data_dir: Path):
     r = cfg.retrieval
     gdir = Path(r.graph_dir) if r.graph_dir else data_dir / "graph" / cfg.snapshot
     ents = load_entities(gdir) if (gdir / "entities.jsonl").exists() else []
-    return EntityLinker(load_resolver(data_dir, cfg.snapshot), ents)
+    return EntityLinker(load_resolver(data_dir, cfg.snapshot, r.aliases_file), ents)
 
 
 def _graph_hybrid(cfg: ExperimentConfig, data_dir: Path, index_path: Path, base: Retriever):

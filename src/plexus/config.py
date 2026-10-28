@@ -56,6 +56,7 @@ class RetrievalConfig(_Strict):
     rerank: RerankConfig | None = None  # A3
     # A4 graph_hybrid: graph traversal hits fused with the hybrid list
     graph_dir: str | None = None  # default data/graph/<snapshot>
+    aliases_file: str | None = None  # default configs/entity_aliases.yaml (ablations only)
     graph_max_edges: int = 12
     # A5: questions naming no company get one passage per company first
     company_diverse: bool = False
