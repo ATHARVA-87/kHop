@@ -17,7 +17,7 @@
 
 **State (2026-10-28, paused for the night):** Phases 0–3 done (PR #5 for Phase 3 open, you merge). Phase 4 on branch `phase4-router` (pushed, clean). Phase 4 gate met: the A6 rule router beats always-X on dev and test and equals the oracle. Honest reading: the gain is the reranker on single-company questions.
 
-**Waiting on you:** label `data/golden/judge_labels.csv`, 49 answers (blind, stratified). Fill `human_verdict` with `correct` / `partially_correct` / `incorrect`, save it in place, then say "labels done".
+**Status 2026-10-28 evening:** your 49 blind judge labels are final (38 correct / 10 partial / 1 incorrect). The Gemini judge agrees poorly (kappa 0.064; 0.133 with your rubric): too lenient. RAGAS (separate `ragas` conda env, `make ragas`) scored 14 of the 49 before Gemini's free daily quota ran out (429). Those 14 are cached; **re-run `make ragas` after the quota resets (midnight Pacific)** to finish. Early sign: RAGAS F1 is too harsh (it penalises extra correct detail); recall mode (matching your rubric) is added and both are reported.
 
 **Next Claude steps, in order (agreed plan):**
 1. `python -m plexus.eval.judge agreement --results results/a6_router.json` gives kappa and the confusion matrix. If the judge is lenient (it rated two half-answers correct), make it stricter (gemini-3.6-flash when not overloaded, or a stricter prompt), re-measure, and report both.
