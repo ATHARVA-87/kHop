@@ -81,3 +81,18 @@ def test_bridge_question_returns_both_evidence_chunks_and_fuses():
     assert [
         h.chunk_id for h in GraphHybridRetriever(g, Base()).retrieve("What is inflation?", 3)
     ] == ["X#1"]
+
+
+def test_partial_names_link_and_full_names_score_higher():
+    filers = {
+        "SWKS": {"company": "SKYWORKS SOLUTIONS, INC."},
+        "DIOD": {"company": "DIODES INC /DEL/"},
+    }
+    res = Resolver(
+        filers, {}, filer_tokens={"skyworks": "SWKS"}, token_caps={"diodes": 0.3, "skyworks": 1.0}
+    )
+    link = EntityLinker(res, [])
+    assert link.link_scored("Who are Skyworks' customers?") == [("company:SWKS", 0.6)]
+    assert link.link_scored("Who are Skyworks Solutions' customers?") == [("company:SWKS", 1.0)]
+    assert link.link("Which companies make diodes?") == []  # common word, lowercase
+    assert link.link("What does Diodes say about tariffs?") == ["company:DIOD"]

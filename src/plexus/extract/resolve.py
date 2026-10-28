@@ -54,23 +54,6 @@ def norm_key(name: str) -> str:
     return " ".join(re.findall(r"[a-z0-9]+", n.lower()))
 
 
-_GENERIC_TAIL = {"semiconductor", "semiconductors", "solutions", "technology", "technologies",
-                 "intertechnology", "systems"}  # fmt: skip
-
-
-def short_key(key: str) -> str:
-    """How people shorten a filer's name: 'skyworks solutions' -> 'skyworks', 'nxp
-    semiconductors' -> 'nxp', 'micron technology' -> 'micron'. Only generic trailing words go,
-    and only if a distinctive word (4+ letters, or an all-letter acronym like 'nxp') remains."""
-    toks = key.split()
-    while len(toks) > 1 and toks[-1] in _GENERIC_TAIL:
-        toks = toks[:-1]
-    short = " ".join(toks)
-    return (
-        short if short != key and (len(short) >= 4 or (len(short) == 3 and short.isalpha())) else ""
-    )
-
-
 def _slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
 
@@ -81,17 +64,75 @@ def concept_key(name: str) -> str:
     return " ".join(s_stem(t) for t in norm_key(name).split())
 
 
+# Words that appear in company names but say nothing about WHICH company, plus places.
+GENERIC_NAME_WORDS = {
+    "semiconductor", "semiconductors", "solutions", "technology", "technologies",
+    "intertechnology", "systems", "devices", "instruments", "materials", "power", "micro",
+    "integrations", "international", "innovation", "logic", "laboratories", "labs", "research",
+    "electronics", "microsystems", "holding", "holdings", "group", "manufacturing", "precision",
+    "industry", "industries", "products", "global", "advanced", "applied", "analog", "digital",
+    "data", "computer", "network", "networks", "national", "united", "general", "corp", "inc",
+    "co", "company", "corporation", "incorporated", "limited", "ltd", "plc", "llc", "the",
+}  # fmt: skip
+PLACE_WORDS = {"texas", "taiwan", "china", "japan", "korea", "america", "american", "europe",
+               "asia", "pacific", "california", "silicon"}  # fmt: skip
+
+
+def token_case_stats(texts, tokens: set[str]) -> dict[str, list[int]]:
+    """For each token: [occurrences, occurrences written with a capital first letter]."""
+    out = {t: [0, 0] for t in tokens}
+    for text in texts:
+        for m in re.finditer(r"[A-Za-z][A-Za-z0-9]*", text):
+            low = m.group().lower()
+            if low in out:
+                out[low][0] += 1
+                out[low][1] += m.group()[0].isupper()
+    return out
+
+
+def distinctive_filer_tokens(
+    filers: dict[str, dict], stats: dict[str, list[int]], min_cap: float = 0.9, min_count: int = 5
+) -> dict[str, str]:
+    """token -> ticker, for name words that identify exactly one filer on their own
+    ("skyworks", "nvidia", "cirrus"). A word qualifies if it is in only one filer's name, is
+    not generic or a place, and the filings write it capitalised >= min_cap of the time, i.e.
+    it is used as a proper noun ("applied", "onto", "diodes" fail: common lowercase words)."""
+    owners: dict[str, set[str]] = defaultdict(set)
+    for ticker, m in filers.items():
+        for t in norm_key(clean_company(m["company"])).split():
+            owners[t].add(ticker)
+    out = {}
+    for t, tick in owners.items():
+        if len(tick) != 1 or len(t) < 3 or t in GENERIC_NAME_WORDS or t in PLACE_WORDS:
+            continue
+        n, cap = stats.get(t, [0, 0])
+        if n >= min_count and cap / n >= min_cap:
+            out[t] = next(iter(tick))
+    return out
+
+
 class Resolver:
-    def __init__(self, filers: dict[str, dict], aliases: dict[str, dict[str, list[str]]]):
+    def __init__(
+        self,
+        filers: dict[str, dict],
+        aliases: dict[str, dict[str, list[str]]],
+        filer_tokens: dict[str, str] | None = None,
+        token_caps: dict[str, float] | None = None,
+    ):
         # key -> (entity id, canonical name, method)
         self.index: dict[tuple[str, str], tuple[str, str]] = {}
         self.filer_ids: dict[str, str] = {}
+        self.filer_canon: dict[str, str] = {}
+        # a distinctive word of one filer's name links to that filer ("Skyworks")
+        self.filer_tokens = filer_tokens or {}
+        # share of capitalised uses per name word; < 0.9 means also a common word ("diodes")
+        self.token_caps = token_caps or {}
         for ticker, m in filers.items():
             eid, canon = f"company:{ticker}", clean_company(m["company"])
             self.filer_ids[ticker] = eid
+            self.filer_canon[ticker] = canon
             names = {m["company"], canon, ticker, COMMON_NAMES.get(ticker, "")}
             keys = {norm_key(n) for n in names if n}
-            keys |= {short_key(k) for k in keys}
             for k in keys:
                 if k:
                     self.index[("company", k)] = (eid, canon)
@@ -112,6 +153,16 @@ class Resolver:
         if (etype, key) in self.index:
             eid, canon = self.index[(etype, key)]
             return eid, canon, "alias"
+        if etype == "company" and self.filer_tokens:
+            # "Skyworks Semiconductor", "Skyworks Inc": one distinctive filer word, the rest
+            # generic -> that filer. Anything more specific ("Skyworks Japan") stays separate.
+            toks = key.split()
+            owners = {self.filer_tokens[t] for t in toks if t in self.filer_tokens}
+            if len(owners) == 1 and all(
+                t in self.filer_tokens or t in GENERIC_NAME_WORDS for t in toks
+            ):
+                tk = owners.pop()
+                return self.filer_ids[tk], self.filer_canon[tk], "filer_token"
         if etype in ("company", "person", "geography", "regulation"):
             return f"{etype}:{_slug(key)}", name, "normalised"
         ck = concept_key(name)
@@ -231,7 +282,30 @@ def load_resolver(data_dir: Path, snapshot: str) -> Resolver:
         m = json.loads(line)
         filers.setdefault(m["ticker"], m)
     aliases = yaml.safe_load((REPO_ROOT / "configs" / "entity_aliases.yaml").read_text())
-    return Resolver(filers, aliases)
+    stats = _name_word_stats(data_dir, snapshot, filers)
+    caps = {t: (c / n if n else 0.0) for t, (n, c) in stats.items()}
+    return Resolver(filers, aliases, distinctive_filer_tokens(filers, stats), caps)
+
+
+def _name_word_stats(
+    data_dir: Path, snapshot: str, filers: dict[str, dict]
+) -> dict[str, list[int]]:
+    """Capitalisation counts of every filer-name word over the corpus, cached on disk."""
+    cache = data_dir / "graph" / snapshot / "name_word_case.json"
+    words = {t for m in filers.values() for t in norm_key(clean_company(m["company"])).split()}
+    words |= {t for m in filers.values() for t in norm_key(m["company"]).split()}
+    if cache.exists():
+        stats = json.loads(cache.read_text())
+        if words <= set(stats):
+            return stats
+    from plexus.ingest.process import iter_docs
+
+    stats = token_case_stats(
+        (d.text for _, d in iter_docs(data_dir / "processed", snapshot)), words
+    )
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    cache.write_text(json.dumps(stats, sort_keys=True) + "\n")
+    return stats
 
 
 def main(argv: list[str] | None = None) -> int:

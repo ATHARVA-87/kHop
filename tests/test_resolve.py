@@ -71,13 +71,17 @@ def test_build_merges_variants_and_keeps_provenance(tmp_path):
     assert ents["company:NVDA"]["ticker"] == "NVDA" and ents["company:tsmc"]["ticker"] is None
 
 
-def test_short_filer_names_resolve_to_the_filer():
-    from plexus.extract.resolve import short_key
+def test_distinctive_filer_tokens_need_proper_noun_use():
+    from plexus.extract.resolve import distinctive_filer_tokens
 
-    assert short_key("skyworks solutions") == "skyworks"
-    assert short_key("nxp semiconductors") == "nxp"
-    assert short_key("micron technology") == "micron"
-    assert short_key("lam research") == ""  # nothing generic to drop
-    assert short_key("on semiconductor") == ""  # 'on' is too short to stand alone
-    r = Resolver({"SWKS": {"company": "SKYWORKS SOLUTIONS, INC."}}, {})
-    assert r.resolve_exact("Skyworks", "company")[0] == "company:SWKS"
+    filers = {"SWKS": {"company": "SKYWORKS SOLUTIONS, INC."}, "ONTO": {"company": "ONTO INNOVATION INC."},
+              "AMAT": {"company": "APPLIED MATERIALS INC /DE"}}  # fmt: skip
+    stats = {"skyworks": [50, 50], "onto": [400, 30], "applied": [300, 40], "materials": [900, 100]}
+    toks = distinctive_filer_tokens(filers, stats)
+    assert toks == {"skyworks": "SWKS"}  # onto/applied are common words; materials generic
+    r = Resolver(filers, {}, filer_tokens=toks)
+    assert r.resolve_exact("Skyworks Semiconductor", "company")[:3:2] == (
+        "company:SWKS",
+        "filer_token",
+    )
+    assert r.resolve_exact("Skyworks Japan", "company")[0] == "company:skyworks-japan"
