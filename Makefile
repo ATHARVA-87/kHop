@@ -50,7 +50,8 @@ golden: ## Build data/golden/golden.jsonl from your reviewed review.csv (+ noise
 extract: ## Graph extraction over 10-K passages with local qwen3.5:4b (~4.5 h, resumable)
 	$(PY) -m plexus.extract.extract
 
-graph: ## Resolve entities and build the LadybugDB graph from data/graph/<snapshot>/extractions.jsonl
+graph: ## Re-validate stored extractions (no LLM), resolve entities, build the LadybugDB graph
+	$(PY) -m plexus.extract.extract --revalidate
 	$(PY) -m plexus.extract.resolve
 	$(PY) -m plexus.index.graph build
 

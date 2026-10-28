@@ -24,7 +24,7 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 from plexus.config import ExperimentConfig
-from plexus.eval.metrics import locate_quote_all
+from plexus.extract.quotes import DEFAULT_CUTOFF, align_quote
 from plexus.extract.schema import (
     RELATION_SIGNATURES,
     Extraction,
@@ -205,7 +205,12 @@ def mentioned_near(name: str, text: str, start: int, end: int, window: int = 250
     return len(ac) >= 2 and re.search(rf"\b{re.escape(ac)}\b", ctx) is not None
 
 
-def validate(p: Passage, ex: Extraction) -> tuple[dict, Counter]:
+QUOTE_WORDS = (5, 120)  # v5 used 6-60; long list quotes are fine once aligned to the passage
+
+
+def validate(
+    p: Passage, ex: Extraction, quote_cutoff: float = DEFAULT_CUTOFF
+) -> tuple[dict, Counter]:
     """Keep only relations that are verifiable and well-typed. Returns the cleaned record and
     counts of what was dropped and why (reported, never silently discarded)."""
     stats: Counter = Counter()
@@ -223,17 +228,20 @@ def validate(p: Passage, ex: Extraction) -> tuple[dict, Counter]:
         if is_filer(s, p):
             s = p.company  # one canonical name for the filer
         allowed_s, allowed_o = RELATION_SIGNATURES[r.relation]
-        spans = locate_quote_all(p.text, r.quote) if 6 <= len(r.quote.split()) <= 60 else []
-        qs, qe = spans[0] if spans else (0, 0)
+        lo, hi = QUOTE_WORDS
+        n_words = len(r.quote.split())
+        # fuzzy span alignment (quotes.py): tolerates "...", punctuation and small slips
+        al = align_quote(r.quote, p.text, quote_cutoff) if lo <= n_words <= hi else None
+        qs, qe = (al.start, al.end) if al else (0, 0)
         if not s or not o or is_generic(s, st) or is_generic(o, ot):
             reason = "drop_generic_entity"
         elif s.lower() == o.lower() or (st == "company" and is_filer(o, p) and s == p.company):
             reason = "drop_self_loop"
         elif st not in allowed_s or ot not in allowed_o:
             reason = "drop_type_mismatch"
-        elif not 6 <= len(r.quote.split()) <= 60:
+        elif not lo <= n_words <= hi:
             reason = "drop_quote_length"
-        elif not spans:
+        elif al is None:
             reason = "drop_quote_not_found"
         elif s != p.company and not mentioned_near(s, p.text, qs, qe):
             reason = "drop_subject_not_filer"  # a third-party edge must name its subject
@@ -246,8 +254,11 @@ def validate(p: Passage, ex: Extraction) -> tuple[dict, Counter]:
             dropped.append({"subject": s, "subject_type": st, "relation": r.relation,
                             "object": o, "object_type": ot, "quote": r.quote, "why": reason})  # fmt: skip
             continue
+        # store the passage's own text as the citation; keep the model's copy for audit
         relations.append({"subject": s, "subject_type": st, "relation": r.relation, "object": o,
-                          "object_type": ot, "qualifier": r.qualifier.strip(), "quote": r.quote,
+                          "object_type": ot, "qualifier": r.qualifier.strip(),
+                          "quote": p.text[qs:qe], "model_quote": r.quote,
+                          "quote_score": round(al.score, 1),
                           "start": p.start + qs, "end": p.start + qe})  # fmt: skip
         stats["relations_kept"] += 1
         for name, t in ((s, st), (o, ot)):
@@ -342,6 +353,37 @@ def run(
     return dict(totals)
 
 
+def revalidate(
+    raw_path: Path, out_path: Path, data_dir: Path, snapshot: str, quote_cutoff: float
+) -> dict:
+    """Re-run validation on every stored relation (kept and dropped) with the current rules.
+    No LLM calls: v5 recorded each relation it saw, with its quote."""
+    from plexus.extract.schema import Relation
+
+    texts = {d.doc_id: d.text for _, d in iter_docs(data_dir / "processed", snapshot)}
+    totals: Counter = Counter()
+    with open(raw_path) as fin, open(out_path, "w") as fout:
+        for line in fin:
+            rec = json.loads(line)
+            p = Passage(rec["passage_id"], rec["doc_id"], rec["ticker"], rec["company"],
+                        rec["section"], rec["start"], rec["end"],
+                        texts[rec["doc_id"]][rec["start"] : rec["end"]])  # fmt: skip
+            rels = [
+                Relation(subject=r["subject"], subject_type=r["subject_type"],
+                         relation=r["relation"], object=r["object"], object_type=r["object_type"],
+                         quote=r.get("model_quote", r["quote"]), qualifier=r.get("qualifier", ""))
+                for r in rec["relations"] + rec["dropped"]
+            ]  # fmt: skip
+            new, stats = validate(p, Extraction(relations=rels), quote_cutoff)
+            new["model"] = rec.get("model", "")
+            new["prompt_version"] = rec.get("prompt_version", "")
+            new["validated_with"] = {"quote_cutoff": quote_cutoff}
+            fout.write(json.dumps(new) + "\n")
+            totals.update(stats)
+            totals["passages"] += 1
+    return dict(totals)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="configs/a1h_hybrid.yaml", help="whose A1 parents to use")
@@ -350,14 +392,23 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--pilot", type=int, default=0, help="stratified sample of N passages")
     ap.add_argument("--out", type=Path, default=None)
+    ap.add_argument("--revalidate", action="store_true",
+                    help="re-check stored relations with current rules (no LLM)")  # fmt: skip
+    ap.add_argument("--quote-cutoff", type=float, default=DEFAULT_CUTOFF)
     args = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     for noisy in ("LiteLLM", "litellm", "httpx"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
     s = Settings.load()
     cfg = ExperimentConfig.load(args.config)
-    passages = load_passages(s.data_dir, cfg)
     graph_dir = s.data_dir / "graph" / cfg.snapshot
+    if args.revalidate:
+        out = args.out or graph_dir / "extractions_validated.jsonl"
+        summary = revalidate(graph_dir / "extractions.jsonl", out, s.data_dir, cfg.snapshot,
+                             args.quote_cutoff)  # fmt: skip
+        print(json.dumps(summary, indent=2))
+        return 0
+    passages = load_passages(s.data_dir, cfg)
     if args.pilot:
         passages = pilot_sample(passages, args.pilot)
         out = args.out or graph_dir / f"pilot_v{PROMPT_VERSION}_{args.provider}.jsonl"

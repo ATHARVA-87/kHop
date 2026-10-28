@@ -316,7 +316,9 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     s = Settings.load()
     gdir = s.data_dir / "graph" / a.snapshot
-    files = a.extractions or [gdir / "extractions.jsonl"]
+    # validated output (current rules, `extract --revalidate`) if present, else the raw run
+    validated = gdir / "extractions_validated.jsonl"
+    files = a.extractions or [validated if validated.exists() else gdir / "extractions.jsonl"]
     print(json.dumps(build(files, load_resolver(s.data_dir, a.snapshot), a.out or gdir), indent=2))
     return 0
 
