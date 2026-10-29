@@ -132,10 +132,19 @@ class DenseIndex:
     def count(self) -> int:
         return self.client.count(self.collection, exact=True).count
 
-    def search(self, vector: np.ndarray, k: int) -> list[Hit]:
+    def search(self, vector: np.ndarray, k: int, doc_ids: list[str] | None = None) -> list[Hit]:
+        """doc_ids: restrict to these filings (per-company sub-queries, Phase 4)."""
+        query_filter = None
+        if doc_ids is not None:
+            from qdrant_client.models import FieldCondition, Filter, MatchAny
+
+            query_filter = Filter(
+                must=[FieldCondition(key="doc_id", match=MatchAny(any=list(doc_ids)))]
+            )
         res = self.client.query_points(
-            self.collection, query=vector.tolist(), limit=k, with_payload=True
-        ).points
+            self.collection, query=vector.tolist(), limit=k, with_payload=True,
+            query_filter=query_filter,
+        ).points  # fmt: skip
         return [
             Hit(
                 chunk_id=p.payload["chunk_id"],

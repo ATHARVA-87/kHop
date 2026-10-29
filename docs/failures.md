@@ -41,3 +41,51 @@ PPR over an entity + evidence-chunk graph (seeded with the question's entities, 
 | graph weight 2 in RRF (any PPR variant) | 0.54–0.56 | | |
 
 PageRank mass leaks through hub nodes (NVIDIA has 126 edges; 1,041 exposure edges join most companies to shared risk nodes). The simple rules (edges between the named entities, or their common neighbours for bridge questions) are better and easier to explain. Removed PPR and weighted RRF; kept plain RRF.
+
+## Per-company sub-queries did not beat the graph (2026-10-28)
+For questions naming 2+ filers: the hybrid search was run once per company, restricted to that company's filings, and the results interleaved (decomposition without an LLM; the research scout cited IRCoT / Self-Ask / least-to-most). Dev multi-hop complete@10: per-company search alone 0.561 (below the no-graph round-robin 0.597; bridge 0.214); graph alone (A6) 0.789; graph + per-company 0.807 (+0.018 [−0.059, +0.111], noise). The graph already retrieves the right passages for these questions. Removed; the per-filing filter is kept for the A7 corrective step ("a named company is missing: search its filings").
+
+## The Gemini judge is too lenient (2026-10-28)
+Agreement with 49 blind human correctness labels (38 correct / 10 partially correct / 1 incorrect) on dev A6 answers:
+
+| judge setup | raw agreement | Cohen's kappa |
+| --- | --- | --- |
+| original prompt (gemini-3.5-flash-lite in practice; 3.6-flash overloaded) | 0.776 | 0.064 |
+| prompt with the human's exact rubric (still flash-lite: 3.6-flash did not answer) | 0.755 | 0.133 |
+
+The judge rated 7–9 of the 10 human "partially correct" answers (one of two named companies answered, or "not enough evidence" for half the question) as correct. Its correctness scores (0.94–0.97) are therefore NOT reported as results. On this sample the human labels give 38/49 = 0.78 fully correct. Next: RAGAS claim-level metrics in a separate env, scored against the same labels.
+
+### Checklist judge: better, still not accepted (2026-10-28)
+Research-recommended fix (CheckEval / TICK style): list the required parts of an answer, check each part ANSWERED / NOT_ANSWERED / CONTRADICTS, correct only if all are answered. Prompts and the acceptance bar (catch >= 70% of human not-correct answers AND pass >= 85% of human-correct answers) were committed before the run (f0198f9); one run, Groq `openai/gpt-oss-120b`, all 49 labels (`results/checklist_judge_a6_router.json`).
+
+| judge (binary: correct vs not) | catches not-correct (TPR, 95% Wilson) | passes correct (TNR) | binary kappa | Gwet AC1 |
+| --- | --- | --- | --- | --- |
+| single-verdict Gemini judge | 3/11 = 0.27 [0.10, 0.57] | 0.97 | 0.32 | 0.75 |
+| checklist judge | 4/11 = 0.36 [0.15, 0.65] | 0.95 | 0.37 | 0.74 |
+
+Not accepted: it still passed 7 of the 10 "partially correct" answers (4 local, 3 multi-hop). Per the protocol the prompts are not tuned on these labels. Headline answer quality stays the human number: 38/49 = 0.78 fully correct (Wilson 0.64–0.87). Automated judges are reported only as "agreement with human", never as answer accuracy.
+
+## A7 company-coverage fix did not help (2026-10-28)
+Deterministic corrective step: if a company the question names had no passage in the writer's top 5, search that company's filings only and insert its best passage. Dev: 20 of 57 multi-hop questions lack both gold passages in the top 5, but the fix triggered on only 8 (the named company was usually present, with the wrong passage), and multi-hop complete@5 stayed 0.649 (top-10 +0.018, n.s.). Removed. The gap is relevance within a company, not coverage: complete@10 is 0.789 vs complete@5 0.649, so showing the writer 10 passages instead of 5 is the simpler lever (to be measured with a validated judge).
+
+## Showing the writer 10 passages instead of 5: no measurable gain (2026-10-29)
+Blind paired human labels on the 49 labelled dev questions (46 differing answer pairs, random order, hidden key; rule fixed before unblinding, commit d5680c8). `results/paired_a6_router_ctx10_vs_a6_router*.json`.
+
+| run | 5 passages correct | 10 passages correct | only 10 correct / only 5 correct | exact McNemar p |
+| --- | --- | --- | --- | --- |
+| primary (human verdicts as given) | 44/49 = 0.90 | 45/49 = 0.92 | 2 / 1 | 1.00 |
+| sensitivity (4 stray "Not enough evidence" cells penalised: the human named 5, one was already partial) | 40/49 = 0.82 | 45/49 = 0.92 | 6 / 1 | 0.125 |
+
+Stray "Not enough evidence" lines in otherwise answered questions: 6 (5 passages) vs 4 (10 passages). All 4 penalised cells are 5-passage answers; the 4 ten-passage answers with a stray line were already labelled partial or incorrect, so penalising cannot lower the 10-passage side. Neither run is significant; 5 passages stays the default (shorter prompt, nothing proven). The better complete@10 retrieval did not turn into measurably better answers on 49 questions.
+
+Label drift found: on re-labelling the SAME 5-passage answers blind, 6 answers first labelled partially_correct were now labelled correct (L-8ab362f0e3, L-950416d079, L-99426bab62, L-a8da0ea627, M-74be6129e9, M-7531785032); four of them are exactly the "partial" answers both judges passed. Human test-retest agreement on the 46 re-labelled answers: 40/46 = 0.87 (the 3 identical answers were not re-labelled). All 6 changes went the same way, and the re-label came after the judge results were known. The judge validation above uses the first labels; it is not re-scored until the human decides which label is right.
+
+### Judges re-scored with the human's updated labels (2026-10-29)
+The human chose the newer labels for the 6 drifted answers (all partially_correct -> correct; `data/golden/judge_labels.csv` now 44 correct / 4 partially correct / 1 incorrect). Same cached judge outputs, no new LLM calls:
+
+| judge (binary) | catches not-correct (TPR, 95% Wilson) | passes correct (TNR) | binary kappa | Gwet AC1 |
+| --- | --- | --- | --- | --- |
+| single-verdict Gemini judge | 3/5 = 0.60 [0.23, 0.88] | 0.98 | 0.63 | 0.93 |
+| checklist judge | 3/5 = 0.60 [0.23, 0.88] | 0.93 | 0.49 | 0.87 |
+
+Still below the 0.70 bar (checklist judge not accepted), and with only 5 not-correct answers the TPR interval is too wide to say anything either way: the validation is underpowered, not just failed. Much of the earlier "judge too lenient" finding was label drift on borderline one-company-missing answers. RAGAS: its 14 scored rows are now all human-correct, so it cannot be compared with humans on them (F1 still marks 12 of those 14 as not correct: too harsh). Headline answer quality: human 44/49 = 0.90 (Wilson 0.78–0.96) under the updated labels; 38/49 = 0.78 (0.64–0.87) under the first labels. Report both: the change is a labelling decision, not a better system. The single-verdict judge now agrees with the human better than the checklist judge (kappa 0.63 vs 0.49), so the checklist judge is not used further. The rule behind the 6 changes (when is an answer that misses part of a question still "correct"?) is to be written into the labelling rubric by the human.

@@ -1,0 +1,22 @@
+{
+  "accuracy": 1.0,
+  "n": 30,
+  "gold_x_predicted": {
+    "local": {
+      "local": 14,
+      "multi_hop": 0,
+      "global": 0
+    },
+    "multi_hop": {
+      "local": 0,
+      "multi_hop": 6,
+      "global": 0
+    },
+    "global": {
+      "local": 0,
+      "multi_hop": 0,
+      "global": 10
+    }
+  },
+  "errors": []
+}

@@ -105,3 +105,23 @@ def test_empty_response_is_never_cached(tmp_path):
     with pytest.raises(ProviderError, match="empty"):
         c.complete(_req())
     assert len(c.cache) == 0
+
+
+def test_strict_schema_marks_every_object_closed_and_required():
+    from pydantic import BaseModel
+
+    from plexus.llm.providers import strict_schema
+
+    class Inner(BaseModel):
+        part: str
+        evidence: str = ""
+
+    class Outer(BaseModel):
+        checks: list[Inner]
+
+    raw = Outer.model_json_schema()
+    s = strict_schema(raw)
+    inner = s["$defs"]["Inner"]
+    assert s["additionalProperties"] is False and inner["additionalProperties"] is False
+    assert inner["required"] == ["part", "evidence"]
+    assert "additionalProperties" not in raw  # the cache-key schema is not mutated

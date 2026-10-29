@@ -13,6 +13,8 @@ import time
 from pathlib import Path
 from typing import Protocol
 
+import numpy as np
+
 from plexus.config import ExperimentConfig
 from plexus.index.dense import Hit
 from plexus.ingest.headers import index_text
@@ -31,8 +33,10 @@ class DenseRetriever:
         self.embedder = embedder
         self.index = index
 
-    def retrieve(self, question: str, k: int) -> list[Hit]:
-        return self.index.search(self.embedder.embed_query(question), k)
+    def retrieve(self, question: str, k: int, doc_ids: list[str] | None = None) -> list[Hit]:
+        if doc_ids is not None and not doc_ids:
+            return []  # an empty filter means "no filings", not "all filings"
+        return self.index.search(self.embedder.embed_query(question), k, doc_ids)
 
     def close(self) -> None:
         if hasattr(self.index, "close"):
@@ -66,9 +70,13 @@ class BM25Retriever:
             log.info("built BM25 over %d chunks in %.1fs", len(chunks), time.perf_counter() - t0)
         return cls(chunks, index)
 
-    def retrieve(self, question: str, k: int) -> list[Hit]:
+    def retrieve(self, question: str, k: int, doc_ids: list[str] | None = None) -> list[Hit]:
+        allowed = None
+        if doc_ids is not None:
+            keep = set(doc_ids)
+            allowed = np.array([c["doc_id"] in keep for c in self.chunks])
         out = []
-        for i, score in self.index.search(question, k):
+        for i, score in self.index.search(question, k, allowed):
             c = self.chunks[i]
             fields = {f: c[f] for f in ("chunk_id", "doc_id", "start", "end", "section", "text")}
             parent = {
@@ -86,9 +94,9 @@ class HybridRetriever:
         self.candidates = candidates
         self.rrf_k = rrf_k
 
-    def retrieve(self, question: str, k: int) -> list[Hit]:
+    def retrieve(self, question: str, k: int, doc_ids: list[str] | None = None) -> list[Hit]:
         n = max(k, self.candidates)
-        return rrf([r.retrieve(question, n) for r in self.retrievers], self.rrf_k)[:k]
+        return rrf([r.retrieve(question, n, doc_ids) for r in self.retrievers], self.rrf_k)[:k]
 
     def close(self) -> None:
         for r in self.retrievers:
@@ -121,6 +129,28 @@ def _graph_hybrid(cfg: ExperimentConfig, data_dir: Path, index_path: Path, base:
     return GraphHybridRetriever(graph, base, r.rrf_k)
 
 
+def _routed(cfg: ExperimentConfig, data_dir: Path, index_path: Path, hybrid: Retriever):
+    """A6: one hybrid retriever shared by three routes (one copy of the models on the GPU)."""
+    from plexus.retrieve.graph_search import CompanyDiverseRetriever
+    from plexus.retrieve.rerank import CrossEncoderScorer, RerankingRetriever
+    from plexus.retrieve.router import FixedRouter, RoutedRetriever, RuleRouter
+
+    r = cfg.retrieval
+    if r.rerank is None:
+        raise ValueError("routed retrieval needs retrieval.rerank (used on the local route)")
+    linker = make_linker(cfg, data_dir)
+    retrievers = {
+        "local": RerankingRetriever(hybrid, CrossEncoderScorer(r.rerank), r.rerank.candidates),
+        "multi_hop": _graph_hybrid(cfg, data_dir, index_path, hybrid),
+        "global": CompanyDiverseRetriever(hybrid, linker),
+    }
+    router = RuleRouter(linker) if r.router == "rules" else FixedRouter(r.router)
+    routed = RoutedRetriever(router, retrievers)
+    graph = retrievers["multi_hop"].graph_retriever.graph
+    routed.closables = [hybrid, graph]  # each shared resource closed exactly once
+    return routed
+
+
 def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:
     from plexus.index.build import index_dir
 
@@ -144,6 +174,8 @@ def make_retriever(cfg: ExperimentConfig, data_dir: Path) -> Retriever:
         bm25 = BM25Retriever.from_index_dir(path, r.bm25_k1, r.bm25_b)
         keyword_only = r.type == "bm25" or (r.type == "graph_hybrid" and r.graph_base == "bm25")
         base = bm25 if keyword_only else HybridRetriever([dense(), bm25], r.candidates, r.rrf_k)
+    if r.type == "routed":
+        return _routed(cfg, data_dir, path, base)
     if r.type == "graph_hybrid":
         base = _graph_hybrid(cfg, data_dir, path, base)
     elif r.type == "hybrid_rr":

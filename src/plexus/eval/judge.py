@@ -22,7 +22,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from plexus.llm import LLMClient, LLMRequest, Message
+from plexus.llm import LLMClient, LLMRequest, Message, ProviderError, StructuredOutputError
 
 Verdict = Literal["correct", "partially_correct", "incorrect"]
 VERDICT_SCORE = {"correct": 1.0, "partially_correct": 0.5, "incorrect": 0.0}
@@ -62,20 +62,51 @@ def correctness_prompt(question: str, reference: str, answer: str) -> str:
     return (
         f"Question: {question}\n\nReference answer (verified by a human):\n{reference}\n\n"
         f"Candidate answer:\n<answer>\n{answer}\n</answer>\n\n"
-        "Is the candidate correct with respect to the reference? Extra correct detail is fine. "
-        "Missing a key part is partially_correct. Contradicting it is incorrect. "
+        "Is the candidate correct with respect to the reference? Use exactly this rubric, the "
+        "same one the human labeller used:\n"
+        "- correct: answers what the question asks as well as the reference does. Extra correct "
+        "detail is fine. For a sector-wide question (about all/many companies), naming a "
+        "different set of relevant companies than the reference is fine: the reference lists "
+        "examples, not every company.\n"
+        "- partially_correct: misses a key part of what the question asks, e.g. a company the "
+        "question NAMES is left out or not answered for, or the main point of the reference is "
+        "missing, or the answer answers part and says there is not enough evidence for the rest.\n"
+        "- incorrect: contradicts the reference, or refuses to answer.\n"
         'JSON: {"verdict": "correct"|"partially_correct"|"incorrect", "rationale": str}'
     )
 
 
 class Judge:
-    def __init__(self, llm: LLMClient, provider: str, model: str, seed: int = 0):
+    def __init__(self, llm: LLMClient, provider: str, model: str, seed: int = 0,
+                 fallback_models: Sequence[str] = ()):  # fmt: skip
         self.llm, self.provider, self.model, self.seed = llm, provider, model, seed
+        self.models = [model, *fallback_models]
+        self.used: Counter = Counter()  # which model produced each verdict (reported)
+        self.failures: Counter = Counter()  # consecutive failures per model
 
-    def _req(self, prompt: str) -> LLMRequest:
+    def _json(self, prompt: str, schema):
+        """Main model first, then fallbacks (Gemini 3.6-flash is often overloaded)."""
+        last = None
+        live = [m for m in self.models if self.failures[m] < self.MAX_FAILURES] or self.models[-1:]
+        for m in live:
+            try:
+                out = self.llm.complete_json(self._req(prompt, m), schema)
+                self.used[m] += 1
+                self.failures[m] = 0
+                return out
+            except (ProviderError, StructuredOutputError) as exc:
+                self.failures[m] += 1
+                last = exc
+        raise last  # type: ignore[misc]
+
+    # circuit breaker: after this many failures in a row, a model is skipped for the run
+    # (an overloaded model otherwise costs a timeout on every call; failures are not cached)
+    MAX_FAILURES = 3
+
+    def _req(self, prompt: str, model: str | None = None) -> LLMRequest:
         return LLMRequest(
             provider=self.provider,
-            model=self.model,
+            model=model or self.model,
             messages=(
                 Message(role="system", content=JUDGE_SYSTEM),
                 Message(role="user", content=prompt),
@@ -87,17 +118,13 @@ class Judge:
 
     def faithfulness(self, question: str, answer: str, excerpts: Sequence[str]) -> float | None:
         """None when the answer makes no claims (e.g. a refusal): not counted either way."""
-        out = self.llm.complete_json(
-            self._req(faithfulness_prompt(question, answer, excerpts)), FaithfulnessOut
-        )
+        out = self._json(faithfulness_prompt(question, answer, excerpts), FaithfulnessOut)
         if not out.claims:
             return None
         return sum(c.supported for c in out.claims) / len(out.claims)
 
     def correctness(self, question: str, reference: str, answer: str) -> Verdict:
-        out = self.llm.complete_json(
-            self._req(correctness_prompt(question, reference, answer)), CorrectnessOut
-        )
+        out = self._json(correctness_prompt(question, reference, answer), CorrectnessOut)
         return out.verdict
 
 
@@ -123,7 +150,16 @@ def export_for_labelling(results: dict, out: Path, limit: int = 60, seed: int = 
     import random
 
     rows = [r for r in results.get("per_query", []) if r.get("answer")]
-    rows = random.Random(seed).sample(rows, min(limit, len(rows)))  # not just the first N
+    # proportional to question type, so every type is checked, seeded (not just the first N)
+    rng = random.Random(seed)
+    by_type: dict[str, list[dict]] = {}
+    for r in rows:
+        by_type.setdefault(r.get("qtype", "all"), []).append(r)
+    picked = []
+    for _qtype, rs in sorted(by_type.items()):
+        n = max(1, round(limit * len(rs) / len(rows)))
+        picked += rng.sample(rs, min(n, len(rs)))
+    rows = picked[:limit]
     with open(out, "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=LABEL_COLUMNS)
         w.writeheader()
@@ -169,12 +205,13 @@ def main(argv: list[str] | None = None) -> int:
     e = sub.add_parser("export")
     e.add_argument("--results", type=Path, required=True)
     e.add_argument("--out", type=Path, default=Path("data/golden/judge_labels.csv"))
+    e.add_argument("--limit", type=int, default=50)
     a = sub.add_parser("agreement")
     a.add_argument("--labels", type=Path, default=Path("data/golden/judge_labels.csv"))
     a.add_argument("--results", type=Path, required=True)
     args = ap.parse_args(argv)
     if args.cmd == "export":
-        n = export_for_labelling(json.loads(args.results.read_text()), args.out)
+        n = export_for_labelling(json.loads(args.results.read_text()), args.out, args.limit)
         print(
             f"wrote {n} answers to {args.out}: fill human_verdict (correct/partially_correct/incorrect)"
         )
