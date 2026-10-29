@@ -15,7 +15,7 @@ from pathlib import Path
 # package -> (reason, mitigation, review-by date or None)
 ACCEPTED = {
     "torch": (
-        "pinned 2.5.1 by project rule (CUDA setup, ADR 0002); fixes need >= 2.6",
+        "2.6.0 (upgraded 2026-10-29); remaining fixes need 2.7.1-2.13, a further owner-approved upgrade",
         "only pinned BAAI models (HF commit revision), safetensors weights, no torch.load / "
         "torch.jit / torch.compile on untrusted input",
         None,
@@ -26,9 +26,10 @@ ACCEPTED = {
         None,
     ),
     "filelock": (
-        "12 of 13 fixes need 4.2.1 (released 2026-10-17, under the 2-week supply-chain rule)",
+        "fixes need filelock 4.x, but litellm 1.106.4 and virtualenv 20.x require filelock < 4 "
+        "(tried 4.2.1 on 2026-10-29: broke both, reverted)",
         "local lock-file races need another user on the same machine (single-user laptop)",
-        date(2026, 10, 31),  # upgrade to filelock 4.2.1 on or after this date
+        date(2026, 11, 30),  # re-check whether litellm / virtualenv allow filelock 4
     ),
 }
 

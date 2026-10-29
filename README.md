@@ -18,7 +18,7 @@ Answers are research output over public filings, **not investment advice**.
 ## Quick start
 
 ```bash
-conda activate torch              # Python 3.11 env (torch 2.5.1 stays pinned)
+conda activate torch              # Python 3.11 env (torch 2.6.0 + numpy 1.26.4 pinned)
 make install-ml                   # pip install -c constraints.txt -e '.[ml,dev]'
 make doctor                       # what is missing and how to fix it
 make test
