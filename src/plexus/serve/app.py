@@ -125,6 +125,85 @@ def source_of(n: int, hit, docs: dict) -> dict:
     }
 
 
+def _json(rel: str):
+    path = REPO_ROOT / rel
+    return json.loads(path.read_text()) if path.exists() else None
+
+
+def about_figures() -> list[dict]:
+    """Measured results for the About page, read from results/*.json at request time (never
+    typed in by hand). A figure whose file is missing is left out, not shown as a blank."""
+    out: list[dict] = []
+
+    def add(label: str, value: str, source: str):
+        out.append({"label": label, "value": value, "source": source})
+
+    def recall(rel: str):
+        d = _json(rel)
+        return d["retrieval"]["all"]["recall@10"]["mean"] if d else None
+
+    a, b = recall("results/a0_naive.json"), recall("results/a6_filter.json")
+    if a is not None and b is not None:
+        add(
+            "Questions where the right passages are in the top 10, first version vs now (134 practice questions)",
+            f"{a:.0%} to {b:.0%}",
+            "results/a0_naive.json, results/a6_filter.json",
+        )
+    a, b = recall("results/test/a0_naive.json"), recall("results/test/a6_router.json")
+    if a is not None and b is not None:
+        add(
+            "The same on 91 held-back questions, scored once before the latest improvement",
+            f"{a:.0%} to {b:.0%}",
+            "results/test/a0_naive.json, results/test/a6_router.json",
+        )
+    labels = REPO_ROOT / "data" / "golden" / "judge_labels.csv"
+    if labels.exists():
+        import csv
+
+        with open(labels, newline="", encoding="utf-8-sig") as fh:
+            v = [
+                r["human_verdict"].strip().lower()
+                for r in csv.DictReader(fh)
+                if r["human_verdict"].strip()
+            ]
+        add(
+            "Answers fully correct, checked by hand",
+            f"{v.count('correct')} of {len(v)}",
+            "data/golden/judge_labels.csv",
+        )
+    d = _json("results/verifier_validation.json")
+    if d:
+        m = d["summary"]["minicheck"]
+        n_bad = d["summary"]["human_unsupported"]
+        add(
+            "Unsupported sentences the fact-checker catches (hand-labelled test)",
+            f"{round(m['tpr_catches_not_correct'] * n_bad)} of {n_bad}",
+            "results/verifier_validation.json",
+        )
+    d = _json("results/guardrails_a9_agents.json")
+    if d:
+        h = d["summary"]["refusals_heldout"]["refuse_advice"]
+        add(
+            "Investment-advice questions declined (fresh test set)",
+            f"{h['ok']} of {h['n']}",
+            "results/guardrails_a9_agents.json",
+        )
+        i = d["summary"]["injection"]
+        add(
+            "Hidden instructions planted in filings that changed the answer",
+            f"{i['attack_success']} of {i['n']}",
+            "results/guardrails_a9_agents.json",
+        )
+    d = _json("results/latency_a9_agents.json")
+    if d:
+        add(
+            "Typical time to a full answer on a laptop GPU",
+            f"{d[0]['total_ms_p50'] / 1000:.0f} seconds",
+            "results/latency_a9_agents.json",
+        )
+    return out
+
+
 def build_state(config: Path = CONFIG) -> dict:
     from plexus.agents.flow import build_flow
     from plexus.baseline.naive import NaiveRAG
@@ -214,6 +293,10 @@ def create_app(state_factory=build_state) -> FastAPI:
             raise HTTPException(503, "Plexus is busy answering other questions. Try again shortly.",
                                 headers={"Retry-After": "20"})  # fmt: skip
         return q.strip(), position
+
+    @app.get("/api/about")
+    def about():
+        return {"figures": about_figures()}
 
     @app.get("/api/ask", response_class=EventSourceResponse)
     def ask(admitted: tuple[str, int] = Depends(admit)):

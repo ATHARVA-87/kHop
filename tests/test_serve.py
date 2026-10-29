@@ -84,3 +84,9 @@ def test_meta_lists_all_companies(monkeypatch):
     with _client(monkeypatch) as c:
         m = c.get("/api/meta").json()
         assert len(m["companies"]) == 39 and m["filings"] == 156
+
+
+def test_about_figures_come_from_results(monkeypatch):
+    with _client(monkeypatch) as c:
+        figs = c.get("/api/about").json()["figures"]
+        assert figs and all(f["source"] and f["value"] for f in figs)

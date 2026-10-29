@@ -92,7 +92,7 @@ def build_flow(rag: NaiveRAG):
         on_text = (lambda t: writer({"type": "token", "text": t})) if writer else None
         ans = rag.generate(s["question"], s["hits"], on_text)
         ans.retrieval_ms = next(t["ms"] for t in s["trace"] if t["step"] == "retrieve")
-        return {"answer": ans, **_step("answer", t0, cited=ans.cited_chunk_ids)}
+        return {"answer": ans, **_step("answer", t0, cited=ans.cited_chunk_ids, cached=ans.cached)}
 
     scorer = None
 
