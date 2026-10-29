@@ -12,6 +12,31 @@ const EXAMPLES = [
 ];
 
 const STEP_ORDER = ["guard", "route", "retrieve", "answer", "verify"];
+const HISTORY_KEY = "plexus-history"; // this browser tab only (sessionStorage), never sent anywhere
+const HISTORY_MAX = 20;
+
+function loadHistory() {
+  try {
+    const h = JSON.parse(sessionStorage.getItem(HISTORY_KEY) || "[]");
+    return Array.isArray(h) ? h : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(h) {
+  try {
+    sessionStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(0, HISTORY_MAX)));
+  } catch {
+    // storage full or blocked: history just is not kept
+  }
+}
+
+function stepsOf(data) {
+  const steps = Object.fromEntries((data.trace || []).map((t) => [t.step, t]));
+  if (data.from_cache) steps.cache = { step: "cache" };
+  return steps;
+}
 const NOT_ENOUGH = "Not enough evidence in the filings to answer this.";
 const REASONS = {
   advice: "It asks for investment advice.",
@@ -256,11 +281,13 @@ export default function AskPage() {
   const [error, setError] = useState("");
   const [current, setCurrent] = useState(null);
   const [meta, setMeta] = useState(null);
+  const [history, setHistory] = useState([]);
   const [metaError, setMetaError] = useState(false);
   const abort = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
+    setHistory(loadHistory());
     fetch(`${API}/api/meta`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then(setMeta)
@@ -298,6 +325,11 @@ export default function AskPage() {
           setText(data.answer);
           setResult(data);
           setPhase("done");
+          setHistory((h) => {
+            const next = [{ q: clean, at: Date.now(), data }, ...h.filter((e) => e.q !== clean)].slice(0, HISTORY_MAX);
+            saveHistory(next);
+            return next;
+          });
         } else if (event === "error") {
           finished = true;
           setError(data.message);
@@ -315,6 +347,24 @@ export default function AskPage() {
         : e.message);
       setPhase("error");
     }
+  }
+
+  function reopen(entry) {
+    abort.current?.abort();
+    setQuestion(entry.q);
+    setAsked(entry.q);
+    setText(entry.data.answer);
+    setResult(entry.data);
+    setSteps(stepsOf(entry.data));
+    setQueued(0);
+    setError("");
+    setCurrent(null);
+    setPhase("done");
+  }
+
+  function clearHistory() {
+    setHistory([]);
+    saveHistory([]);
   }
 
   function onCite(n) {
@@ -368,6 +418,26 @@ export default function AskPage() {
           Name one or more companies, or ask about the whole sector. Plexus does not give investment advice.
         </p>
       </form>
+
+      {history.length > 0 && (
+        <details className="history" open={phase === "start"}>
+          <summary>Your questions this session ({history.length})</summary>
+          <ul className="history-list">
+            {history.map((e) => (
+              <li key={e.at}>
+                <button type="button" className="history-item" onClick={() => reopen(e)}
+                  aria-current={phase !== "start" && e.q === asked ? "true" : undefined}>
+                  {e.q}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="history-note">
+            Kept only in this browser tab; closing the tab clears it.{" "}
+            <button type="button" className="text-button" onClick={clearHistory}>Clear these questions</button>
+          </p>
+        </details>
+      )}
 
       <p className="visually-hidden" aria-live="polite">{phase !== "start" ? statusText : ""}</p>
 
