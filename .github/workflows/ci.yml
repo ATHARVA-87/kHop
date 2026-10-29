@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install core + dev + graph deps from the lockfile
-        run: uv sync --frozen --extra dev --extra graph
+        run: uv sync --frozen --extra dev --extra graph --extra agents
       - name: Lint
         run: |
           uv run ruff check src tests
@@ -49,7 +49,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install core + dev + graph deps from the lockfile
-        run: uv sync --frozen --extra dev --extra graph
+        run: uv sync --frozen --extra dev --extra graph --extra agents
       - name: Fetch processed filings and graph extractions (release assets, checksum-verified)
         run: |
           uv run python -m plexus.ingest.ci_data
