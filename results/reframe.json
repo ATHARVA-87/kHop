@@ -1,5 +1,5 @@
 {
-  "version": "v2",
+  "version": "v3",
   "spelling_fresh_set": {
     "golden_questions": 225,
     "golden_spelling_changes": [],
@@ -8,7 +8,7 @@
     "company_restored": "113/113",
     "word_restored": "114/125",
     "wrong_replacements": [],
-    "p95_ms": 0.4,
+    "p95_ms": 0.38,
     "bars": {
       "golden_spelling_changes": true,
       "trap_changes": true,
@@ -33,7 +33,7 @@
         "expected": "relate"
       }
     ],
-    "p95_ms": 0.4,
+    "p95_ms": 0.39,
     "bars": {
       "golden_spelling_changes": true,
       "trap_changes": true,
