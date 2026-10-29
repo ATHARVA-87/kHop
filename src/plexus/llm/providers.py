@@ -33,6 +33,12 @@ class FakeProvider:
         self.responder = responder or (lambda r: f"echo: {r.messages[-1].content}")
         self.calls = 0
 
+    def stream(self, request: LLMRequest):
+        """Word by word, like a real streaming model."""
+        words = self.complete(request).text.split(" ")
+        for i, w in enumerate(words):
+            yield w if i == len(words) - 1 else w + " "
+
     def complete(self, request: LLMRequest) -> LLMResponse:
         self.calls += 1
         text = self.responder(request)
@@ -79,9 +85,7 @@ class LiteLLMProvider:
         self.name = name
         self.api_base = api_base
 
-    def complete(self, request: LLMRequest) -> LLMResponse:
-        import litellm  # imported lazily: it is slow to import
-
+    def _kwargs(self, request: LLMRequest) -> dict:
         kwargs: dict = {
             "model": f"{_LITELLM_PREFIX[self.name]}/{request.model}",
             "messages": [m.model_dump() for m in request.messages],
@@ -96,6 +100,26 @@ class LiteLLMProvider:
         # one attempt per call with a hard timeout; LLMClient owns the retry policy
         kwargs.setdefault("timeout", 120)
         kwargs.setdefault("num_retries", 0)
+        return kwargs
+
+    def stream(self, request: LLMRequest):
+        """Yield answer text as it is generated (Phase 6 live answers). JSON-schema
+        requests are not streamed; LLMClient falls back to complete() for them."""
+        import litellm
+
+        try:
+            for chunk in litellm.completion(**self._kwargs(request), stream=True):
+                delta = chunk.choices[0].delta
+                piece = getattr(delta, "content", None)  # reasoning tokens are skipped
+                if piece:
+                    yield piece
+        except Exception as exc:
+            raise ProviderError(f"{self.name}/{request.model}: {exc}") from exc
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        import litellm  # imported lazily: it is slow to import
+
+        kwargs = self._kwargs(request)
         if request.json_schema is not None:
             kwargs["response_format"] = {
                 "type": "json_schema",

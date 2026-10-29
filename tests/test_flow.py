@@ -76,3 +76,15 @@ def test_verify_marks_sentences_without_changing_the_answer(tmp_path, monkeypatc
     ans, trace = ask(build_flow(rag), "Who makes the chips?")
     assert ans.text == "TSMC makes the chips for us [1]."
     assert ans.checks[0]["supported"] and trace[-1]["step"] == "verify"
+
+
+def test_ask_events_streams_steps_tokens_and_done(tmp_path):
+    from plexus.agents.flow import ask_events
+
+    rag = _rag(tmp_path, lambda r: "TSMC makes the chips for us [1].")
+    events = list(ask_events(build_flow(rag), "Who makes the chips?"))
+    kinds = [k for k, _ in events]
+    assert kinds[-1] == "done" and kinds.count("token") > 1
+    assert [e["step"] for k, e in events if k == "step"] == ["route", "retrieve", "answer"]
+    text = "".join(t for k, t in events if k == "token")
+    assert text == events[-1][1]["answer"].text == "TSMC makes the chips for us [1]."

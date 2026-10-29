@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from dataclasses import dataclass, field
 from typing import TypeVar
 
@@ -97,6 +98,46 @@ class LLMClient:
         self.stats.completion_tokens += response.usage.completion_tokens
         self.cache.put(request, response)
         return response.model_copy(update={"cache_key": request.cache_key()})
+
+    def stream(self, request: LLMRequest):
+        """Like complete(), but yields text pieces as they are generated. Same cache key, so a
+        streamed answer and a complete() answer are the same entry. The text is cached only
+        after the stream finishes with non-empty text: if the reader stops early (the browser
+        closed), the generator is closed at a `yield` and nothing is written.
+        `self.last_cached` says whether the last stream was served from the cache."""
+        self.last_cached = False
+        provider = self.providers.get(request.provider)
+        if request.json_schema is not None or not hasattr(provider, "stream"):
+            response = self.complete(request)
+            self.last_cached = response.cached
+            yield response.text
+            return
+        self.stats.calls += 1
+        self.stats.by_provider[request.provider] = (
+            self.stats.by_provider.get(request.provider, 0) + 1
+        )
+        cached = self.cache.get(request)
+        if cached is not None:
+            self.stats.cache_hits += 1
+            self.last_cached = True
+            yield cached.text
+            return
+        if self.offline:
+            raise CacheMissError(
+                f"offline mode: no cached response for {request.provider}/{request.model} "
+                f"(key {request.cache_key()[:12]})"
+            )
+        parts: list[str] = []
+        t0 = time.perf_counter()
+        for piece in provider.stream(request):
+            parts.append(piece)
+            yield piece
+        text = "".join(parts)
+        if not text.strip():
+            raise ProviderError(f"{request.provider}/{request.model}: empty response")
+        self.cache.put(
+            request, LLMResponse(text=text, latency_ms=(time.perf_counter() - t0) * 1000)
+        )
 
     @staticmethod
     @retry(
