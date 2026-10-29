@@ -77,3 +77,23 @@ def test_agreement_without_any_pairs_is_a_clear_error(tmp_path):
     export_for_labelling({"per_query": [{"qid": "q1", "answer": "a"}]}, out)
     with pytest.raises(ValueError, match="no labelled answers"):
         agreement(out, {"per_query": []})
+
+
+def test_judge_skips_a_model_after_repeated_failures(tmp_path):
+    from plexus.eval.judge import Judge
+    from plexus.llm import FakeProvider, LLMCache, LLMClient, ProviderError
+
+    calls = []
+
+    def respond(req):
+        calls.append(req.model)
+        if req.model == "busy":
+            raise ProviderError("503 overloaded")
+        return '{"verdict": "correct", "rationale": ""}'
+
+    llm = LLMClient(LLMCache(tmp_path / "c.sqlite"), {"gemini": FakeProvider(respond)})
+    j = Judge(llm, "gemini", "busy", 0, ["lite"])
+    for i in range(6):
+        assert j.correctness(f"q{i}", "ref", "ans") == "correct"
+    assert j.used["lite"] == 6
+    assert calls.count("busy") <= Judge.MAX_FAILURES * 4  # stops trying after the breaker opens

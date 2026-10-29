@@ -86,7 +86,20 @@ class EntityLinker:
                 if len(k) > 2:
                     self.names.setdefault(tuple(k.split()), e["id"])
         self.max_len = max((len(k) for k in self.names), default=1)
+        # the corpus filers. NOT derived from self.tickers: that also holds short aliases
+        self.filer_ids: set[str] = set(resolver.filer_ids.values())
         self.tickers = {eid.split(":")[1]: eid for eid in resolver.filer_ids.values()}
+        # short all-caps aliases of FILERS ("TI", "MPS", "ADI") match like tickers: exact,
+        # capitals only. Found on the held-out test: "What does TI say..." routed as global.
+        # Filers only (review 2026-10-28): "DOC", "BIS", "ST", "GF" are not filers.
+        for (etype, key), (eid, _canon) in resolver.index.items():
+            if (
+                etype == "company"
+                and 2 <= len(key) <= 3
+                and key.isalpha()
+                and eid in self.filer_ids
+            ):
+                self.tickers.setdefault(key.upper(), eid)
         self.words = {t: resolver.filer_ids[tk] for t, tk in resolver.filer_tokens.items()}
         self.caps = resolver.token_caps
 
@@ -100,12 +113,12 @@ class EntityLinker:
                 eid = self.names.get(key)
                 if eid is None:
                     continue
-                if n == 1 and not _proper(toks[i][0]):
+                if n == 1 and not (_proper(toks[i][0]) or self._proper_noun(key[0])):
                     continue  # one lowercase word ("arm's length", "diodes") is not a name
                 cands.append((self.FULL, i, i + n, eid))
             if toks[i][0] in self.tickers:
                 cands.append((self.TICKER, i, i + 1, self.tickers[toks[i][0]]))
-            if low[i] in self.words and _proper(toks[i][0]):
+            if low[i] in self.words:  # distinctive filer words are proper nouns in any case
                 cands.append((self.WORD, i, i + 1, self.words[low[i]]))
         # keep the best match per span: higher score, then longer
         cands.sort(key=lambda c: (-c[0], -(c[2] - c[1]), c[1]))
@@ -120,6 +133,11 @@ class EntityLinker:
             if eid not in best or score > best[eid][1]:
                 best[eid] = (min(a, best.get(eid, (a, 0))[0]), score)
         return [(eid, sc) for eid, (_, sc) in sorted(best.items(), key=lambda kv: kv[1][0])]
+
+    def _proper_noun(self, word: str) -> bool:
+        """A lowercase single word may still be a name if the filings almost always write it
+        capitalised ("qualcomm", "nvidia"): review 2026-10-28, 'risks for qualcomm' -> global."""
+        return self.caps.get(word, 0.0) >= 0.9
 
     def link(self, question: str) -> list[str]:
         return [eid for eid, _ in self.link_scored(question)]
@@ -167,7 +185,7 @@ class GraphRetriever:
         linked = [e for e, _ in scored]
         conf = dict(scored)
         cues = relation_cues(question)
-        filers = [e for e in linked if e in self.linker.tickers.values()]
+        filers = [e for e in linked if e in self.linker.filer_ids]
         others = [e for e in linked if e not in filers]
         edges: list[Edge] = []
         mode = "none"
@@ -258,7 +276,7 @@ class CompanyRoundRobinRetriever:
     def retrieve(self, question: str, k: int) -> list[Hit]:
         hits = self.base.retrieve(question, max(k, self.depth))
         tickers = {eid.split(":")[1] for eid in self.linker.link(question)
-                   if eid in self.linker.tickers.values()}  # fmt: skip
+                   if eid in self.linker.filer_ids}  # fmt: skip
         if len(tickers) < 2:
             return hits[:k]
         order = [

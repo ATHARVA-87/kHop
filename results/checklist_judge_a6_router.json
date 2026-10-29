@@ -1,0 +1,1119 @@
+{
+  "summary": {
+    "checklist_judge": {
+      "n": 49,
+      "human_not_correct": 5,
+      "tpr_catches_not_correct": 0.6,
+      "tpr_ci": [
+        0.231,
+        0.882
+      ],
+      "tnr_passes_correct": 0.932,
+      "tnr_ci": [
+        0.818,
+        0.977
+      ],
+      "raw_agreement": 0.898,
+      "binary_kappa": 0.489,
+      "gwet_ac1": 0.873
+    },
+    "single_verdict_judge": {
+      "n": 49,
+      "human_not_correct": 5,
+      "tpr_catches_not_correct": 0.6,
+      "tpr_ci": [
+        0.231,
+        0.882
+      ],
+      "tnr_passes_correct": 0.977,
+      "tnr_ci": [
+        0.882,
+        0.996
+      ],
+      "raw_agreement": 0.939,
+      "binary_kappa": 0.633,
+      "gwet_ac1": 0.927
+    },
+    "human_accuracy": {
+      "correct": 44,
+      "n": 49,
+      "rate": 0.898,
+      "wilson_95": [
+        0.782,
+        0.956
+      ]
+    },
+    "accepted": false,
+    "acceptance_bar": {
+      "tpr": 0.7,
+      "tnr": 0.85
+    },
+    "models_used": {
+      "openai/gpt-oss-120b": 98
+    },
+    "failed": 0,
+    "judge_code_commit": "21c03e7"
+  },
+  "per_query": [
+    {
+      "qid": "B-0192416a5a",
+      "qtype": "multi_hop",
+      "human": "partially_correct",
+      "verdict": "correct",
+      "parts": [
+        "Arm"
+      ],
+      "checks": [
+        {
+          "part": "Arm",
+          "status": "ANSWERED",
+          "evidence": "Ambarella Inc. uses an ARM CPU architecture for its CV3-AD685"
+        }
+      ]
+    },
+    {
+      "qid": "B-611217c7b6",
+      "qtype": "multi_hop",
+      "human": "partially_correct",
+      "verdict": "not_correct",
+      "parts": [
+        "Tesla"
+      ],
+      "checks": [
+        {
+          "part": "Tesla",
+          "status": "CONTRADICTS",
+          "evidence": "there is no evidence that any company designed its own SoCs in-house and is a key customer of Skyworks."
+        }
+      ]
+    },
+    {
+      "qid": "B-8a448465a7",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Huawei"
+      ],
+      "checks": [
+        {
+          "part": "Huawei",
+          "status": "ANSWERED",
+          "evidence": "Both MaxLinear and Teradyne state that they restrict business with entities affiliated with Huawei Technologies Co., Ltd."
+        }
+      ]
+    },
+    {
+      "qid": "B-bf5d25e90c",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Identify the company that bought Rambus's PHY IP group",
+        "State how Ambarella describes its relationship with that company"
+      ],
+      "checks": [
+        {
+          "part": "Identify the company that bought Rambus's PHY IP group",
+          "status": "ANSWERED",
+          "evidence": "Cadence Design Systems, Inc. bought Rambus's PHY IP group"
+        },
+        {
+          "part": "State how Ambarella describes its relationship with that company",
+          "status": "ANSWERED",
+          "evidence": "Ambarella describes its relationship with Cadence as critical to its ability to develop new products or product enhancements in a timely manner"
+        }
+      ]
+    },
+    {
+      "qid": "B-d9746d69e7",
+      "qtype": "multi_hop",
+      "human": "partially_correct",
+      "verdict": "not_correct",
+      "parts": [
+        "TSMC"
+      ],
+      "checks": [
+        {
+          "part": "TSMC",
+          "status": "NOT_ANSWERED",
+          "evidence": "Not enough evidence in the filings to answer this."
+        }
+      ]
+    },
+    {
+      "qid": "G-06cfa36669",
+      "qtype": "global",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Describe how semiconductor companies characterize their exposure to U.S. export controls (e.g., as a material risk, subject to sanctions, investigations, and compliance obligations)",
+        "List the business impacts they cite, such as lost China sales, restricted shipments, harmed competitive position, compliance costs, subpoenas/investigations, and potential future restrictions"
+      ],
+      "checks": [
+        {
+          "part": "Describe how semiconductor companies characterize their exposure to U.S. export controls",
+          "status": "ANSWERED",
+          "evidence": "Semiconductor companies describe their exposure to U.S. export controls as a significant risk that negatively impacts demand, supply chain complexity, margins, and competitive positioning."
+        },
+        {
+          "part": "List the business impacts they cite",
+          "status": "ANSWERED",
+          "evidence": "They cite reduced revenue, increased compliance costs, diversion of customers to foreign competitors, excess inventory, supply\u2011chain complexity, higher manufacturing costs, lower margins and harmed competitive position, and note that new rules may further restrict shipments."
+        }
+      ]
+    },
+    {
+      "qid": "G-354b628368",
+      "qtype": "global",
+      "human": "correct",
+      "verdict": "not_correct",
+      "parts": [
+        "Regulatory compliance costs and potential operational restrictions",
+        "Stakeholder and ESG pressure increasing costs",
+        "Potential liabilities, penalties, and legal exposure",
+        "Customer demands for carbon emission reductions or renewable energy use",
+        "State-level climate reporting and third-party verification requirements",
+        "Overall material adverse impact on business and financial condition"
+      ],
+      "checks": [
+        {
+          "part": "Regulatory compliance costs and potential operational restrictions",
+          "status": "ANSWERED",
+          "evidence": "Increased Operational Costs: Companies note that compliance ... can impose additional costs."
+        },
+        {
+          "part": "Stakeholder and ESG pressure increasing costs",
+          "status": "ANSWERED",
+          "evidence": "Legal, Reputational, and Operational Risks: Failure to meet evolving stakeholder expectations regarding ESG ... can expose companies to ... financial ... risks."
+        },
+        {
+          "part": "Potential liabilities, penalties, and legal exposure",
+          "status": "ANSWERED",
+          "evidence": "risk of unintentionally violating environmental laws ... could cause adverse effects on business operations and reputational harm."
+        },
+        {
+          "part": "Customer demands for carbon emission reductions or renewable energy use",
+          "status": "NOT_ANSWERED",
+          "evidence": "customers passing on their own compliance costs"
+        },
+        {
+          "part": "State-level climate reporting and third-party verification requirements",
+          "status": "NOT_ANSWERED",
+          "evidence": "Companies face new or proposed climate-related disclosure requirements from regulators like the SEC"
+        },
+        {
+          "part": "Overall material adverse impact on business and financial condition",
+          "status": "NOT_ANSWERED",
+          "evidence": "impose additional costs"
+        }
+      ]
+    },
+    {
+      "qid": "G-44fef5ccc2",
+      "qtype": "global",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Describe how semiconductor companies state their dependence on Taiwan (e.g., reliance on Taiwanese foundries, revenue, supply chain)",
+        "Describe how they characterize their exposure to cross\u2011strait geopolitical risk (e.g., vulnerability to regional disruptions, trade restrictions, national security concerns)"
+      ],
+      "checks": [
+        {
+          "part": "Describe how semiconductor companies state their dependence on Taiwan (e.g., reliance on Taiwanese foundries, revenue, supply chain)",
+          "status": "ANSWERED",
+          "evidence": "Onto Innovation Inc. states that it derives substantial revenue from sales to semiconductor device foundries in Taiwan (e.g., TSMC)"
+        },
+        {
+          "part": "Describe how they characterize their exposure to cross\u2011strait geopolitical risk (e.g., vulnerability to regional disruptions, trade restrictions, national security concerns)",
+          "status": "ANSWERED",
+          "evidence": "Skyworks Solutions, Inc. highlights the risk that geopolitical changes in China\u2011Taiwan relations could disrupt operations of suppliers or partners in Taiwan"
+        }
+      ]
+    },
+    {
+      "qid": "G-9a28615079",
+      "qtype": "global",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Describe how semiconductor companies portray AI as a demand driver for their products",
+        "Identify the AI-related risks that semiconductor companies cite"
+      ],
+      "checks": [
+        {
+          "part": "Describe how semiconductor companies portray AI as a demand driver for their products",
+          "status": "ANSWERED",
+          "evidence": "Applied Materials Inc. states that \"Artificial intelligence (AI) and technologies related to AI are a significant demand driver for the industries we serve\""
+        },
+        {
+          "part": "Identify the AI-related risks that semiconductor companies cite",
+          "status": "ANSWERED",
+          "evidence": "Silicon Laboratories Inc. notes that competitors are implementing AI strategies, creating a competitive environment where rapid technological change could harm their competitiveness"
+        }
+      ]
+    },
+    {
+      "qid": "L-07ebaffcc3",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "additional restructuring charges",
+        "disruptions in operations",
+        "loss of key personnel"
+      ],
+      "checks": [
+        {
+          "part": "additional restructuring charges",
+          "status": "ANSWERED",
+          "evidence": "may result in additional restructuring charges"
+        },
+        {
+          "part": "disruptions in operations",
+          "status": "ANSWERED",
+          "evidence": "lead to disruptions in operations"
+        },
+        {
+          "part": "loss of key personnel",
+          "status": "ANSWERED",
+          "evidence": "risk of losing key personnel"
+        }
+      ]
+    },
+    {
+      "qid": "L-13ae2a142d",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "development and testing tools for software and hardware"
+      ],
+      "checks": [
+        {
+          "part": "development and testing tools for software and hardware",
+          "status": "ANSWERED",
+          "evidence": "development and testing tools for software and hardware"
+        }
+      ]
+    },
+    {
+      "qid": "L-17cd146474",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Support for embedded system design through integrated workflows for signal processing, edge computing, and connectivity."
+      ],
+      "checks": [
+        {
+          "part": "Support for embedded system design through integrated workflows for signal processing, edge computing, and connectivity.",
+          "status": "ANSWERED",
+          "evidence": "Analog Devices' CodeFusion Studio 2.0 is designed to support embedded system design through integrated workflows for signal processing, edge computing, and connectivity"
+        }
+      ]
+    },
+    {
+      "qid": "L-1cafa4e734",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Microchip's capital expenditures for the nine months ended December 31, 2024"
+      ],
+      "checks": [
+        {
+          "part": "Microchip's capital expenditures for the nine months ended December 31, 2024",
+          "status": "ANSWERED",
+          "evidence": "were $111.8 million"
+        }
+      ]
+    },
+    {
+      "qid": "L-22723db9ff",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Percentage of eligible U.S. employees at Power Integrations who participate in the 401(k) plan"
+      ],
+      "checks": [
+        {
+          "part": "Percentage of eligible U.S. employees at Power Integrations who participate in the 401(k) plan",
+          "status": "ANSWERED",
+          "evidence": "Approximately 97% of eligible U.S. employees participate in the company's 401(k) plan"
+        }
+      ]
+    },
+    {
+      "qid": "L-47aef70f5a",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Highly flammable gases"
+      ],
+      "checks": [
+        {
+          "part": "Highly flammable gases",
+          "status": "ANSWERED",
+          "evidence": "Amkor uses highly flammable gases in the preparation of wafers holding semiconductor devices for flip chip packaging"
+        }
+      ]
+    },
+    {
+      "qid": "L-4e51f48592",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Interest income fell because lower cash balances reduced the amount of cash on which interest could be earned, resulting in a $7.1\u202fmillion decrease."
+      ],
+      "checks": [
+        {
+          "part": "Interest income fell because lower cash balances reduced the amount of cash on which interest could be earned, resulting in a $7.1\u202fmillion decrease.",
+          "status": "ANSWERED",
+          "evidence": "Teradyne's interest income fell ... primarily due to lower cash balances ... decreased by $7.1 million"
+        }
+      ]
+    },
+    {
+      "qid": "L-5c2f0c36e5",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Wolfspeed expects that underutilization costs will continue to be substantial during the initial periods as the Mohawk Valley fab ramps up production."
+      ],
+      "checks": [
+        {
+          "part": "Wolfspeed expects that underutilization costs will continue to be substantial during the initial periods as the Mohawk Valley fab ramps up production.",
+          "status": "ANSWERED",
+          "evidence": "Wolfspeed expects that underutilization costs related to the Mohawk Valley Fab will continue to be substantial as it ramps up the facility..."
+        }
+      ]
+    },
+    {
+      "qid": "L-6ac3514931",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Qualcomm's future licensing revenues could be negatively impacted."
+      ],
+      "checks": [
+        {
+          "part": "Qualcomm's future licensing revenues could be negatively impacted.",
+          "status": "ANSWERED",
+          "evidence": "its future licensing revenues could be negatively impacted"
+        }
+      ]
+    },
+    {
+      "qid": "L-77ed32c36f",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Credo's mission: redefine high-speed connectivity by delivering breakthrough solutions for next\u2011generation AI\u2011driven applications."
+      ],
+      "checks": [
+        {
+          "part": "Credo's mission: redefine high-speed connectivity by delivering breakthrough solutions for next\u2011generation AI\u2011driven applications.",
+          "status": "ANSWERED",
+          "evidence": "Credo Technology Group Holding Ltd's mission is to redefine high-speed connectivity by delivering breakthrough solutions that enable the next generation of AI-driven applications"
+        }
+      ]
+    },
+    {
+      "qid": "L-83be086895",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "October 2023"
+      ],
+      "checks": [
+        {
+          "part": "October 2023",
+          "status": "ANSWERED",
+          "evidence": "Micron started construction of its fab in Boise, Idaho in October 2023"
+        }
+      ]
+    },
+    {
+      "qid": "L-8ab362f0e3",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "macroeconomic weakness related to trade and political disputes between the United States and Europe or China",
+        "tensions across the Taiwan Strait that may affect its Taiwan operations, customers and the supply chain",
+        "the Russia-Ukraine conflict",
+        "tensions in Israel and the Middle East"
+      ],
+      "checks": [
+        {
+          "part": "macroeconomic weakness related to trade and political disputes between the United States and Europe or China",
+          "status": "ANSWERED",
+          "evidence": "**Macroeconomic weakness** related to trade and political disputes between the United States and Europe or China"
+        },
+        {
+          "part": "tensions across the Taiwan Strait that may affect its Taiwan operations, customers and the supply chain",
+          "status": "ANSWERED",
+          "evidence": "**Tensions across the Taiwan Strait**, which may adversely affect operations in Taiwan, customers, and the technology industry supply chain"
+        },
+        {
+          "part": "the Russia-Ukraine conflict",
+          "status": "ANSWERED",
+          "evidence": "**The ongoing conflict between Russia and Ukraine**"
+        },
+        {
+          "part": "tensions in Israel and the Middle East",
+          "status": "ANSWERED",
+          "evidence": "**Tensions in Israel and the Middle East**"
+        }
+      ]
+    },
+    {
+      "qid": "L-950416d079",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Q1 2025 revenue",
+        "Growth from Q1 2024"
+      ],
+      "checks": [
+        {
+          "part": "Q1 2025 revenue",
+          "status": "ANSWERED",
+          "evidence": "total revenue for the first quarter of 2025 was $4.07 billion"
+        },
+        {
+          "part": "Growth from Q1 2024",
+          "status": "ANSWERED",
+          "evidence": "represented an increase of $408 million or 11% compared to the same period in the prior year"
+        }
+      ]
+    },
+    {
+      "qid": "L-99426bab62",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Board is staggered into two classes, with only one class elected at each annual meeting."
+      ],
+      "checks": [
+        {
+          "part": "Board is staggered into two classes, with only one class elected at each annual meeting.",
+          "status": "ANSWERED",
+          "evidence": "Rambus's board of directors is staggered into two classes, with only one class elected at each annual meeting"
+        }
+      ]
+    },
+    {
+      "qid": "L-a18a1e01b3",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "money market funds",
+        "U.S. Treasury and government securities",
+        "corporate bonds and notes",
+        "municipal bonds"
+      ],
+      "checks": [
+        {
+          "part": "money market funds",
+          "status": "ANSWERED",
+          "evidence": "including money market funds"
+        },
+        {
+          "part": "U.S. Treasury and government securities",
+          "status": "ANSWERED",
+          "evidence": "including ... U.S. Treasury and government securities"
+        },
+        {
+          "part": "corporate bonds and notes",
+          "status": "ANSWERED",
+          "evidence": "including ... corporate bonds and notes"
+        },
+        {
+          "part": "municipal bonds",
+          "status": "ANSWERED",
+          "evidence": "including ... municipal bonds"
+        }
+      ]
+    },
+    {
+      "qid": "L-a2c00a9f8b",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Cash, cash equivalents, and marketable securities amount for FormFactor as of March 29, 2025"
+      ],
+      "checks": [
+        {
+          "part": "Cash, cash equivalents, and marketable securities amount for FormFactor as of March 29, 2025",
+          "status": "ANSWERED",
+          "evidence": "FormFactor had approximately $299.0 million in cash, cash equivalents, and marketable securities as of March 29, 2025"
+        }
+      ]
+    },
+    {
+      "qid": "L-a4b3d7b618",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "patents",
+        "copyrights",
+        "trademarks",
+        "trade secrets"
+      ],
+      "checks": [
+        {
+          "part": "patents",
+          "status": "ANSWERED",
+          "evidence": "including patents"
+        },
+        {
+          "part": "copyrights",
+          "status": "ANSWERED",
+          "evidence": "including copyrights"
+        },
+        {
+          "part": "trademarks",
+          "status": "ANSWERED",
+          "evidence": "including trademarks"
+        },
+        {
+          "part": "trade secrets",
+          "status": "ANSWERED",
+          "evidence": "including ... trade secrets"
+        }
+      ]
+    },
+    {
+      "qid": "L-a8da0ea627",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Remote working arrangements",
+        "Russia-Ukraine conflict",
+        "Middle East conflict",
+        "AI-powered cybersecurity threats"
+      ],
+      "checks": [
+        {
+          "part": "Remote working arrangements",
+          "status": "ANSWERED",
+          "evidence": "...heightened by remote working arrangements..."
+        },
+        {
+          "part": "Russia-Ukraine conflict",
+          "status": "ANSWERED",
+          "evidence": "...heightened by ... the Russia-Ukraine conflict..."
+        },
+        {
+          "part": "Middle East conflict",
+          "status": "ANSWERED",
+          "evidence": "...heightened by ... the Middle East conflict..."
+        },
+        {
+          "part": "AI-powered cybersecurity threats",
+          "status": "ANSWERED",
+          "evidence": "...heightened by ... AI-powered cybersecurity threats..."
+        }
+      ]
+    },
+    {
+      "qid": "L-a96c0fbfdf",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Cash and cash equivalents held by foreign subsidiaries as of June 30, 2025",
+        "Short-term investments held by foreign subsidiaries as of June 30, 2025"
+      ],
+      "checks": [
+        {
+          "part": "Cash and cash equivalents held by foreign subsidiaries as of June 30, 2025",
+          "status": "ANSWERED",
+          "evidence": "$687.4 million in cash and cash equivalents"
+        },
+        {
+          "part": "Short-term investments held by foreign subsidiaries as of June 30, 2025",
+          "status": "ANSWERED",
+          "evidence": "$181.4 million in short-term investments"
+        }
+      ]
+    },
+    {
+      "qid": "L-d445f5ab12",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Fourth quarter"
+      ],
+      "checks": [
+        {
+          "part": "Fourth quarter",
+          "status": "ANSWERED",
+          "evidence": "lower in the **fourth quarter** than in the third quarter"
+        }
+      ]
+    },
+    {
+      "qid": "L-e5b33be7e2",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Semiconductor Manufacturing International Corporation (SMIC)"
+      ],
+      "checks": [
+        {
+          "part": "Semiconductor Manufacturing International Corporation (SMIC)",
+          "status": "ANSWERED",
+          "evidence": "Semiconductor Manufacturing International Corporation (SMIC) was added to the BIS Entity list in December 2020"
+        }
+      ]
+    },
+    {
+      "qid": "L-e7cba04788",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Potential delays in product releases for Israeli customers",
+        "Possible reduction in demand for Teradyne's products due to labor and supplier disruptions"
+      ],
+      "checks": [
+        {
+          "part": "Potential delays in product releases for Israeli customers",
+          "status": "ANSWERED",
+          "evidence": "causing delays in product releases due to impacts on their labor force and disruptions to their suppliers"
+        },
+        {
+          "part": "Possible reduction in demand for Teradyne's products due to labor and supplier disruptions",
+          "status": "ANSWERED",
+          "evidence": "could lead to decreased demand for Teradyne's products from those customers"
+        }
+      ]
+    },
+    {
+      "qid": "L-eab9a6091b",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "$60.6 billion"
+      ],
+      "checks": [
+        {
+          "part": "$60.6 billion",
+          "status": "ANSWERED",
+          "evidence": "As of October 26, 2025, NVIDIA had $60.6 billion in cash, cash equivalents, and marketable securities"
+        }
+      ]
+    },
+    {
+      "qid": "L-fa04780483",
+      "qtype": "local",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Use a discounted cash flow valuation method",
+        "Assume timing and amount of future cash flows",
+        "Apply discount rates",
+        "Use weighted average cost of capital",
+        "Estimate useful lives of the assets"
+      ],
+      "checks": [
+        {
+          "part": "Use a discounted cash flow valuation method",
+          "status": "ANSWERED",
+          "evidence": "using a **discounted cash flow valuation method**"
+        },
+        {
+          "part": "Assume timing and amount of future cash flows",
+          "status": "ANSWERED",
+          "evidence": "assumptions regarding the **timing and amount of future cash flows**"
+        },
+        {
+          "part": "Apply discount rates",
+          "status": "ANSWERED",
+          "evidence": "**discount rates**"
+        },
+        {
+          "part": "Use weighted average cost of capital",
+          "status": "ANSWERED",
+          "evidence": "**weighted average cost of capital**"
+        },
+        {
+          "part": "Estimate useful lives of the assets",
+          "status": "ANSWERED",
+          "evidence": "**estimated useful lives**"
+        }
+      ]
+    },
+    {
+      "qid": "M-029431a3df",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "AMD's relationship with NVIDIA",
+        "Rambus's relationship with NVIDIA"
+      ],
+      "checks": [
+        {
+          "part": "AMD's relationship with NVIDIA",
+          "status": "ANSWERED",
+          "evidence": "AMD identifies NVIDIA as its principal competitor in the supply of discrete graphics products"
+        },
+        {
+          "part": "Rambus's relationship with NVIDIA",
+          "status": "ANSWERED",
+          "evidence": "Rambus Inc. lists NVIDIA as one of the leading semiconductor and electronic system companies that has licensed their patents for use in their own products"
+        }
+      ]
+    },
+    {
+      "qid": "M-03274ff886",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "AMD relies on UMC for integrated circuits (programmable logic devices)",
+        "Allegro MicroSystems relies on UMC for wafer fabrication of semiconductor wafers"
+      ],
+      "checks": [
+        {
+          "part": "AMD relies on UMC for integrated circuits (programmable logic devices)",
+          "status": "ANSWERED",
+          "evidence": "AMD relies on United Microelectronics Corporation (UMC) for the production of integrated circuits (ICs) in the form of programmable logic devices"
+        },
+        {
+          "part": "Allegro MicroSystems relies on UMC for wafer fabrication of semiconductor wafers",
+          "status": "ANSWERED",
+          "evidence": "Allegro Microsystems relies on UMC as one of its primary third-party wafer fabrication facilities for the fabrication of semiconductor wafers used in the manufacture of its IC products"
+        }
+      ]
+    },
+    {
+      "qid": "M-25b9262768",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Broadcom uses TSMC as a contract manufacturer that fabricates roughly 95% of its wafers",
+        "Lam Research counts TSMC among its most significant customers, a leading semiconductor manufacturer"
+      ],
+      "checks": [
+        {
+          "part": "Broadcom uses TSMC as a contract manufacturer that fabricates roughly 95% of its wafers",
+          "status": "ANSWERED",
+          "evidence": "approximately 95% of the wafers manufactured by Broadcom's CMs were produced by TSMC"
+        },
+        {
+          "part": "Lam Research counts TSMC among its most significant customers, a leading semiconductor manufacturer",
+          "status": "ANSWERED",
+          "evidence": "Lam Research's customers include TSMC"
+        }
+      ]
+    },
+    {
+      "qid": "M-283acbdb08",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "not_correct",
+      "parts": [
+        "Credo: outsourced IC manufacturing (foundry wafer fabrication)",
+        "Impinj: manufacturing of endpoint and reader IC wafers in Asia on a purchase-order basis"
+      ],
+      "checks": [
+        {
+          "part": "Credo: outsourced IC manufacturing (foundry wafer fabrication)",
+          "status": "ANSWERED",
+          "evidence": "outsources all of its IC manufacturing to TSMC"
+        },
+        {
+          "part": "Impinj: manufacturing of endpoint and reader IC wafers in Asia on a purchase-order basis",
+          "status": "NOT_ANSWERED",
+          "evidence": "Impinj uses TSMC to manufacture its endpoint IC wafers"
+        }
+      ]
+    },
+    {
+      "qid": "M-2c6e9e0188",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "AMD uses UMC to fabricate its integrated circuits, including programmable logic devices.",
+        "Lattice partners with UMC (and its subsidiary) to manufacture its products on 130nm, 90nm, 65nm and other process technologies."
+      ],
+      "checks": [
+        {
+          "part": "AMD uses UMC to fabricate its integrated circuits, including programmable logic devices.",
+          "status": "ANSWERED",
+          "evidence": "utilizing United Microelectronics Corporation (UMC) ... for the production of its ICs in the form of programmable logic devices"
+        },
+        {
+          "part": "Lattice partners with UMC (and its subsidiary) to manufacture its products on 130nm, 90nm, 65nm and other process technologies.",
+          "status": "ANSWERED",
+          "evidence": "partners with United Microelectronics Corporation (UMC) and its subsidiary ... to manufacture its products on UMC's 130nm, 90nm, 65nm, and 40nm"
+        }
+      ]
+    },
+    {
+      "qid": "M-3a9e7ec6a9",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Ambarella's relationship with Cadence",
+        "Rambus's deal with Cadence"
+      ],
+      "checks": [
+        {
+          "part": "Ambarella's relationship with Cadence",
+          "status": "ANSWERED",
+          "evidence": "Ambarella relies on relationships with Cadence Design Systems, Inc., as a leader in the computer-aided design industry to assist in the design, simulation, and verification of its new products and product enhancements"
+        },
+        {
+          "part": "Rambus's deal with Cadence",
+          "status": "ANSWERED",
+          "evidence": "Rambus entered into an asset purchase agreement with Cadence Design Systems, Inc. ... to sell certain assets ... of its PHY IP group to Cadence"
+        }
+      ]
+    },
+    {
+      "qid": "M-4ef2df83e8",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Ambarella relies on TSMC for advanced process technologies such as 10nm or 5nm manufacturing of its chips.",
+        "Lattice relies on TSMC as part of its outsourced manufacturing model to fabricate silicon wafers for its semiconductor products."
+      ],
+      "checks": [
+        {
+          "part": "Ambarella relies on TSMC for advanced process technologies such as 10nm or 5nm manufacturing of its chips.",
+          "status": "ANSWERED",
+          "evidence": "Ambarella Inc relies on TSMC (along with Samsung) for advanced process technologies, specifically noting that only a few foundries like TSMC are currently available for certain advanced nodes such as 10nm or 5nm"
+        },
+        {
+          "part": "Lattice relies on TSMC as part of its outsourced manufacturing model to fabricate silicon wafers for its semiconductor products.",
+          "status": "ANSWERED",
+          "evidence": "Lattice Semiconductor Corp partners with TSMC to develop and manufacture its products on 16nm technology, which is used in its Avant platform of FPGA products"
+        }
+      ]
+    },
+    {
+      "qid": "M-725f6d6c79",
+      "qtype": "multi_hop",
+      "human": "incorrect",
+      "verdict": "not_correct",
+      "parts": [
+        "NXP names Broadcom among its primary key public competitors.",
+        "NVIDIA lists Broadcom as a competitor and supplier of hardware and software for SoC products used in servers, automobiles, autonomous machines and gaming devices."
+      ],
+      "checks": [
+        {
+          "part": "NXP names Broadcom among its primary key public competitors",
+          "status": "ANSWERED",
+          "evidence": "NXP ... describes Broadcom as a primary key public competitor"
+        },
+        {
+          "part": "NVIDIA lists Broadcom as a competitor and supplier of hardware and software for SoC products used in servers, automobiles, autonomous machines and gaming devices",
+          "status": "NOT_ANSWERED",
+          "evidence": "NVIDIA ... describes Broadcom as a supplier of networking products and hardware/software for SoC products used in servers and automobiles"
+        }
+      ]
+    },
+    {
+      "qid": "M-73181cfc09",
+      "qtype": "multi_hop",
+      "human": "partially_correct",
+      "verdict": "correct",
+      "parts": [
+        "Samsung is a major competitor to Micron in the memory and storage markets",
+        "Samsung is one of NXP's 10 largest OEM end customers"
+      ],
+      "checks": [
+        {
+          "part": "Samsung is a major competitor to Micron in the memory and storage markets",
+          "status": "ANSWERED",
+          "evidence": "Micron faces \"intense competition\" from Samsung Electronics Co., Ltd."
+        },
+        {
+          "part": "Samsung is one of NXP's 10 largest OEM end customers",
+          "status": "ANSWERED",
+          "evidence": "Samsung as one of NXP's \"10 largest OEM end customers\""
+        }
+      ]
+    },
+    {
+      "qid": "M-74be6129e9",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "MaxLinear describes Huawei as being subject to regulatory restrictions (added to the Entity List, further restricted business operations).",
+        "NVIDIA describes Huawei as a competitor supplying accelerated computing solutions, including for AI."
+      ],
+      "checks": [
+        {
+          "part": "MaxLinear describes Huawei as being subject to regulatory restrictions (added to the Entity List, further restricted business operations)",
+          "status": "ANSWERED",
+          "evidence": "Maxlinear describes its relationship with Huawei as ... severely restricted by U.S. export controls ... added these entities to the Entity List"
+        },
+        {
+          "part": "NVIDIA describes Huawei as a competitor supplying accelerated computing solutions, including for AI",
+          "status": "ANSWERED",
+          "evidence": "NVIDIA describes Huawei as a direct competitor ... explicitly listing Huawei ... as suppliers and licensors of hardware and software for discrete and integrated GPUs"
+        }
+      ]
+    },
+    {
+      "qid": "M-7531785032",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "not_correct",
+      "parts": [
+        "SiTime \u2013 Apple is its largest end customer, about 17% of revenue for the three months ended June 30, 2025",
+        "Qualcomm \u2013 Apple has used competitor modems instead of Qualcomm\u2019s for certain device launches"
+      ],
+      "checks": [
+        {
+          "part": "SiTime \u2013 Apple is its largest end customer, about 17% of revenue for the three months ended June 30, 2025",
+          "status": "NOT_ANSWERED",
+          "evidence": "revenue attributable to Apple accounting for approximately 22% of SITIME's revenue in 2024"
+        },
+        {
+          "part": "Qualcomm \u2013 Apple has used competitor modems instead of Qualcomm\u2019s for certain device launches",
+          "status": "NOT_ANSWERED",
+          "evidence": "Qualcomm Inc (QCOM) sells its MDM (thin modem) products to Apple... While Apple currently purchases some of these products"
+        }
+      ]
+    },
+    {
+      "qid": "M-785fbe2558",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Onto Innovation describes Huawei as being subject to U.S. export controls that restrict transferring U.S. products to it",
+        "NVIDIA describes Huawei as a competitor in accelerated computing solutions, cloud services with internal hardware/software design, and a supplier of Arm\u2011based CPUs"
+      ],
+      "checks": [
+        {
+          "part": "Onto Innovation describes Huawei as being subject to U.S. export controls that restrict transferring U.S. products to it",
+          "status": "ANSWERED",
+          "evidence": "the U.S. Department of Commerce has imposed restrictions on the transfer of U.S. products to ... Huawei Technologies Co., Ltd."
+        },
+        {
+          "part": "NVIDIA describes Huawei as a competitor in accelerated computing solutions, cloud services with internal hardware/software design, and a supplier of Arm\u2011based CPUs",
+          "status": "ANSWERED",
+          "evidence": "significant competitor ... accelerated computing solutions ... large cloud services companies with internal teams designing hardware and software ... suppliers of Arm-based CPUs"
+        }
+      ]
+    },
+    {
+      "qid": "M-81480ee57d",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Cirrus Logic relies on TSMC as a third\u2011party foundry for manufacturing its semiconductor wafers and IC products.",
+        "Allegro MicroSystems relies on TSMC as a third\u2011party foundry for manufacturing its semiconductor wafers and IC products."
+      ],
+      "checks": [
+        {
+          "part": "Cirrus Logic relies on TSMC as a third\u2011party foundry for manufacturing its semiconductor wafers and IC products.",
+          "status": "ANSWERED",
+          "evidence": "relies on Taiwan Semiconductor Manufacturing Company (TSMC) as one of its primary foundries for wafer fabrication"
+        },
+        {
+          "part": "Allegro MicroSystems relies on TSMC as a third\u2011party foundry for manufacturing its semiconductor wafers and IC products.",
+          "status": "ANSWERED",
+          "evidence": "relies on TSMC as one of its four primary fab partners ... for the fabrication of semiconductor wafers used in its IC products"
+        }
+      ]
+    },
+    {
+      "qid": "M-83e2e426cf",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "NVIDIA describes Huawei as a competitor in accelerated computing solutions and AI\u2011enabled cloud services",
+        "KLA describes Huawei as subject to export restrictions and listed on the U.S. Entity List"
+      ],
+      "checks": [
+        {
+          "part": "NVIDIA describes Huawei as a competitor in accelerated computing solutions and AI\u2011enabled cloud services",
+          "status": "ANSWERED",
+          "evidence": "NVIDIA describes Huawei as a significant competitor ... accelerated computing solutions ... AI"
+        },
+        {
+          "part": "KLA describes Huawei as subject to export restrictions and listed on the U.S. Entity List",
+          "status": "ANSWERED",
+          "evidence": "KLA Corp describes Huawei as a target of U.S. export controls ... on the U.S. Entity List"
+        }
+      ]
+    },
+    {
+      "qid": "M-9d162a27d2",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Silicon Laboratories Inc. relies on SMIC as a manufacturer of silicon wafers for the products it has sold.",
+        "Microchip Technology Inc. has some of its products manufactured at SMIC."
+      ],
+      "checks": [
+        {
+          "part": "Silicon Laboratories Inc. relies on SMIC as a manufacturer of silicon wafers for the products it has sold.",
+          "status": "ANSWERED",
+          "evidence": "Silicon Laboratories relies on Semiconductor Manufacturing International Corporation (SMIC) to manufacture the majority of its semiconductor wafers ... most silicon wafers for its sold products are manufactured by either TSMC or SMIC"
+        },
+        {
+          "part": "Microchip Technology Inc. has some of its products manufactured at SMIC.",
+          "status": "ANSWERED",
+          "evidence": "Microchip Technology Inc. states that some of its products are manufactured at SMIC"
+        }
+      ]
+    },
+    {
+      "qid": "M-f8199de8b1",
+      "qtype": "multi_hop",
+      "human": "correct",
+      "verdict": "correct",
+      "parts": [
+        "Skyworks sells to Apple via multiple distributors and contract manufacturers",
+        "Amkor sells directly to Apple, which accounted for 30.8% of its net sales"
+      ],
+      "checks": [
+        {
+          "part": "Skyworks sells to Apple via multiple distributors and contract manufacturers",
+          "status": "ANSWERED",
+          "evidence": "through sales to multiple distributors, contract manufacturers"
+        },
+        {
+          "part": "Amkor sells directly to Apple, which accounted for 30.8% of its net sales",
+          "status": "ANSWERED",
+          "evidence": "Direct sales to Apple accounted for 30.8% of Amkor's net sales"
+        }
+      ]
+    }
+  ]
+}

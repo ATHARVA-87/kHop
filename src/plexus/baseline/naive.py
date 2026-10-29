@@ -24,9 +24,10 @@ Rules:
 def format_context(hits: list[Hit]) -> str:
     blocks = []
     for i, h in enumerate(hits, start=1):
-        blocks.append(
-            f"[{i}] (source: {h.doc_id}, section: {h.section})\n<excerpt>\n{h.text}\n</excerpt>"
-        )
+        # the header names the company: filings say "we", so without it the model can credit
+        # one company's facts to another (seen in the first Phase 4 answers)
+        source = h.header or f"(source: {h.doc_id}, section: {h.section})"
+        blocks.append(f"[{i}] {source}\n<excerpt>\n{h.text}\n</excerpt>")
     return "\n\n".join(blocks)
 
 
@@ -44,8 +45,12 @@ def _norm(text: str) -> str:
 
 
 def is_refusal(text: str) -> bool:
-    """The answer declines for lack of evidence (tolerant of punctuation/case)."""
-    return _norm(NOT_ENOUGH) in _norm(strip_thinking(text))
+    """The answer declines for lack of evidence: it opens with the refusal sentence, or is
+    little more than it. An answer that gives facts and adds "not enough evidence" about one
+    detail is an answer, not a refusal (first Phase 4 run counted those: 15 "refusals",
+    most of them full answers)."""
+    norm, ref = _norm(strip_thinking(text)), _norm(NOT_ENOUGH)
+    return norm.startswith(ref) or (ref in norm and len(norm.split()) <= len(ref.split()) + 15)
 
 
 @dataclass
@@ -81,13 +86,30 @@ class NaiveRAG:
             temperature=g.temperature,
             max_tokens=g.max_tokens,
             seed=self.cfg.seed,
+            params=self._params(),
         )
+
+    def _params(self) -> dict:
+        g = self.cfg.generation
+        if g.provider != "ollama":
+            return {}
+        # num_ctx only when set, so cache keys of earlier runs stay the same
+        return {"think": g.think} | ({"num_ctx": g.num_ctx} if g.num_ctx else {})
 
     def answer(self, question: str) -> Answer:
         if self.llm is None:
             raise RuntimeError("NaiveRAG.answer needs an LLMClient")
         t0 = time.perf_counter()
         hits = self.retrieve(question)
+        ans = self.generate(question, hits)
+        ans.retrieval_ms = (time.perf_counter() - t0) * 1000 - ans.generation_ms
+        return ans
+
+    def generate(self, question: str, hits: list[Hit]) -> Answer:
+        """Write the cited answer from the top `context_chunks` hits (the LangGraph "answer"
+        node calls this too, so both paths give the same answer)."""
+        if self.llm is None:
+            raise RuntimeError("NaiveRAG.generate needs an LLMClient")
         t1 = time.perf_counter()
         context = hits[: self.cfg.generation.context_chunks]
         resp = self.llm.complete(self.build_request(question, context))
@@ -99,7 +121,6 @@ class NaiveRAG:
             text=text,
             hits=context,
             cited_chunk_ids=[context[n - 1].chunk_id for n in cited if 1 <= n <= len(context)],
-            retrieval_ms=(t1 - t0) * 1000,
             generation_ms=(t2 - t1) * 1000,
             cached=resp.cached,
         )

@@ -1,0 +1,11 @@
+# Constraints for the SEPARATE `ragas` conda env (never the torch env). No torch here, so
+# numpy 2 is allowed (pyarrow >= 24 for datasets needs it). ragas 0.4.3 still imports
+# langchain_community.chat_models.vertexai, removed in langchain-community 0.4, hence <0.4.
+# litellm pinned to the uv.lock version so LLM calls behave as in the main env.
+# Rebuild (see Makefile target ragas-env):
+#   conda create -n ragas python=3.11
+#   pip install -c constraints-ragas.txt ragas==0.4.3 litellm pydantic pyyaml python-dotenv tenacity httpx
+#   pip install --no-deps -e .
+litellm==1.106.4
+langchain-community<0.4
+ragas==0.4.3

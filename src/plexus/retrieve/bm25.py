@@ -208,8 +208,13 @@ class BM25Index:
             s[docs] += self.idf(term) * tf * (self.k1 + 1.0) / (tf + self._norm[docs])
         return s
 
-    def search(self, query: str, k: int) -> list[tuple[int, float]]:
+    def search(
+        self, query: str, k: int, allowed: np.ndarray | None = None
+    ) -> list[tuple[int, float]]:
+        """allowed: boolean mask over documents (chunks); others score 0."""
         s = self.scores(query)
+        if allowed is not None:
+            s = np.where(allowed, s, 0.0).astype(np.float32)
         k = min(k, self.n_docs)
         if k <= 0:
             return []

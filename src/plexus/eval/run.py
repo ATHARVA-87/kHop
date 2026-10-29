@@ -32,6 +32,7 @@ from plexus.eval.metrics import (
     recall_at_k,
     retrieval_metrics,
 )
+from plexus.ingest.headers import index_text
 from plexus.settings import REPO_ROOT, Settings
 
 
@@ -201,7 +202,7 @@ WORD_BUDGETS = (500, 1000, 2000, 3000, 5000)
 BUDGET_DEPTH = 60  # hits fetched so a 5,000-word budget fills even with ~160-word chunks
 METRICS = [
     "recall@1", "recall@5", "recall@10", "recall@20", "ndcg@10", "mrr",
-    "complete@10", "complete@20", "strict_recall@10",
+    "complete@5", "complete@10", "complete@20", "strict_recall@10",
     "company_coverage@10", "company_coverage@20", "coverage_base_rate", "context_words@10",
     *(f"recall@{b}w" for b in WORD_BUDGETS),
 ]  # fmt: skip
@@ -262,13 +263,17 @@ def score_generation(
             answer=ans.text,
             refused=is_refusal(ans.text),
             n_citations=len(cited),
+            # what the writer saw (with company headers): lets external evaluators such as
+            # RAGAS score the same answers without re-running retrieval
+            contexts=[index_text(h.header, h.text) for h in ans.hits],
             citation_gold_precision=(sum(hits_gold) / len(cited)) if cited else None,
             generation_ms=ans.generation_ms,
             generation_cached=ans.cached,
         )
         if judge is not None:
+            # excerpts WITH their company header, so the judge can catch wrong-company claims
             row["faithfulness"] = judge.faithfulness(
-                q.question, ans.text, [h.text for h in ans.hits]
+                q.question, ans.text, [index_text(h.header, h.text) for h in ans.hits]
             )
             verdict = judge.correctness(q.question, q.answer, ans.text)
             row["judge_verdict"] = verdict
@@ -359,7 +364,11 @@ def run(
     )
     generation = {}
     if generate or use_judge:
-        judge = Judge(llm, cfg.judge.provider, cfg.judge.model, cfg.seed) if use_judge else None
+        judge = (
+            Judge(llm, cfg.judge.provider, cfg.judge.model, cfg.seed, cfg.judge.fallback_models)
+            if use_judge
+            else None
+        )
         score_generation(queries, rows, pipeline, doc_texts, judge)
         generation = aggregate_generation(rows, seed=cfg.seed) if rows else {}
         generation["llm_usage"] = {
@@ -370,6 +379,8 @@ def run(
             "completion_tokens_uncached": llm.stats.completion_tokens,
             "by_provider": llm.stats.by_provider,
         }
+        if judge is not None:
+            generation["judge_models_used"] = dict(judge.used)
     if hasattr(retriever, "close"):
         retriever.close()
 

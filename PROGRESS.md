@@ -8,23 +8,22 @@
 | 1. Harness | EDGAR snapshot, golden-set candidates, human verification, metrics, A0 | A0 scored with CIs | **Gate met 2026-10-27** (134 verified queries; A0 recall@10 0.276). Branch `phase1-harness`, PR #1 needs your review |
 | 2. Retrieval + CI gate | A1–A3, retrieval gate on PRs | A1–A3 recorded; gate blocks a planted regression | **Gate met 2026-10-27.** A2 hybrid + headers recall@10 0.704 (A0 0.276); CI gate blocks planted regression (run 40527190366). Branch `phase2-retrieval`, PR #2 needs your review |
 | 3. Graph | Extraction, resolution, Kuzu, Leiden, summaries, A4, A5 | Extraction P/R; A4, A5 recorded | — |
-| 4. Single-graph agent | Router, grade-and-rewrite, A6, A7 | Router vs always-local/global | — |
+| 4. Single-graph agent | Router, grade-and-rewrite, A6, A7 | Router vs always-local/global | **Gate met 2026-10-28** (A6 router beats always-X on dev and test; = oracle). A7 loop in progress |
 | 5. Multi-agent | 4 agents, guardrails, A9 | A9 vs A7 with latency/cost; guardrail metrics | — |
 | 6. Systems + UI | Semantic cache (A8), SSE, Phoenix, Next.js, Locust | p95, cache hit rate, cost/query | — |
 | 7. Ship | README, ADRs, demo Space, drift check, demo script | Definition of done | — |
 
 ## Resume here
 
-**State (2026-10-27 evening):** Phases 0–2 gates met. Branches: `main` = Phase 0; `phase1-harness` (PR #1) = harness, golden set, A0; `phase2-retrieval` (PR #2, stacked on #1) = A1–A3 + CI retrieval gate. Fast tests pass; CI green on `phase2-retrieval` (run 40526855835). GitHub does not fire push/PR events for this repo, so CI is started with `gh workflow run ci --ref <branch>`.
+**State (2026-10-28, paused for the night):** Phases 0–3 done (PR #5 for Phase 3 open, you merge). Phase 4 on branch `phase4-router` (pushed, clean). Phase 4 gate met: the A6 rule router beats always-X on dev and test and equals the oracle. Honest reading: the gain is the reranker on single-company questions.
 
-**Best retriever so far:** A2 = `configs/a1h_hybrid.yaml` (structure-aware chunks + contextual headers + BM25/dense RRF): recall@10 0.704, multi-hop 0.675. The reranker (A3) helps single-company questions (0.923) but hurts two-company ones. Use it only on single-company questions once the router exists (docs/failures.md).
+**Status 2026-10-28 evening:** your 49 blind judge labels are final (38 correct / 10 partial / 1 incorrect). The Gemini judge agrees poorly (kappa 0.064; 0.133 with your rubric): too lenient. RAGAS (separate `ragas` conda env, `make ragas`) scored 14 of the 49 before Gemini's free daily quota ran out (429). Those 14 are cached; **re-run `make ragas` after the quota resets (midnight Pacific)** to finish. Early sign: RAGAS F1 is too harsh (it penalises extra correct detail); recall mode (matching your rubric) is added and both are reported.
 
-**Your open items:**
-1. Review PR #1 (metrics, golden-set code) and PR #2 (`eval/run.py`, `eval/gate.py`, `eval/compare.py`), then merge #1 before #2.
-2. Sign off ADRs 0001–0005.
-3. Phase 3 needs Ollama (human step 4, sudo): install it and `ollama pull qwen3.5:4b`. Graph extraction can use Gemini/Groq free tier meanwhile.
-
-**Next Claude task:** Phase 3 (graph). LLM entity/relation extraction with a strict JSON schema → entity resolution → Kuzu → Leiden communities + summaries; A4 graph traversal, A5 community search (aimed at global questions: company_coverage@10 is stuck at ~0.5 for every retriever).
+**Next Claude steps, in order (agreed plan):**
+1. `python -m plexus.eval.judge agreement --results results/a6_router.json` gives kappa and the confusion matrix. If the judge is lenient (it rated two half-answers correct), make it stricter (gemini-3.6-flash when not overloaded, or a stricter prompt), re-measure, and report both.
+2. A7 grade-and-rewrite: deterministic coverage grade (every named company present? ≥N companies for global?) → corrective search in the missing company's filings (per-filing filter already built) → one yes/no LLM grade → at most 1 rewrite keeping the company names. Compare loop vs no loop (answer metrics, rewrite rate, latency).
+3. LangGraph wiring last: pinned version ≥ 2 weeks old, in-memory state only, no CLI/server (security advisories noted in the research report).
+4. A reviewer agent after each step; delete what loses (keep it explainable).
 
 ## Gate evidence
 
@@ -194,6 +193,29 @@ Planned (by phase):
 
 - **CI green on `phase3-graph`: run 40637527821.** `lint-test` passes (graph extra installed) and `retrieval-gate` passes for both a1h_bm25 and a5_ci_bm25. The second rebuilds the graph from the published extractions and gates graph search + A5, with no torch.
 
+## Phase 4 (branch `phase4-router`): router + grade-and-rewrite
+Plan agreed 2026-10-28 (research scout: Adaptive-RAG, CRAG, IRCoT/Self-Ask, RAGAS/ARES, LangGraph advisories): route → retrieve (per type) → grade → at most 1 rewrite → generate with citations; LangGraph last, as wiring only.
+
+**Step 1, A6 rule router (gate met).** 0 companies named → global (A5 ranking); 2+ corpus filers → multi-hop (A4 graph); else local (hybrid + reranker, which helps local but hurt multi-hop in Phase 2). No LLM call.
+
+| | router accuracy | all R@10 | all both@10 | local R@10 | multi-hop both@10 | global cov@10 |
+| --- | --- | --- | --- | --- | --- | --- |
+| dev: always-local / multi-hop / global | | 0.684 / 0.794 / 0.706 | 0.560 / 0.739 / 0.619 | | | |
+| dev: **A6 router** (= oracle) | **1.000** (134) | **0.833** | **0.776** | 0.923 | 0.789 | 0.892 |
+| test: always-local / multi-hop / global | | 0.532 / 0.563 / 0.518 | 0.462 / 0.494 / 0.418 | | | |
+| test: **A6 router** (= oracle) | **0.978** (91) | **0.584** | **0.516** | 1.000 | 0.435 | 0.671 |
+
+- Caveat: the golden questions separate cleanly by how many companies they name; real user questions will not always. Both test misroutes were "TI" not linking, fixed after the test run (docs/ai_review_log.md); the 0.978 is pre-fix.
+- **Honest reading (router review, 2026-10-28):** A6 differs from A5 only on single-company questions (dev 5 of 65 changed, test 2 of 37), where the reranker now runs. The gain over A5 is "+reranker on local questions"; the router is the explainable switch that makes it possible. "Router = oracle" holds by construction, because golden questions were generated per type with 0 / 1 / 2+ filers named.
+- **Router review fixes:** non-filer short aliases (Amazon, Arm, DOC, BIS) had leaked into the filer set and silently lowered six dev multi-hop rankings. Fixed, and all dev configs re-run at clean commit 35b6498 (multi-hop nDCG@10 0.726 again). Lowercase names now link when the filings capitalise them ≥ 90% ("amd" 0.995, "on" 0.06), and "which companies / chip companies / industry-wide" route to global.
+- **Routing on realistic phrasings** (`data/golden/routing_robustness.jsonl`: 30 assistant-written paraphrases of dev questions with lowercase names, tickers, "vs", sector cues): 0.933 before the last two general fixes, 1.000 after. Small and self-written: a diagnostic, not a benchmark. The test set is spent for linker tuning (the "TI" fix came from it).
+- **Step 2, per-company sub-queries:** measured and removed (docs/failures.md). The per-filing search filter is kept for the A7 corrective step.
+- **Answer-quality judges vs 49 blind human labels** (docs/failures.md): single-verdict Gemini judge catches 3/11 human not-correct answers; checklist judge (pre-registered, Groq gpt-oss-120b) 4/11 = 0.36 [0.15, 0.65], TNR 0.95, binary kappa 0.37: **below its pre-set bar, not accepted**. RAGAS 14/49 so far (Gemini daily quota; resume with `make ragas`). Headline answer quality = human 38/49 = 0.78 [0.64, 0.87].
+- **10 vs 5 writer passages (blind paired human labels):** 45/49 vs 44/49, McNemar p = 1.0 (penalising stray refusal lines: 45 vs 40, p = 0.125). Not significant: keep 5. Label drift: 6 of the first 49 labels moved partial -> correct on blind re-label (awaiting the human's decision; judges not re-scored yet).
+- **Agent flow in LangGraph (user choice 2026-10-29, after an ADK / LangGraph / plain-Python comparison):** `src/plexus/agents/flow.py`, route -> retrieve -> answer, nodes are our own functions (LLM calls still via the cached LLMClient), one trace entry per step, in-memory, LangSmith off. langgraph==1.2.15 (>= 1.2.14 security fix) in the `agents` extra; torch/numpy untouched. Check (`make flow-check`, cache-only, `results/flow_check.json`): all 134 dev answers identical to `results/a6_router.json`, and every route equals the golden question type. Review fixes: tracing forced off, nodes call the retriever's own `retrieve()` (no copied routing), `retrieval_ms` set. `make ask Q="..."`. The grade -> rewrite loop is added only if measured to help.
+- **Labels updated (human's choice 2026-10-29: newer labels for the 6 drifted answers).** Human accuracy now 44/49 = 0.90 [0.78, 0.96] (first labels: 38/49 = 0.78; both reported). Judges re-scored from cache: both catch 3/5 not-correct answers (TPR 0.60 [0.23, 0.88]); checklist judge still below its bar; validation underpowered with 5 negatives (docs/failures.md).
+- Also fixed at Phase 4 start: generation returned empty answers (qwen3.5 thinking), now `generation.think: false`.
+
 ## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
 `results/test/*.json`. No design decision was made on these numbers.
 
@@ -233,3 +255,4 @@ Honest reading:
 - Known limits, not fixed: chunks longer than bge's 512 tokens are truncated (now counted in `build_info.json`); the parser is validated on synthetic HTML only.
 - 2026-10-27 09:20–09:40: `make ingest` (156 filings, 39 cos; QRVO missing after the Skyworks merger; YAML `ON` ticker bug fixed). `make process`: parser v4, 152/156 fully sectioned. `make index` for A0: 20,360 chunks, 156 s on GPU, **1,031 chunks (5.1%) exceed bge's 512 tokens** (table-heavy), a known A0 weakness for A1 to address with token-based sizing.
 - User chose to keep the brief's phase order (multi-agent = Phase 5). Gemini + Groq keys added. `make candidates` done: 180 candidates (10% auto-rejected) + 21 bridge questions. **Next: you review `review.csv` (local + multi-hop first) and `review_bridge.csv`; spot-check `global_themes.csv`; then `make golden` and `make eval`.**
+- **10 vs 5 passages, scoring rule fixed BEFORE unblinding (2026-10-29):** the human noticed stray "Not enough evidence" lines in otherwise complete answers, mostly in one column of each pair. Primary = human verdicts as given (same rubric as the 49 labels: only "not enough evidence" for a part the question asks is partial). Sensitivity = the human named 5 cells; 4 changed (G-9a28615079:2, M-81480ee57d:1, M-4ef2df83e8:1, G-06cfa36669:2; B-0192416a5a was already partial) re-marked partially_correct. Stray lines are counted per config by code as a separate metric.

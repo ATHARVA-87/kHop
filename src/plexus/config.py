@@ -47,7 +47,7 @@ class RerankConfig(_Strict):
 
 
 class RetrievalConfig(_Strict):
-    type: Literal["dense", "bm25", "hybrid", "graph_hybrid", "hybrid_rr"] = "dense"
+    type: Literal["dense", "bm25", "hybrid", "graph_hybrid", "hybrid_rr", "routed"] = "dense"
     top_k: int = 20
     candidates: int = 100  # hybrid: hits taken from each retriever before fusion
     rrf_k: int = 60  # reciprocal rank fusion constant (the paper's default)
@@ -59,6 +59,8 @@ class RetrievalConfig(_Strict):
     aliases_file: str | None = None  # default configs/entity_aliases.yaml (ablations only)
     graph_max_edges: int = 12
     graph_base: Literal["hybrid", "bm25"] = "hybrid"  # bm25: the CI gate (no torch in CI)
+    # A6 routed: "rules" = RuleRouter; a route name = always that route (gate baselines)
+    router: Literal["rules", "local", "multi_hop", "global"] = "rules"
     # A5: questions naming no company get one passage per company first
     company_diverse: bool = False
 
@@ -69,11 +71,18 @@ class GenerationConfig(_Strict):
     temperature: float = 0.0
     max_tokens: int = 512
     context_chunks: int = 5
+    # qwen3.5 "thinking" spends the whole token budget on hidden reasoning and returns an
+    # empty answer (found 2026-10-28 in the first generation run); off unless asked for
+    think: bool = False
+    # Ollama context window in tokens; None keeps Ollama's default (~4K), which would silently
+    # cut a 10-passage prompt (~3.5K tokens + answer)
+    num_ctx: int | None = None
 
 
 class JudgeConfig(_Strict):
     provider: str = "gemini"
     model: str = "gemini-3.6-flash"  # 3.8-flash overloaded on 2026-10-27, ADR 0005
+    fallback_models: list[str] = ["gemini-3.5-flash-lite"]  # tried when the main one fails
 
 
 class ExperimentConfig(_Strict):

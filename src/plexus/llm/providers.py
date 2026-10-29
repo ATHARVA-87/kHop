@@ -47,6 +47,29 @@ class FakeProvider:
 _LITELLM_PREFIX = {"ollama": "ollama", "gemini": "gemini", "groq": "groq"}
 
 
+def strict_schema(schema: dict) -> dict:
+    """Strict JSON-schema form (OpenAI/Groq): every object gets additionalProperties: false
+    and lists all its properties as required. Groq rejects Pydantic's default schema otherwise
+    ("additionalProperties:false must be set on every object"). Applied at call time only, so
+    the cache key (the original request) and cached responses are unchanged."""
+    import copy
+
+    def fix(node):
+        if isinstance(node, dict):
+            if node.get("type") == "object" or "properties" in node:
+                node["additionalProperties"] = False
+                if "properties" in node:
+                    node["required"] = list(node["properties"])
+            for v in node.values():
+                fix(v)
+        elif isinstance(node, list):
+            for v in node:
+                fix(v)
+        return node
+
+    return fix(copy.deepcopy(schema))
+
+
 class LiteLLMProvider:
     """Ollama, Gemini and Groq through LiteLLM, so agents can switch provider by config."""
 
@@ -76,8 +99,9 @@ class LiteLLMProvider:
         if request.json_schema is not None:
             kwargs["response_format"] = {
                 "type": "json_schema",
-                "json_schema": {"name": "output", "schema": request.json_schema, "strict": True},
-            }
+                "json_schema": {"name": "output", "schema": strict_schema(request.json_schema),
+                                "strict": True},
+            }  # fmt: skip
         start = time.perf_counter()
         try:
             resp = litellm.completion(**kwargs)

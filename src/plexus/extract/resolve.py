@@ -406,6 +406,10 @@ def _name_word_stats(
     cache = data_dir / "graph" / snapshot / "name_word_case.json"
     words = {t for m in filers.values() for t in norm_key(clean_company(m["company"])).split()}
     words |= {t for m in filers.values() for t in norm_key(m["company"]).split()}
+    words |= {t.lower() for t in filers}  # tickers ("amd", "nvda"): lowercase use is measured too
+    aliases = yaml.safe_load((REPO_ROOT / "configs" / "entity_aliases.yaml").read_text())
+    words |= {t for names in (aliases.get("filers") or {}).values() for n in names
+              for t in norm_key(n).split()}  # fmt: skip
     if cache.exists():
         stats = json.loads(cache.read_text())
         if words <= set(stats):

@@ -16,7 +16,7 @@ class StubIndex:
     def __init__(self, hits):
         self.hits = hits
 
-    def search(self, vector, k):
+    def search(self, vector, k, doc_ids=None):
         return self.hits[:k]
 
 
@@ -68,3 +68,22 @@ def test_thinking_block_is_stripped_and_refusal_detected(tmp_path):
     assert is_refusal("<think>hmm</think> Not enough evidence in the filings to answer this")
     assert is_refusal("NOT ENOUGH EVIDENCE in the filings to answer this.")
     assert not is_refusal("TSMC makes them [1].")
+
+
+def test_ollama_requests_turn_thinking_off(tmp_path):
+    rag = _rag(tmp_path, lambda r: "ok [1]")
+    req = rag.build_request("q", HITS[:2])
+    assert req.params == {"think": False}  # qwen3.5 otherwise returns empty answers
+    rag.cfg.generation.num_ctx = 8192  # only sent when set (old cache keys unchanged)
+    assert rag.build_request("q", HITS[:2]).params == {"think": False, "num_ctx": 8192}
+
+
+def test_refusal_means_declining_not_a_caveat():
+    from plexus.baseline.naive import is_refusal
+
+    assert is_refusal(NOT_ENOUGH)
+    assert is_refusal("Not enough evidence in the filings to answer this. Sorry.")
+    long_answer = (
+        "Wolfspeed's liquidity came from cash and marketable securities [1]. " * 4
+    ) + NOT_ENOUGH
+    assert not is_refusal(long_answer)
