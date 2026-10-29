@@ -233,24 +233,19 @@ Not built (research + measurements): LLM planner / sub-question split, LLM resea
 ## Phase 6 (branch `phase6-app`): the app
 Research first (2026-10-29). Built: FastAPI service with live answers (SSE; `make serve`, 127.0.0.1:8000), static Next.js 16.4.1 page (ADR 0008; design plan approved by the owner: white / filing red / highlighter yellow, light by default, dark only by switch, remembered), one-company filter for single-company questions (found by using the app; dev recall@10 +0.015, kept; `configs/app.yaml`), A8 semantic cache, per-question trace log, load test.
 
-**Gate evidence** (cold caches, `results/phase6_load.json`, `phase6_load_mix.json`, `phase6_stages.json`, `a8_cache.json`):
+**Gate evidence, final setup** (writer loaded first, 100% on the GPU; fact-checker on CPU; cold caches; `results/phase6_load.json`, `phase6_load_mix.json`, `phase6_stages.json`, `a8_cache.json`):
 | people asking at once | answered | told "busy" (503) | first words p50 / p95 | full answer p50 / p95 |
 | --- | --- | --- | --- | --- |
-| 1 | 2/2 | 0 | 18.3 s | 21.8 s |
-| 2 | 4/4 | 0 | 6.0 / 15.8 s | 14.3 / 25.5 s |
-| 4 | 8/8 | 0 | 21.0 / 28.8 s | 24.2 / 39.2 s |
-| 8 | 10/16 | 6 (queue limit 4, by design) | 21.9 / 33.1 s | 25.5 / 36.2 s |
-- Per step (fresh answers): retrieve p50 0.62 s, writer p50 5.3 s / p95 20.5 s, verify p50 0.07 s; queue wait p50 6.6 s; cached answers p50 31 ms.
-- Semantic cache: owner-checked pairs, 23/40 rewordings reused with 0/40 wrong reuses (threshold 0.935). Mixed load round (6 rewordings + 4 new, sent together, after the fix below): 7 answered, 2 cache hits, 3 told busy.
-- Cost per question: $0 (local model); 1 LLM call per fresh question, 0 per cache hit.
-- **Caveat:** during the load test the GPU was too full for the whole writer model: Ollama ran 35% of it on the CPU, which explains the slow single-user times (18-22 s vs ~8 s when the GPU is free) and the laptop lag. One GPU = one answer at a time; more people means longer waits, not more throughput.
+| 1 | 2/2 | 0 | 9.0 s | 13.7 s |
+| 2 | 4/4 | 0 | 5.6 / 15.8 s | 14.7 / 23.6 s |
+| 4 | 8/8 | 0 | 13.3 / 31.2 s | 27.2 / 34.6 s |
+| 8 | 10/16 | 6 (queue limit 4, by design) | 10.7 / 27.5 s | 16.5 / 33.2 s |
+| mix: 6 rewordings + 4 new | 9/10 | 1 | 0.7 / 13.6 s | 2.4 / 16.0 s (4 cache hits) |
+- Per step (fresh answers): retrieve p50 0.53 s, writer p50 3.1 s / p95 9.8 s, fact-check (CPU) p50 2.2 s; queue wait p50 5.2 s; cached answers p50 6 ms. Cache: 23/40 owner-checked rewordings reused, 0/40 wrong.
+- Cost per question: $0; 1 LLM call per fresh question, 0 per cache hit.
+- GPU: 5,513 / 6,141 MB in normal use (inside the owner's 10% margin); peak 5,565 MB under 8 concurrent questions (40 MB over the margin, brief). Stopping the app frees the GPU.
+- First run (writer 35% on CPU, before the load-order fix) is in docs/failures.md.
 - Found by the load test: cache hits were being turned away as "busy" because the queue was checked before the cache; fixed (cache first, then queue), test added.
-
-## Resume here (2026-10-29, owner restarting the PC)
-Branch `phase6-app`, all work committed. Next, when the owner says "continue":
-1. Run the fact-checker (MiniCheck-RoBERTa) on the CPU in the app (owner's choice: the app's 1.8 GB + the writer's 3.1-3.7 GB exceed the 6 GB card minus the 10% safety margin; CPU check measured at ~3.0 s per answer on 4 threads). Make it a config setting (`guard.verifier_device`, default cpu), cap CPU threads, re-check VRAM with the writer loaded (target: Ollama 100% GPU), then re-run the cold load test.
-2. Owner rule (memory): check CPU/GPU/RAM before every heavy task, keep a 10% margin, ask the owner to free resources if more VRAM is needed; unload Ollama (`ollama stop qwen3.5:4b`) and stop servers when done.
-3. Then: reviewer agent on Phase 6, update Walkthrough (simple words), open the Phase 6 PR, run CI.
 
 ## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
 `results/test/*.json`. No design decision was made on these numbers.
