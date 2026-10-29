@@ -2,45 +2,45 @@
   "summary": {
     "checklist_judge": {
       "n": 49,
-      "human_not_correct": 11,
-      "tpr_catches_not_correct": 0.364,
+      "human_not_correct": 5,
+      "tpr_catches_not_correct": 0.6,
       "tpr_ci": [
-        0.152,
-        0.646
+        0.231,
+        0.882
       ],
-      "tnr_passes_correct": 0.947,
+      "tnr_passes_correct": 0.932,
       "tnr_ci": [
-        0.827,
-        0.985
+        0.818,
+        0.977
       ],
-      "raw_agreement": 0.816,
-      "binary_kappa": 0.371,
-      "gwet_ac1": 0.742
+      "raw_agreement": 0.898,
+      "binary_kappa": 0.489,
+      "gwet_ac1": 0.873
     },
     "single_verdict_judge": {
       "n": 49,
-      "human_not_correct": 11,
-      "tpr_catches_not_correct": 0.273,
+      "human_not_correct": 5,
+      "tpr_catches_not_correct": 0.6,
       "tpr_ci": [
-        0.097,
-        0.566
+        0.231,
+        0.882
       ],
-      "tnr_passes_correct": 0.974,
+      "tnr_passes_correct": 0.977,
       "tnr_ci": [
-        0.865,
-        0.995
+        0.882,
+        0.996
       ],
-      "raw_agreement": 0.816,
-      "binary_kappa": 0.318,
-      "gwet_ac1": 0.752
+      "raw_agreement": 0.939,
+      "binary_kappa": 0.633,
+      "gwet_ac1": 0.927
     },
     "human_accuracy": {
-      "correct": 38,
+      "correct": 44,
       "n": 49,
-      "rate": 0.776,
+      "rate": 0.898,
       "wilson_95": [
-        0.641,
-        0.87
+        0.782,
+        0.956
       ]
     },
     "accepted": false,
@@ -52,7 +52,7 @@
       "openai/gpt-oss-120b": 98
     },
     "failed": 0,
-    "judge_code_commit": "43191ee"
+    "judge_code_commit": "21c03e7"
   },
   "per_query": [
     {
@@ -444,7 +444,7 @@
     {
       "qid": "L-8ab362f0e3",
       "qtype": "local",
-      "human": "partially_correct",
+      "human": "correct",
       "verdict": "correct",
       "parts": [
         "macroeconomic weakness related to trade and political disputes between the United States and Europe or China",
@@ -478,7 +478,7 @@
     {
       "qid": "L-950416d079",
       "qtype": "local",
-      "human": "partially_correct",
+      "human": "correct",
       "verdict": "correct",
       "parts": [
         "Q1 2025 revenue",
@@ -500,7 +500,7 @@
     {
       "qid": "L-99426bab62",
       "qtype": "local",
-      "human": "partially_correct",
+      "human": "correct",
       "verdict": "correct",
       "parts": [
         "Board is staggered into two classes, with only one class elected at each annual meeting."
@@ -600,7 +600,7 @@
     {
       "qid": "L-a8da0ea627",
       "qtype": "local",
-      "human": "partially_correct",
+      "human": "correct",
       "verdict": "correct",
       "parts": [
         "Remote working arrangements",
@@ -964,7 +964,7 @@
     {
       "qid": "M-74be6129e9",
       "qtype": "multi_hop",
-      "human": "partially_correct",
+      "human": "correct",
       "verdict": "correct",
       "parts": [
         "MaxLinear describes Huawei as being subject to regulatory restrictions (added to the Entity List, further restricted business operations).",
@@ -986,7 +986,7 @@
     {
       "qid": "M-7531785032",
       "qtype": "multi_hop",
-      "human": "partially_correct",
+      "human": "correct",
       "verdict": "not_correct",
       "parts": [
         "SiTime \u2013 Apple is its largest end customer, about 17% of revenue for the three months ended June 30, 2025",

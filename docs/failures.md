@@ -79,3 +79,13 @@ Blind paired human labels on the 49 labelled dev questions (46 differing answer 
 Stray "Not enough evidence" lines in otherwise answered questions: 6 (5 passages) vs 4 (10 passages). Neither run is significant; 5 passages stays the default (shorter prompt, nothing proven). The better complete@10 retrieval did not turn into measurably better answers on 49 questions.
 
 Label drift found: on re-labelling the SAME 5-passage answers blind, 6 answers first labelled partially_correct were now labelled correct (L-8ab362f0e3, L-950416d079, L-99426bab62, L-a8da0ea627, M-74be6129e9, M-7531785032); four of them are exactly the "partial" answers both judges passed. Human test-retest agreement on these 49: 43/49 = 0.88. The judge validation above uses the first labels; it is not re-scored until the human decides which label is right.
+
+### Judges re-scored with the human's updated labels (2026-10-29)
+The human chose the newer labels for the 6 drifted answers (all partially_correct -> correct; `data/golden/judge_labels.csv` now 44 correct / 4 partially correct / 1 incorrect). Same cached judge outputs, no new LLM calls:
+
+| judge (binary) | catches not-correct (TPR, 95% Wilson) | passes correct (TNR) | binary kappa | Gwet AC1 |
+| --- | --- | --- | --- | --- |
+| single-verdict Gemini judge | 3/5 = 0.60 [0.23, 0.88] | 0.98 | 0.63 | 0.93 |
+| checklist judge | 3/5 = 0.60 [0.23, 0.88] | 0.93 | 0.49 | 0.87 |
+
+Still below the 0.70 bar (checklist judge not accepted), and with only 5 not-correct answers the TPR interval is too wide to say anything either way: the validation is underpowered, not just failed. Much of the earlier "judge too lenient" finding was label drift on borderline one-company-missing answers. RAGAS: its 14 scored rows are now all human-correct, so it cannot be compared with humans on them (F1 still marks 12 of those 14 as not correct: too harsh). Headline answer quality: human 44/49 = 0.90 (Wilson 0.78–0.96).
