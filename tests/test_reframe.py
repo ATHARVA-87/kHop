@@ -43,7 +43,9 @@ def test_case_only_change_is_not_shown_as_a_change():
 
 def test_v2_fixes_possessives_mixed_case_names_and_valid_words():
     r2 = Reframer(
-        VOCAB | Counter({"does": 5000, "dies": 900, "diodes": 300}), FORMS | {"Diodes": "Diodes"}
+        VOCAB | Counter({"does": 5000, "dies": 900, "diodes": 300}),
+        FORMS | {"Diodes": "Diodes"},
+        english=frozenset({"falling"}),  # same on every machine (CI has no system word list)
     )
     assert not r2("What does Texas Instruments' filing say?").changed
     assert (
