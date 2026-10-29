@@ -1,0 +1,55 @@
+# Entity resolution alias table (Phase 3). canonical name -> other names it appears under.
+# Filers are added automatically from the snapshot manifest (legal name, cleaned name, ticker,
+# common name), so only non-filer counterparties and odd spellings live here.
+# General knowledge only: not tuned to the golden questions. Extend when a resolution
+# spot-check finds a missed merge.
+# Short names for FILERS (ticker -> names), beyond the legal name, ticker and the common name in
+# ingest/headers.py. Added after the Phase 3 review found "Monolithic Power" and "on semi" missed.
+filers:
+  MPWR: [Monolithic Power, Monolithic Power System, MPS]
+  ON: [ON Semi, on semi, onsemi, ON Semiconductor]
+  TXN: [Texas Instruments, TI]
+  ADI: [Analog Devices]
+  AMAT: [Applied Materials]
+  SLAB: [Silicon Labs, Silicon Laboratories]
+  MTSI: [MACOM]
+  POWI: [Power Integrations]
+  AMD: [AMD, Advanced Micro Devices]
+company:
+  TSMC: [Taiwan Semiconductor Manufacturing Company, Taiwan Semiconductor Manufacturing,
+         Taiwan Semiconductor Manufacturing Co, Taiwan Semiconductor, TSMC Limited]
+  Samsung: [Samsung Electronics, Samsung Electronics Co, Samsung Foundry]
+  SK hynix: [SK Hynix, SK Hynix Inc, Hynix]
+  GlobalFoundries: [GLOBALFOUNDRIES, GF, Global Foundries]
+  UMC: [United Microelectronics, United Microelectronics Corporation]
+  SMIC: [Semiconductor Manufacturing International, Semiconductor Manufacturing International Corporation]
+  Vanguard International Semiconductor: [VIS, Vanguard International Semiconductor Corporation]
+  ASE: [ASE Technology, Advanced Semiconductor Engineering, ASE Group]
+  ASML: [ASML Holding]
+  Tokyo Electron: [TEL, Tokyo Electron Limited]
+  Apple: [Apple Inc]
+  Microsoft: [Microsoft Corporation]
+  Amazon: [Amazon.com, Amazon Web Services, AWS]
+  Alphabet: [Google, Google LLC, Alphabet Inc]
+  Meta: [Meta Platforms, Facebook]
+  Foxconn: [Hon Hai, Hon Hai Precision Industry, Hon Hai Precision Industry Co, Foxconn Technology Group]
+  Huawei: [Huawei Technologies, Huawei Technologies Co]
+  Arm: [Arm Holdings, ARM, Arm Limited, Arm Ltd]
+  Synopsys: [Synopsys Inc]
+  Cadence: [Cadence Design Systems]
+  Dell: [Dell Technologies]
+  Hewlett Packard Enterprise: [HPE]
+  Bosch: [Robert Bosch, Robert Bosch GmbH]
+  Infineon: [Infineon Technologies, Infineon Technologies AG]
+  Renesas: [Renesas Electronics, Renesas Electronics Corporation]
+  STMicroelectronics: [STMicro, ST]
+  Tesla: [Tesla Motors]
+  U.S. Department of Commerce: [Department of Commerce, Commerce Department, DOC]
+  Bureau of Industry and Security: [BIS, U.S. Bureau of Industry and Security]
+geography:
+  United States: [U.S., US, USA, U.S.A., the United States, America]
+  China: [PRC, People's Republic of China, mainland China, Mainland China]
+  Taiwan: [ROC]
+  South Korea: [Korea, Republic of Korea]
+  United Kingdom: [UK, U.K., Britain]
+  European Union: [EU, E.U., Europe]

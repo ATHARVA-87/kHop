@@ -14,3 +14,30 @@ With `bge-reranker-base` over the top 50 hybrid hits, single-company recall@10 r
 
 ## Equal-weight hybrid below BM25 alone on A0 chunks (2026-10-27)
 On A0's 300-word chunks, RRF of dense + BM25 (recall@10 0.374) was worse than BM25 alone (0.432, Δ −0.057 [−0.110, −0.007]), because the weaker dense list pushed good BM25 hits out of the top 10. With A1 chunks plus headers the dense side improved enough that hybrid wins (0.704 vs 0.612).
+
+## Extraction prompt v6 and gleaning did not help (2026-10-28)
+Scored on 40 gold-labelled 10-K passages (187 relations; AI labels, human confirmation pending), relation-family level:
+
+| variant | precision | recall | company-company P / R |
+| --- | --- | --- | --- |
+| v5 (current) | 0.67 | 0.18 | 0.90 / 0.45 |
+| v6: worked examples + `licenses_to` | 0.32 | 0.14 | 0.46 / 0.25 |
+| v5 + one gleaning pass (GraphRAG `max_gleanings`) | 0.45 | 0.32 | 0.56 / 0.50 |
+
+- v6's examples made the 4B model list more generic objects ("applicable executive orders") and repeat edges. Worse on every measure.
+- Gleaning raised recall mainly for products, segments and exposures, but company-company precision fell from 0.90 to 0.56; false company edges create false bridges for A4. Not adopted.
+- Kept: v5. Known v5 error class: `licenses_from` written where the filer licenses TO the object (5 of 15 bad edges in the quote calibration). Fixing it needs a stronger model or a rule, not more prompting.
+- Sample is small (20 company-company gold relations); CIs in `results/extraction_*.json`.
+
+## HippoRAG-style Personalized PageRank lost to simple edge rules (2026-10-28)
+PPR over an entity + evidence-chunk graph (seeded with the question's entities, fused with A2 by RRF), dev multi-hop complete@10:
+
+| variant | all multi-hop | bridge (14) | comparison (43) |
+| --- | --- | --- | --- |
+| A2-RR (no graph) | 0.597 | 0.357 | 0.674 |
+| **A4 edge rules** | **0.772** | **0.643** | **0.814** |
+| PPR, all edges, damping 0.5 or 0.85 | 0.596 | 0.571 | 0.605 |
+| PPR, company edges only | 0.649 | 0.714 | 0.628 |
+| graph weight 2 in RRF (any PPR variant) | 0.54–0.56 | | |
+
+PageRank mass leaks through hub nodes (NVIDIA has 126 edges; 1,041 exposure edges join most companies to shared risk nodes). The simple rules (edges between the named entities, or their common neighbours for bridge questions) are better and easier to explain. Removed PPR and weighted RRF; kept plain RRF.

@@ -23,7 +23,9 @@ class CrossEncoderScorer:
         from sentence_transformers import CrossEncoder  # heavy import
 
         self.cfg = cfg
-        self.model = CrossEncoder(cfg.model, max_length=cfg.max_length, device=cfg.device)
+        self.model = CrossEncoder(
+            cfg.model, max_length=cfg.max_length, device=cfg.device, revision=cfg.revision
+        )
         if self.model.model.device.type == "cuda":
             self.model.model.half()  # fp16 on GPU: same ranking in practice, half the memory
 

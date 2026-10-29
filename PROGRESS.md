@@ -149,6 +149,76 @@ Planned (by phase):
 - Finding: the author email on the first 51 commits is a personal address, public in commit metadata. Future commits use the GitHub noreply address (repo-local git config). Rewriting history needs your decision.
 - New pre-commit hook `no-secrets` blocks API-key and token patterns and personal email addresses.
 
+## Phase 3 progress (2026-10-28)
+- Extraction v5, `make extract` (you ran it): 1,665 10-K passages in 91 min (3.3 s each), 0 failures. 3,513 relations proposed, 2,348 kept (67%). Drops: quote not found 588, quote length 202, type mismatch 148, generic entity 103, object not in quote 99. **Only 397 of 1,665 passages yielded any relation**; possible recall problem, to be measured by the P/R labelling.
+- Graph (`make graph`): 1,363 entities (292 companies, all 39 filers), 1,992 edges (exposed_to 1,041, competes_with 197, has_segment 194, makes_product 154, operates_in 119, supplied_by 63, sells_to 51, manufactured_by 48, acquired 38). Alias resolution covered 2,818 of 4,696 mentions; 11 fuzzy merges, all logged. A merge of "Country Groups D4/D5" into "D1" was caught in the log and fixed (codes must match).
+- **A4 (graph traversal + A2, RRF) on dev** vs A2: multi-hop complete@10 0.509 → **0.667** (+0.158 [+0.058, +0.246]), multi-hop recall@10 +0.140, all recall@10 0.704 → 0.764 (+0.060 [+0.014, +0.101]); local unchanged; global unchanged (A5's job).
+- Dev tuning (dev set only): (1) filer short names ("Skyworks", "NXP", "Lattice") were not linked, and mentions of Skyworks in other filings formed a second, disconnected node; fixed by `short_key`. (2) The graph is skipped for single-entity questions: it cost local recall −0.20 on the 10 such questions.
+
+### Research-driven fixes (scout report 2026-10-28; user approved all 5 steps)
+- **Step 1, quote grounding:** normalise, split on "...", rapidfuzz `partial_ratio_alignment` (cutoff 95), else an in-order word match for lists with skipped names; the stored citation is the passage's own span. Calibrated on 80 stratified dropped quotes (AI-labelled; human confirmation pending): the alignment score did NOT predict support (almost every quote scoring under 90 was a real edge). Fuzzy ≥95 OR in-order kept 54/63 good edges and let in 9/15 bad (precision 0.86), against 14/63 kept at ≥95 alone. The remaining bad ones are direction/relation-type errors (e.g. `licenses_from` where Rambus licenses TO them): a prompt problem for step 3, not a quote problem.
+- **Step 2, resolution:** SEC `company_tickers.json` (10,430 registrants, fetched 2026-10-28, sha256 in `data/reference/*.meta.json`) as a canonical-name layer; `cleanco` suffix stripping; rapidfuzz token_sort_ratio plus "same name except generic words" merging, including into filer, alias and SEC entities. Group/place/nationality names are no longer companies. Not fully closed-world: Hon Hai, Wistron etc. are not SEC registrants.
+- Result: relations kept 2,348 → 2,928; edges 1,992 → 2,413; junk company nodes gone; merges logged (Samsung Semiconductor → Samsung, Monolithic Power System → MPS).
+- **A4 on dev after steps 1–2:** multi-hop complete@10 0.772 (A2 0.509, +0.263 [+0.100, +0.417]); all recall@10 0.790. Still to compare against the no-graph round-robin baseline (step 4).
+
+- **Step 3, extraction P/R** (40 gold passages, human-confirmed labels; family level): v5 P 0.67 R 0.18, company-company P 0.90 R 0.45. Prompt v6 (worked examples) and gleaning were measured and rejected (docs/failures.md). No re-extraction.
+- **Step 4, multi-hop, with the honest baseline (dev complete@10):**
+
+| config | all multi-hop (57) | bridge (14) | comparison (43) | all recall@10 |
+| --- | --- | --- | --- | --- |
+| A2 hybrid | 0.509 | 0.214 | 0.605 | 0.704 |
+| A2-RR (no graph, alternate named filers) | 0.597 | 0.357 | 0.674 | 0.730 |
+| **A4 graph edges + A2** | **0.772** | **0.643** | **0.814** | **0.790** |
+
+  A4 vs A2-RR: +0.175 [−0.020, +0.341] (cluster bootstrap by linking entity); comparison +0.140 [0.000, +0.262]; bridge +0.286 (n = 14, wide CI). HippoRAG-style PPR and weighted RRF lost and were removed (user rule: keep it explainable).
+
+- **Step 5, sector-wide questions (A5 = A4 + company-diverse ranking):** when a question names no company, the best passage of each company goes first. Dev global company_coverage@10 0.475 → 0.892. **Honest reading (Phase 3 review):** the base rate for ANY 10 different companies is 0.923, because most themes apply to 32–39 of 39 companies. So A5's gain is diversity: it makes the top 10 span 10 companies. Whether those passages answer the question is left to the Phase 4 answer judge. Deviation from the brief's "A5 community search": Leiden communities give peer groups, not themes (reviewer and research scout).
+
+### Phase 3 review fixes (2026-10-28; user: "fix all 7, then test")
+1. A5 coverage reported against its base rate (`coverage_base_rate` in results), and the claim reworded as above.
+2. **Alias ablation:** graph and linker rebuilt without the hand-listed aliases of the 17 dev multi-hop linking entities (SEC list kept). Multi-hop complete@10: A2-RR 0.597 / **A4 without those aliases 0.737** / A4 full 0.789; bridge 0.643 either way. About three quarters of the graph's gain does not depend on the hand-listed aliases.
+3. SEC gazetteer matches full names only (≥ 2 words, pure legal suffixes removed). This fixed Merck KGaA → MRK, STAr Technologies → Star Group, "Target" → TGT. sha256 checked on load; `python -m plexus.ingest.sec_reference` re-fetches.
+4. In-order quote match: one sentence only, no skipped or preceding negation, low density only for lists.
+5. Single-word company mentions must be capitalised ("arm's length" no longer links Arm); filer short-name aliases; one shared linker for A2-RR/A4/A5.
+6. (see below)
+7. Unused igraph/leidenalg removed.
+- After fixes: A4/A5 multi-hop complete@10 **0.789** (bridge 0.643, comparison 0.837), all recall@10 0.795.
+
+**How the system works, in 6 steps (for interviews):**
+1. Split each filing into sections and passages, and label each passage with company, form and section.
+2. Search two ways, by keywords (BM25) and by meaning (embeddings), and merge the rankings (RRF).
+3. Offline, a small local LLM lists company relationships in each passage ("AMD is manufactured by TSMC"); a relationship is kept only if its quote is found in the filing.
+4. Spellings of a company ("TSMC", "Taiwan Semiconductor") are merged with an alias list and the SEC company list, giving a graph.
+5. For a question naming companies: find them in the graph, follow the links between them (or to a shared partner), and add those links' source passages to the results.
+6. For a sector-wide question naming no company: put one best passage per company first.
+
+- **CI green on `phase3-graph`: run 40637527821.** `lint-test` passes (graph extra installed) and `retrieval-gate` passes for both a1h_bm25 and a5_ci_bm25. The second rebuilds the graph from the published extractions and gates graph search + A5, with no torch.
+
+## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
+`results/test/*.json`. No design decision was made on these numbers.
+
+| config | all R@10 | local R@10 | multi-hop R@10 | multi-hop both@10 | bridge | comparison | global coverage@10 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| A0 naive | 0.179 | 0.324 | 0.130 | 0.000 | 0.000 | 0.000 | 0.442 |
+| A2 hybrid + headers | 0.519 | 0.946 | 0.500 | 0.130 | 0.000 | 0.214 | 0.394 |
+| A2-RR (no graph) | 0.541 | 0.946 | 0.587 | 0.348 | 0.222 | 0.429 | 0.394 |
+| A3 reranker | 0.532 | 1.000 | 0.457 | 0.217 | 0.111 | 0.286 | 0.397 |
+| A4 graph | 0.563 | 0.946 | 0.674 | 0.435 | 0.222 | 0.571 | 0.394 |
+| **A5 (final)** | **0.561** | **0.946** | **0.674** | **0.435** | 0.222 | 0.571 | **0.671** |
+
+Honest reading:
+- Clear on test: A5 vs A0 all recall@10 +0.383 [+0.260, +0.499]; local +0.62; multi-hop both@10 0.000 → 0.435; A5's company diversity +0.277 [+0.188, +0.362] over A4.
+- **Not established on test:** the graph's own gain over the no-graph baseline. A4 vs A2-RR multi-hop both@10 +0.087 [−0.273, +0.297] (n = 23, cluster bootstrap by linking entity). On dev it was +0.192. Direction is consistent, the size is not.
+- **Dev → test drop on multi-hop** (A4 both@10 0.789 → 0.435). The test questions are paraphrased user-style and their links are not dev links, and dev drove the rule design. That gap is the overfitting the held-out set exists to show.
+- A5 global coverage 0.671 is below the 0.93 base rate for any 10 different companies; it measures diversity, not answer quality.
+- The reranker made local recall@10 1.000 on test (+0.054 [0.000, +0.135]).
+
+## Held-out test set (2026-10-27)
+- Same procedure as dev: Gemini drafts (user-style phrasing, dev passages and company pairs excluded) -> 3 AI reviewer agents -> human. You approved the AI pre-review as a whole ("most edits not required, same meaning"), so human/AI agreement is 100% by construction. Report it that way.
+- 130 candidates -> **91 verified** (37 local, 23 multi-hop: 14 comparison + 9 bridge, 31 global ≈ 2–3 angles × 12 themes). `data/golden/golden_test.jsonl`, built with `make golden-test`.
+- Draft quality: 39/130 rejected (30%). Counting cosmetic edits as errors gives 88% (`review_test_stats.json`). The reviewers rejected executive-bio links, weak Ambarella–TSMC links, non-unique bridge answers and boilerplate.
+- **Rule: final configs only, scored once.** Every design decision uses the dev set (`golden.jsonl`).
+
 ## Open questions for you
 1. Sign off or amend ADRs 0001–0005. 0003 (the ticker list) and 0004 (definition of a retrieval hit) matter most.
 2. The brief puts the LLM key and Ollama in Phase 3, but Phase 1 needs an LLM for candidates and the judge. I pulled the Gemini key forward. Is that OK?

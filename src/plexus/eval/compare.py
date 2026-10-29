@@ -16,11 +16,19 @@ from pathlib import Path
 
 from plexus.eval.bootstrap import paired_bootstrap
 
-DEFAULT_METRICS = ("recall@10", "ndcg@10", "mrr", "company_coverage@10")
+DEFAULT_METRICS = ("recall@10", "complete@10", "ndcg@10", "mrr", "company_coverage@10")
 
 
 def _per_query(path: Path) -> dict[str, dict]:
     return {r["qid"]: r for r in json.loads(path.read_text())["per_query"]}
+
+
+def _in_slice(row: dict, slice_: str) -> bool:
+    """'all', a qtype ('multi_hop'), or qtype:tag ('multi_hop:bridge')."""
+    if slice_ == "all":
+        return True
+    qtype, _, tag = slice_.partition(":")
+    return row["qtype"] == qtype and (not tag or tag in row.get("tags", []))
 
 
 def compare(a: Path, b: Path, metrics=DEFAULT_METRICS, seed: int = 0) -> dict:
@@ -28,14 +36,20 @@ def compare(a: Path, b: Path, metrics=DEFAULT_METRICS, seed: int = 0) -> dict:
     if set(qa) != set(qb):
         raise ValueError(f"different query sets: {len(set(qa) ^ set(qb))} qids differ")
     out: dict[str, dict] = {}
-    for slice_ in ("all", "local", "multi_hop", "global"):
-        qids = sorted(q for q in qa if slice_ == "all" or qa[q]["qtype"] == slice_)
+    tag_slices = sorted({f"{r['qtype']}:{t}" for r in qa.values() for t in r.get("tags", [])})
+    for slice_ in ("all", "local", "multi_hop", *tag_slices, "global"):
+        qids = sorted(q for q in qa if _in_slice(qa[q], slice_))
         for m in metrics:
-            pairs = [(qa[q][m], qb[q][m]) for q in qids if m in qa[q] and m in qb[q]]
+            kept = [q for q in qids if m in qa[q] and m in qb[q]]
+            pairs = [(qa[q][m], qb[q][m]) for q in kept]
             if not pairs:
                 continue
+            clusters = [qa[q].get("cluster", q) for q in kept]
             d = paired_bootstrap(
-                [float(x) for x, _ in pairs], [float(y) for _, y in pairs], seed=seed
+                [float(x) for x, _ in pairs],
+                [float(y) for _, y in pairs],
+                seed=seed,
+                clusters=clusters,
             )
             out.setdefault(slice_, {})[m] = {
                 "a": round(sum(float(x) for x, _ in pairs) / len(pairs), 4),

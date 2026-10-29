@@ -31,7 +31,6 @@ from plexus.eval.metrics import (
     locate_quote_all,
     recall_at_k,
     retrieval_metrics,
-    threshold_sensitivity,
 )
 from plexus.settings import REPO_ROOT, Settings
 
@@ -134,6 +133,11 @@ def score_retrieval(
         if kw and theme_labels and theme_labels.get(kw):
             extra["theme"] = kw
             extra["n_relevant_companies"] = len(theme_labels[kw])
+            # what ANY k different companies would score if each passage were on-theme: most
+            # themes apply to 32-39 of 39 companies, so coverage near this is diversity, not
+            # retrieval skill (Phase 3 review)
+            n_companies = len({d.split("_")[0] for d in doc_texts})
+            extra["coverage_base_rate"] = len(theme_labels[kw]) / max(n_companies, 1)
             for kk in (10, 20):
                 if kk <= k:
                     extra[f"company_coverage@{kk}"] = company_coverage(
@@ -143,10 +147,11 @@ def score_retrieval(
             {
                 "qid": q.qid,
                 "qtype": q.qtype,
+                "tags": list(q.tags),
+                "cluster": cluster_of(q, extra.get("theme")),
                 **extra,
                 "retrieval_ms": ms,
                 **retrieval_metrics(retrieved, gold, ks),
-                **threshold_sensitivity(retrieved, gold),
                 # secondary: only the exact filing the question was written from counts
                 "strict_recall@10": recall_at_k(retrieved, strict, min(10, k)),
                 # cost side: words a writer would read if given the top 10 chunks
@@ -155,6 +160,22 @@ def score_retrieval(
             }
         )
     return rows, label_errors
+
+
+def cluster_of(q: GoldenQuery, theme: str | None = None) -> str:
+    """Bootstrap cluster: theme for global, the linking entity for multi-hop, else the qid."""
+    if theme:
+        return f"theme:{theme}"
+    m = re.search(r"entity=([^;|]+)", q.source or "")
+    if q.qtype == "multi_hop" and m:
+        ent = m.group(1).strip().lower()
+        return "entity:" + ENTITY_ALIASES.get(ent, ent)
+    return q.qid
+
+
+# the same counterparty under two names must be one cluster
+ENTITY_ALIASES = {"taiwan semiconductor": "tsmc", "taiwan semiconductor manufacturing": "tsmc",
+                  "united microelectronics": "umc", "semiconductor manufacturing international": "smic"}  # fmt: skip
 
 
 def budget_recall(hits: Sequence, gold, budgets: Sequence[int] | None = None) -> dict[str, float]:
@@ -180,8 +201,8 @@ WORD_BUDGETS = (500, 1000, 2000, 3000, 5000)
 BUDGET_DEPTH = 60  # hits fetched so a 5,000-word budget fills even with ~160-word chunks
 METRICS = [
     "recall@1", "recall@5", "recall@10", "recall@20", "ndcg@10", "mrr",
-    "recall@10@cover0.3", "recall@10@cover0.7", "strict_recall@10",
-    "company_coverage@10", "company_coverage@20", "context_words@10",
+    "complete@10", "complete@20", "strict_recall@10",
+    "company_coverage@10", "company_coverage@20", "coverage_base_rate", "context_words@10",
     *(f"recall@{b}w" for b in WORD_BUDGETS),
 ]  # fmt: skip
 
@@ -190,6 +211,8 @@ def aggregate(rows: list[dict], seed: int = 0) -> dict:
     groups: dict[str, list[dict]] = {"all": rows}
     for r in rows:
         groups.setdefault(r["qtype"], []).append(r)
+        for t in r.get("tags", []):  # e.g. multi_hop:bridge vs multi_hop:comparison
+            groups.setdefault(f"{r['qtype']}:{t}", []).append(r)
     out = {}
     for name, rs in groups.items():
         out[name] = {}
@@ -197,8 +220,9 @@ def aggregate(rows: list[dict], seed: int = 0) -> dict:
             sub = [r for r in rs if m in r]
             if not sub:
                 continue
-            # global questions: resample whole themes (questions on one theme are not independent)
-            clusters = [r["theme"] for r in sub] if all("theme" in r for r in sub) else None
+            # resample whole clusters: global questions by theme, multi-hop by linking entity
+            # (14 multi-hop questions are about TSMC), everything else on its own
+            clusters = [r.get("cluster", r["qid"]) for r in sub]
             out[name][m] = bootstrap_ci([r[m] for r in sub], seed=seed, clusters=clusters).to_dict()
         lat = np.array([r["retrieval_ms"] for r in rs])
         out[name]["retrieval_ms"] = {
@@ -380,10 +404,12 @@ def main(argv: list[str] | None = None) -> int:
         "--generate", action="store_true", help="also generate answers (LLM calls, cached)"
     )
     ap.add_argument("--judge", action="store_true", help="also judge answers (implies --generate)")
+    ap.add_argument("--results-dir", type=Path, default=None, help="default results/")
     args = ap.parse_args(argv)
     res = run(
         ExperimentConfig.load(args.config),
         args.golden,
+        results_dir=args.results_dir,
         generate=args.generate,
         use_judge=args.judge,
     )

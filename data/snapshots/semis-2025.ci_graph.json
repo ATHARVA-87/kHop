@@ -1,0 +1,9 @@
+{
+  "snapshot": "semis-2025",
+  "what": "raw graph extractions, prompt v5, qwen3.5:4b (ollama digest d8b0f5e9760c)",
+  "target": "graph/semis-2025/extractions.jsonl",
+  "url": "https://github.com/ATHARVA-87/plexus/releases/download/ci-graph-semis-2025/semis-2025-extractions-v5.jsonl.gz",
+  "bytes_gz": 188171,
+  "sha256_gz": "5e2104dd778dc093b49d918930ed18d5e1a053b4ff833a11efeb75c7f1b0f3e2",
+  "sha256_jsonl": "c9e67aedcd3dc5f512e959064fc3a8b8aa6813bffc0825d9b732ee9eef8936ba"
+}

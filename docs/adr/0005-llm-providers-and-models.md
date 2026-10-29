@@ -31,3 +31,6 @@
 ## Consequences
 - Daily caps make the disk cache essential. A capped run resumes the next day from the cache.
 - Judge and generation should not share one model, to limit self-preference bias. Here they differ (Gemini vs Qwen).
+
+## Update 2026-10-28 (Phase 3 extraction)
+- Graph extraction used `ollama/qwen3.5:4b`, Ollama model digest `d8b0f5e9760c` (from `ollama list`), with `think: false`, temperature 0, seed 0, prompt v5. The raw output is published as release asset `ci-graph-semis-2025` (checksums in `data/snapshots/semis-2025.ci_graph.json`), so the graph can be rebuilt without a GPU or LLM.

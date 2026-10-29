@@ -1,0 +1,27 @@
+name: a5_ci_bm25
+description: >
+  CI gate version of A5: graph traversal + company-diverse ranking on top of BM25 only (CI has
+  no torch). Gates extraction re-validation, entity resolution, graph search and A5 together.
+snapshot: semis-2025
+seed: 0
+chunker:
+  type: structured
+  child_words: 200
+  child_chars: 1400
+  parent_words: 800
+  headers: true
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: graph_hybrid
+  graph_max_edges: 12
+  graph_base: bm25
+  company_diverse: true
+  top_k: 20
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 5
+judge:
+  provider: gemini
+  model: gemini-3.6-flash

@@ -192,3 +192,15 @@ def test_gate_flags_stale_baseline():
     base = _res(all__recall_at_10=0.70)
     assert "golden set changed" in check(base, _res(golden="g2", all__recall_at_10=0.9), 0.005)[0]
     assert "corpus" in check(base, _res(corpus="c2", all__recall_at_10=0.7), 0.005)[0]
+
+
+def test_cluster_of_groups_by_theme_and_linking_entity():
+    from plexus.eval.golden import GoldenQuery
+    from plexus.eval.run import cluster_of
+
+    mh = GoldenQuery(qid="M-1", qtype="multi_hop", question="How do X and Y use TSMC?",
+                     answer="a", source="llm:gemini entity=Taiwan Semiconductor")  # fmt: skip
+    assert cluster_of(mh) == "entity:tsmc"
+    loc = GoldenQuery(qid="L-1", qtype="local", question="What is X?", answer="a")
+    assert cluster_of(loc) == "L-1"
+    assert cluster_of(loc, "china") == "theme:china"

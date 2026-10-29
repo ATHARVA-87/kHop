@@ -26,6 +26,14 @@ ml = [
     "sentence-transformers>=3,<6",
     "qdrant-client>=1.12",
 ]
+graph = [
+    # quote grounding (fuzzy span alignment) and legal-suffix stripping; research scout 2026-10-28
+    "rapidfuzz==3.14.6",
+    "cleanco==2.3",
+    # LadybugDB = maintained fork of Kuzu (archived 2025-10-10); ADR 0006. Pinned exactly:
+    # the PyPI name "ladybug" was transferred from an unrelated 2014 project.
+    "ladybug==0.21.2",
+]
 dev = [
     "pytest>=8.0",
     "ruff>=0.6",

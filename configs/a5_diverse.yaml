@@ -1,0 +1,26 @@
+name: a5_diverse
+description: >
+  A5: A4 plus company-diverse ranking for questions that name no company (sector-wide):
+  the best passage of each company first, then the rest in hybrid order.
+snapshot: semis-2025
+seed: 0
+chunker:
+  type: structured
+  child_words: 200
+  child_chars: 1400
+  parent_words: 800
+  headers: true
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: graph_hybrid
+  graph_max_edges: 12
+  company_diverse: true
+  top_k: 20
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 5
+judge:
+  provider: gemini
+  model: gemini-3.6-flash

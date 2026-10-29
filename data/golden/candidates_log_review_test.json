@@ -1,0 +1,177 @@
+{
+  "summary": {
+    "local": {
+      "kept": 51,
+      "quote_not_found": 9
+    },
+    "multi_hop": {
+      "kept": 25,
+      "quote_not_found": 15
+    },
+    "bridge": {
+      "kept": 18,
+      "quote_not_found": 7
+    },
+    "global": {
+      "kept": 36
+    },
+    "auto_filter_rejection_rate": 0.1925
+  },
+  "rejected": [
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "In 2024, the foreign tax incentives are lower compared to 2023 primarily due to less qualifying income."
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "The number of usable products that result from our production process can fluctuate as a result of many factors, including design errors; defects in photomasks, used to print circuits on wafers; minut"
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "Communications and Computing $ 74,027 55.5 %"
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "Some of these uncertainties arise as a consequence of cost reimbursement and royalty arrangements among related entities."
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "The percentage of our revenues derived from outside of the United States was 90% in fiscal 2024"
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "our primary warehouse is in Malaysia."
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "Convertible senior notes, due 2030\n750,000\n750,000"
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "A significant portion of our business is concentrated in China, and the risks of such concentration are exacerbated by U.S./China trade and national security tensions."
+    },
+    {
+      "qtype": "local",
+      "status": "quote_not_found",
+      "detail": "our systems and those of our third-party vendors may experience service interruptions, data loss or compromise and outages, for other reasons, including human error, pandemics, fires, other natural di"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "We had one end customer, Apple Inc., that purchased through multiple contract manufacturers and represented approximately || Sales attributable to Apple Inc., our largest end customer accounted for ap"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "While we restrict use of third-party and open-source AI tools, such as ChatGPT and Microsoft CoPilot, internal governance of adoption of these technologies can be challenging || We partner with Micros"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "ESMC is 70% owned by TSMC, with Bosch, Infineon, and NXP each owning 10%. || the foundries, particularly TSMC which manufactures our newest IC products, must be able to transition to advanced manufact"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "While we restrict use of third-party and open-source AI tools, such as ChatGPT and Microsoft CoPilot, internal governance of adoption of these technologies can be challenging || Zoom, Microsoft Teams,"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "In the IoT market, our primary competitors include AMLogic Inc., Fuzhou Rockchip Electronics Co., Ltd., HiSilicon Technologies Co., Ltd., or HiSilicon, which is owned by Huawei Technologies Co., Ingen"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "We are also in discussions with Huawei, whose agreement has expired. || restrictions on the transfer of U.S. products to certain companies, including Huawei Technologies Co., Ltd., and its affiliates."
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "geopolitical developments in relations between Taiwan and China could affect the supply of our products from Taiwan, including from Taiwan Semiconductor Manufacturing Company, Limited, or TSMC. || We "
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "We partner with Microsoft on our HiWire Switch AEC and open-source implementation that helps realize Microsoft\u2019s vision for a highly reliable network-managed dual-Top-of-Rack (ToR) architecture || Zoo"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "geopolitical developments in relations between Taiwan and China could affect the supply of our products from Taiwan, including from Taiwan Semiconductor Manufacturing Company, Limited, or TSMC. || Add"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "Before joining Wolfspeed, Mr. Madormo held sales leadership positions at Intel Corporation || Companies that compete directly with our businesses include, but are not limited to, Advanced Micro Device"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "If we lose Microsoft Corporation\u2019s support for our products or other software vendors do not design and develop software to run on our products, our ability to sell our products could be materially ad"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "European Semiconductor Manufacturing Company (ESMC) GmbH will build and operate a new 300mm semiconductor wafer manufacturing facility in Dresden, Germany. ESMC is 70% owned by TSMC, with Bosch, Infin"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "In the automotive camera market, we compete against Allwinner Technology Co., Ltd., Horizon Robotics Inc., iCatch Technology, Inc., Mobileye, a subsidiary of Intel Corporation, Novatek, NVIDIA, NXP Se"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "Prior to Xilinx, Mr. Hill served in various finance positions with Intel Corporation for 25 years, most recently as Corporate Vice President and Chief Financial Officer and Chief Operating Officer, Te"
+    },
+    {
+      "qtype": "multi_hop",
+      "status": "quote_not_found",
+      "detail": "We had one end customer, Apple Inc., that purchased through multiple contract manufacturers and represented approximately 90 percent of the Company\u2019s total net sales for each of the second quarters of"
+    },
+    {
+      "qtype": "bridge",
+      "status": "quote_not_found",
+      "detail": "We rely on Taiwan Semiconductor Manufacturing Company Limited (TSMC) for the production of all wafers for microprocessor and GPU products at 7 nanometer (nm) or smaller nodes || Taiwan Semiconductor M"
+    },
+    {
+      "qtype": "bridge",
+      "status": "quote_not_found",
+      "detail": "We face intense competition in the semiconductor memory and storage markets from a number of companies, including Samsung Electronics Co., Ltd.; SK hynix Inc.; Kioxia Holdings Corporation; Sandisk Cor"
+    },
+    {
+      "qtype": "bridge",
+      "status": "quote_not_found",
+      "detail": "Our principal competitors in these markets include AKM Semiconductor Inc., Analog Devices Inc., Qualcomm Incorporated, Realtek Semiconductor Corporation, Renesas Electronics Corporation, Shanghai Awin"
+    },
+    {
+      "qtype": "bridge",
+      "status": "quote_not_found",
+      "detail": "from memory chip manufacturers in South Korea such as Samsung Electronics Co., Ltd., and from semiconductor device manufacturers in Japan such as Toshiba Corporation. || We face intense competition in"
+    },
+    {
+      "qtype": "bridge",
+      "status": "quote_not_found",
+      "detail": "We had one end customer, Apple Inc., that purchased through multiple contract manufacturers and represented approximately 91 percent and 89 percent of the Company\u2019s total net sales for the third quart"
+    },
+    {
+      "qtype": "bridge",
+      "status": "quote_not_found",
+      "detail": "Companies that compete directly with our businesses include, but are not limited to, Advanced Micro Devices, Inc. (\u201cAMD\u201d), Alchip Technologies (\u201cAlchip\u201d), Alphawave Semi (\u201cAlphawave\u201d), Astera Labs, In"
+    },
+    {
+      "qtype": "bridge",
+      "status": "quote_not_found",
+      "detail": "Recent highlights in our PC-focused business include being featured as part of the Intel Arrow Lake reference design, sampling our latest amplifier and codec specifically designed for laptops, and exp"
+    }
+  ]
+}

@@ -67,14 +67,23 @@ def paired_bootstrap(
     n_resamples: int = 2000,
     alpha: float = 0.05,
     seed: int = 0,
+    clusters: Sequence[str] | None = None,
 ) -> PairedDiff:
-    """Is config B better than config A on the SAME queries? Resample queries, not scores."""
+    """Is config B better than config A on the SAME queries? Resample queries (or whole
+    clusters of related queries), not scores."""
     xa, xb = np.asarray(a, dtype=float), np.asarray(b, dtype=float)
     if xa.shape != xb.shape or xa.size == 0:
         raise ValueError("paired bootstrap needs two equal-length, non-empty score lists")
     d = xb - xa
     rng = np.random.default_rng(seed)
-    means = d[rng.integers(0, d.size, size=(n_resamples, d.size))].mean(axis=1)
+    if clusters is None:
+        means = d[rng.integers(0, d.size, size=(n_resamples, d.size))].mean(axis=1)
+    else:
+        groups = [np.flatnonzero(np.asarray(clusters) == c) for c in sorted(set(clusters))]
+        means = np.empty(n_resamples)
+        for i in range(n_resamples):
+            pick = rng.integers(0, len(groups), size=len(groups))
+            means[i] = np.concatenate([d[groups[j]] for j in pick]).mean()
     lo, hi = np.quantile(means, [alpha / 2, 1 - alpha / 2])
     return PairedDiff(
         CI(float(d.mean()), float(lo), float(hi), int(d.size)), float((means <= 0).mean())

@@ -229,3 +229,33 @@ def test_old_multi_hop_rows_default_to_comparison_tag(tmp_path):
     row = {"qid": "M-1", "qtype": "multi_hop", "question": "q?", "answer": "a",
            "evidence_doc_ids": "D", "evidence_quotes": "x", "verdict": "accept"}  # fmt: skip
     assert row_to_query(row).tags == ["comparison"]
+
+
+def test_held_out_filter_drops_dev_passages_and_pairs(tmp_path):
+    import json
+
+    from plexus.eval.candidates import Passage, held_out_filter
+
+    dev = [
+        {"qid": "L-1", "qtype": "local", "source": "llm", "evidence": [
+            {"doc_id": "NVDA_10K_2025-02-26", "quote": "We rely on   TSMC for wafers."}]},
+        {"qid": "M-1", "qtype": "multi_hop", "source": "llm entity=Apple", "evidence": [
+            {"doc_id": "SWKS_10K_x", "quote": "a"}, {"doc_id": "AMKR_10K_y", "quote": "b"}]},
+    ]  # fmt: skip
+    path = tmp_path / "golden.jsonl"
+    path.write_text("\n".join(json.dumps(d) for d in dev) + "\n")
+    p_dev = Passage("NVDA_10K_2025-02-26", "NVDA", "NVIDIA", "10-K", "d", "business",
+                    "Intro. We rely on TSMC for wafers. More.")  # fmt: skip
+    p_new = Passage("NVDA_10K_2025-02-26", "NVDA", "NVIDIA", "10-K", "d", "business",
+                    "We sell GPUs to cloud providers.")  # fmt: skip
+    kept, pairs = held_out_filter([p_dev, p_new], [str(path)])
+    assert kept == [p_new]  # whitespace and case differences still match the dev quote
+    assert pairs == {("Apple", "AMKR", "SWKS")}
+
+
+def test_user_style_prompt_drops_filing_rule():
+    from plexus.eval.candidates import SYSTEM, system_prompt
+
+    assert system_prompt("filing") == SYSTEM
+    s = system_prompt("user")
+    assert "Name the company and the filing" not in s and "Paraphrase" in s

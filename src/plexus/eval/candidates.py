@@ -51,6 +51,10 @@ class CandidateConfig(BaseModel):
     local_sections: list[str] = Field(default_factory=lambda: ["risk_factors", "mdna", "business"])
     counterparties: list[str] = Field(default_factory=list)
     themes: dict[str, str] = Field(default_factory=dict)
+    # held-out test set: phrase like a user, avoid passages/pairs already in these golden files
+    style: Literal["filing", "user"] = "filing"
+    exclude_golden: list[str] = Field(default_factory=list)
+    qid_prefix: str = ""  # "T" marks test-set ids (TL-, TM-, TB-, TG-)
 
 
 @dataclass(frozen=True)
@@ -109,6 +113,28 @@ Rules:
 - No yes/no questions. No questions about stock price or investment merit.
 - Quotes must be copied EXACTLY from the passage (same words, same order), 8 to 40 words.
 - Reply with one JSON object only."""
+
+
+USER_STYLE = """
+Phrasing (important): write the question the way an analyst would type it into a search box.
+- Use the company's common short name ("Qualcomm", "onsemi", "TI", "Lam Research"), never a
+  legal name with suffixes like "INC/DE" or "Corp".
+- No filing dates or form names. Mention a period only if the answer depends on it, in plain
+  words ("in Q1 2025", "as of June 2025", "in fiscal 2024").
+- Paraphrase: do not copy distinctive phrases from the passage into the question. Describe the
+  concept in your own words, the way someone who has NOT read the passage would ask."""
+
+
+def system_prompt(style: str) -> str:
+    if style == "user":
+        return (
+            SYSTEM.replace(
+                '- Name the company and the filing in the question (e.g. "In NVIDIA\'s 10-K filed 2025-02-26, ...").\n',
+                "",
+            )
+            + USER_STYLE
+        )
+    return SYSTEM
 
 
 def _describe(p: Passage) -> str:
@@ -241,7 +267,11 @@ def sample_local(
 
 
 def sample_multi_hop(
-    passages: list[Passage], cfg: CandidateConfig, rng: random.Random, n: int
+    passages: list[Passage],
+    cfg: CandidateConfig,
+    rng: random.Random,
+    n: int,
+    exclude: set[tuple[str, str, str]] | None = None,
 ) -> list[tuple[Passage, Passage, str]]:
     by_entity: dict[str, dict[str, list[Passage]]] = defaultdict(lambda: defaultdict(list))
     # Only substantive prose: exhibit lists and statement notes give incidental mentions
@@ -253,7 +283,7 @@ def sample_multi_hop(
                 by_entity[e][p.ticker].append(p)
     candidates = [e for e, t in sorted(by_entity.items()) if len(t) >= 2]
     out: list[tuple[Passage, Passage, str]] = []
-    seen: set[tuple[str, str, str]] = set()
+    seen: set[tuple[str, str, str]] = set(exclude or ())
     attempts = 0
     while candidates and len(out) < n and attempts < n * 20:
         attempts += 1
@@ -295,7 +325,10 @@ def _request(cfg: CandidateConfig, prompt: str, model: str | None = None) -> LLM
     return LLMRequest(
         provider=cfg.provider,
         model=model or cfg.model,
-        messages=(Message(role="system", content=SYSTEM), Message(role="user", content=prompt)),
+        messages=(
+            Message(role="system", content=system_prompt(cfg.style)),
+            Message(role="user", content=prompt),
+        ),
         temperature=0.3,  # a little diversity across questions; cached, so still reproducible
         max_tokens=2048,  # Gemini 3 spends output tokens on hidden thinking
         seed=cfg.seed,
@@ -308,10 +341,37 @@ def _check(doc_texts: dict[str, str], doc_id: str, quote: str) -> bool:
     return 8 <= len(quote.split()) <= 60 and len(locate_quote_all(doc_texts[doc_id], quote)) == 1
 
 
-def _qid(prefix: str, *parts: str) -> str:
+def _qid(prefix: str, *parts: str) -> str:  # cfg.qid_prefix is prepended in generate()
     """Content-derived id: reruns give the same id for the same candidate, so already
     reviewed rows are recognised and kept instead of clashing with new positional ids."""
     return f"{prefix}-" + hashlib.sha1("\x00".join(parts).encode()).hexdigest()[:10]
+
+
+def _norm_ws(text: str) -> str:
+    return re.sub(r"\s+", " ", text.lower()).strip()
+
+
+def held_out_filter(
+    passages: list[Passage], golden_paths: list[str]
+) -> tuple[list[Passage], set[tuple[str, str, str]]]:
+    """Drop passages that contain any quote from the given golden sets, and return the
+    (entity, ticker, ticker) multi-hop pairs they already use, so a test set never re-asks
+    the dev set's facts."""
+    quotes: dict[str, list[str]] = defaultdict(list)
+    pairs: set[tuple[str, str, str]] = set()
+    for path in golden_paths:
+        for line in Path(path).read_text().splitlines():
+            q = json.loads(line)
+            for e in q["evidence"]:
+                quotes[e["doc_id"]].append(_norm_ws(e["quote"]))
+            m = re.search(r"entity=([^;|]+)", q.get("source", ""))
+            if q["qtype"] == "multi_hop" and m and len(q["evidence"]) >= 2:
+                t = sorted(e["doc_id"].split("_")[0] for e in q["evidence"][:2])
+                pairs.add((m.group(1).strip(), t[0], t[1]))
+    kept = [
+        p for p in passages if not any(qt in _norm_ws(p.text) for qt in quotes.get(p.doc_id, []))
+    ]
+    return kept, pairs
 
 
 def generate(
@@ -319,6 +379,9 @@ def generate(
 ) -> tuple[list[GoldenQuery], list[dict]]:
     rng = random.Random(cfg.seed)
     passages, doc_texts = load_passages(data_dir, cfg)
+    used_pairs: set[tuple[str, str, str]] = set()
+    if cfg.exclude_golden:
+        passages, used_pairs = held_out_filter(passages, cfg.exclude_golden)
     kept: list[GoldenQuery] = []
     log: list[dict] = []
 
@@ -355,7 +418,9 @@ def generate(
                                 evidence=[Evidence(doc_id=p.doc_id, quote=out.quote)], source=source))  # fmt: skip
         record("local", "kept")
 
-    for a, b, ent in sample_multi_hop(passages, cfg, rng, cfg.counts.get("multi_hop", 0)):
+    for a, b, ent in sample_multi_hop(
+        passages, cfg, rng, cfg.counts.get("multi_hop", 0), used_pairs
+    ):
         res = ask(multi_hop_prompt(a, b, ent), MultiHopOut, "multi_hop")
         if res is None:
             continue
@@ -373,7 +438,7 @@ def generate(
 
     # separate seed: bridge pairs should not just repeat the comparison pairs
     for a, b, ent in sample_multi_hop(
-        passages, cfg, random.Random(cfg.seed + 1), cfg.counts.get("bridge", 0)
+        passages, cfg, random.Random(cfg.seed + 1), cfg.counts.get("bridge", 0), used_pairs
     ):
         res = ask(bridge_prompt(a, b, ent), BridgeOut, "bridge")
         if res is None:
@@ -414,6 +479,8 @@ def generate(
                                 evidence=evidence, source=f"{source} theme={theme}"))  # fmt: skip
         record("global", "kept")
 
+    if cfg.qid_prefix:
+        kept = [q.model_copy(update={"qid": cfg.qid_prefix + q.qid}) for q in kept]
     # drop exact-duplicate questions
     seen_q: set[str] = set()
     unique = []
@@ -449,7 +516,13 @@ def main(argv: list[str] | None = None) -> int:
     queries, log = generate(cfg, llm, settings.data_dir)
     write_review_csv(queries, args.out, skip_reviewed=True)
     summary = summarise(log)
-    (args.out.parent / "candidates_log.json").write_text(
+    # dev keeps its original log name; any other output (e.g. review_test.csv) gets its own
+    log_name = (
+        "candidates_log.json"
+        if args.out.name == "review.csv"
+        else f"candidates_log_{args.out.stem}.json"
+    )
+    (args.out.parent / log_name).write_text(
         json.dumps(
             {"summary": summary, "rejected": [r for r in log if r["status"] != "kept"]}, indent=2
         )

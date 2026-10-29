@@ -1,0 +1,27 @@
+name: a4_alias_ablation
+description: >
+  Ablation of A4: graph and linker built WITHOUT the hand-listed aliases of the dev
+  multi-hop linking entities (configs/entity_aliases_ablate.yaml). The SEC list stays.
+snapshot: semis-2025
+seed: 0
+chunker:
+  type: structured
+  child_words: 200
+  child_chars: 1400
+  parent_words: 800
+  headers: true
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: graph_hybrid
+  graph_max_edges: 12
+  graph_dir: data/graph/semis-2025-ablate
+  aliases_file: configs/entity_aliases_ablate.yaml
+  top_k: 20
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 5
+judge:
+  provider: gemini
+  model: gemini-3.6-flash

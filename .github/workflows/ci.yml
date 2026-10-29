@@ -23,8 +23,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install core + dev deps from the lockfile
-        run: uv sync --frozen --extra dev
+      - name: Install core + dev + graph deps from the lockfile
+        run: uv sync --frozen --extra dev --extra graph
       - name: Lint
         run: |
           uv run ruff check src tests
@@ -48,9 +48,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install core + dev deps from the lockfile
-        run: uv sync --frozen --extra dev
-      - name: Fetch processed filings (release asset, checksum-verified)
-        run: uv run python -m plexus.ingest.ci_data
-      - name: Retrieval gate (BM25 path)
+      - name: Install core + dev + graph deps from the lockfile
+        run: uv sync --frozen --extra dev --extra graph
+      - name: Fetch processed filings and graph extractions (release assets, checksum-verified)
+        run: |
+          uv run python -m plexus.ingest.ci_data
+          uv run python -m plexus.ingest.ci_data --graph
+      - name: Retrieval gate (BM25, and graph + A5 on BM25)
         run: make gate-ci PY="uv run python"

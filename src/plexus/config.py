@@ -30,6 +30,7 @@ class ChunkerConfig(_Strict):
 
 class EmbedderConfig(_Strict):
     model: str = "BAAI/bge-small-en-v1.5"
+    revision: str | None = "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a"  # HF commit, pinned
     # bge models expect this prefix on queries (not on passages)
     query_prefix: str = "Represent this sentence for searching relevant passages: "
     batch_size: int = 64
@@ -38,6 +39,7 @@ class EmbedderConfig(_Strict):
 
 class RerankConfig(_Strict):
     model: str = "BAAI/bge-reranker-base"
+    revision: str | None = "2cfc18c9415c912f9d8155881c133215df768a70"  # HF commit, pinned
     candidates: int = 50  # base hits the cross-encoder reorders
     max_length: int = 512
     batch_size: int = 32
@@ -45,13 +47,20 @@ class RerankConfig(_Strict):
 
 
 class RetrievalConfig(_Strict):
-    type: Literal["dense", "bm25", "hybrid"] = "dense"
+    type: Literal["dense", "bm25", "hybrid", "graph_hybrid", "hybrid_rr"] = "dense"
     top_k: int = 20
     candidates: int = 100  # hybrid: hits taken from each retriever before fusion
     rrf_k: int = 60  # reciprocal rank fusion constant (the paper's default)
     bm25_k1: float = 1.2
     bm25_b: float = 0.75
     rerank: RerankConfig | None = None  # A3
+    # A4 graph_hybrid: graph traversal hits fused with the hybrid list
+    graph_dir: str | None = None  # default data/graph/<snapshot>
+    aliases_file: str | None = None  # default configs/entity_aliases.yaml (ablations only)
+    graph_max_edges: int = 12
+    graph_base: Literal["hybrid", "bm25"] = "hybrid"  # bm25: the CI gate (no torch in CI)
+    # A5: questions naming no company get one passage per company first
+    company_diverse: bool = False
 
 
 class GenerationConfig(_Strict):

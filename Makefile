@@ -3,7 +3,7 @@
 PY ?= python
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci extract serve ui
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph extract serve ui
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -47,8 +47,19 @@ candidates: ## Generate ~200 golden-set candidates into data/golden/review.csv (
 golden: ## Build data/golden/golden.jsonl from your reviewed review.csv (+ noise rate)
 	$(PY) -m plexus.eval.golden build
 
-extract: ## Graph extraction (Phase 3)
-	@echo "extract: not implemented yet (Phase 3)"; exit 1
+extract: ## Graph extraction over 10-K passages with local qwen3.5:4b (~4.5 h, resumable)
+	$(PY) -m plexus.extract.extract
+
+graph: ## Re-validate stored extractions (no LLM), resolve entities, build the LadybugDB graph
+	$(PY) -m plexus.extract.extract --revalidate
+	$(PY) -m plexus.extract.resolve
+	$(PY) -m plexus.index.graph build
+
+golden-test: ## Build data/golden/golden_test.jsonl from your reviewed review_test.csv
+	$(PY) -m plexus.eval.golden build --split test
+
+test-candidates: ## Held-out test-set candidates (Gemini, user-style, excludes dev passages)
+	$(PY) -m plexus.eval.candidates --config configs/golden_test.yaml --out data/golden/review_test.csv
 
 eval: ## Retrieval metrics for $(CONFIG) on the verified golden set (no LLM calls)
 	$(PY) -m plexus.eval.run --config $(CONFIG)
@@ -63,11 +74,14 @@ judge-agreement: ## Cohen's kappa between the judge and your labels
 	$(PY) -m plexus.eval.judge agreement --results results/$${NAME:-a0_naive}.json
 
 gate: ## retrieval regression gate vs committed results (full set; needs GPU models)
-	$(PY) -m plexus.eval.gate --config configs/a1h_bm25.yaml --config configs/a1h_hybrid.yaml --config configs/a3h_rerank.yaml
+	$(PY) -m plexus.eval.gate --config configs/a1h_bm25.yaml --config configs/a1h_hybrid.yaml --config configs/a3h_rerank.yaml --config configs/a5_diverse.yaml
 
-gate-ci: ## the CI subset of the gate: BM25 path only, no torch (needs data/processed)
+gate-ci: ## CI gate, no torch: BM25, and graph + A5 on BM25 (needs data/processed + graph extractions)
 	$(PY) -m plexus.index.build --config configs/a1h_bm25.yaml --chunks-only
-	$(PY) -m plexus.eval.gate --config configs/a1h_bm25.yaml
+	$(PY) -m plexus.extract.extract --revalidate
+	$(PY) -m plexus.extract.resolve
+	$(PY) -m plexus.index.graph build
+	$(PY) -m plexus.eval.gate --config configs/a1h_bm25.yaml --config configs/a5_ci_bm25.yaml
 
 compare: ## paired bootstrap of B vs A on the same queries: make compare A=a0_naive B=a0_bm25
 	$(PY) -m plexus.eval.compare results/$(A).json results/$(B).json

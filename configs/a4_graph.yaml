@@ -1,0 +1,26 @@
+name: a4_graph
+description: >
+  A4: A2 (A1 chunks + headers, hybrid RRF) fused by RRF with graph-traversal hits: companies
+  named in the question are linked to graph nodes; edges between them (or their common
+  neighbours for bridge questions) return the exact passages they were extracted from.
+snapshot: semis-2025
+seed: 0
+chunker:
+  type: structured
+  child_words: 200
+  child_chars: 1400
+  parent_words: 800
+  headers: true
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: graph_hybrid
+  graph_max_edges: 12
+  top_k: 20
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 5
+judge:
+  provider: gemini
+  model: gemini-3.6-flash
