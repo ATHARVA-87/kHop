@@ -1,0 +1,255 @@
+"""Plexus web service (Phase 6): one question in, live events out (Server-Sent Events).
+
+    make serve            # http://127.0.0.1:8000  (UI + API on one port)
+
+GET /api/ask?q=...  streams events while the answer is made:
+    queued {position}        the question waits for the GPU (one question at a time)
+    step   {step, ms, ...}   a step of the flow finished (guard, route, retrieve, answer, verify)
+    token  {text}            a piece of the answer as the model writes it
+    done   {answer, sources, checks, trace}
+    error  {message}         what went wrong and what to do
+GET /api/health, GET /api/meta (companies covered, for the start screen).
+
+Safety (docs/security.md): binds to 127.0.0.1 by default; question length 3-1000; per-client
+rate limit; at most MAX_WAITING questions queued (else 503 + Retry-After); one question on the
+GPU at a time (the 6 GB card holds one writer + search + verifier); a hard deadline per
+question; generic error messages (details only in the local log); security headers; filing
+text is sent as plain text (the UI never renders it as HTML).
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+import threading
+import time
+from collections import defaultdict, deque
+from contextlib import asynccontextmanager
+from pathlib import Path
+
+import yaml
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
+from fastapi.sse import EventSourceResponse, ServerSentEvent
+
+from plexus.settings import REPO_ROOT, Settings
+
+log = logging.getLogger("plexus.serve")
+
+CONFIG = Path(os.getenv("PLEXUS_CONFIG", REPO_ROOT / "configs" / "a9_agents.yaml"))
+MAX_WAITING = 4  # questions allowed to wait for the GPU
+RATE_PER_MIN = 10  # questions per client per minute
+DEADLINE_S = 120  # one question, start to finish
+UI_DIR = REPO_ROOT / "web" / "out"  # the static Next.js export
+
+
+class RateLimiter:
+    """Sliding one-minute window per client address."""
+
+    def __init__(self, per_min: int):
+        self.per_min = per_min
+        self.hits: dict[str, deque] = defaultdict(deque)
+        self.lock = threading.Lock()
+
+    def allow(self, key: str, now: float | None = None) -> bool:
+        now = time.monotonic() if now is None else now
+        with self.lock:
+            q = self.hits[key]
+            while q and now - q[0] > 60:
+                q.popleft()
+            if len(q) >= self.per_min:
+                return False
+            q.append(now)
+            return True
+
+
+class GpuQueue:
+    """One question on the GPU at a time; a few may wait; the rest are told to retry."""
+
+    def __init__(self, max_waiting: int):
+        self.slot = threading.BoundedSemaphore(1)
+        self.max_waiting = max_waiting
+        self.waiting = 0
+        self.lock = threading.Lock()
+
+    def join(self) -> int | None:
+        """Place in the queue (0 = next), or None when full."""
+        with self.lock:
+            if self.waiting >= self.max_waiting:
+                return None
+            self.waiting += 1
+            return self.waiting - 1
+
+    def acquire(self, timeout: float) -> bool:
+        try:
+            return self.slot.acquire(timeout=timeout)
+        finally:
+            with self.lock:
+                self.waiting -= 1
+
+    def release(self) -> None:
+        self.slot.release()
+
+
+def load_meta() -> dict:
+    names = yaml.safe_load((REPO_ROOT / "configs" / "companies.yaml").read_text())
+    docs = {}
+    manifest = REPO_ROOT / "data" / "snapshots" / "semis-2025.manifest.jsonl"
+    for line in manifest.read_text().splitlines():
+        r = json.loads(line)
+        docs[r["doc_id"]] = {"company": names.get(r["ticker"], r["company"]), "ticker": r["ticker"],
+                             "form": r["form"], "filed": r["filing_date"], "url": r["url"]}  # fmt: skip
+    return {"names": names, "docs": docs}
+
+
+SECTION_NAMES = {
+    "risk_factors": "Risk factors", "mdna": "Management's discussion", "business": "Business",
+    "financial_statements": "Financial statements", "market_risk": "Market risk",
+    "legal_proceedings": "Legal proceedings", "controls": "Controls and procedures",
+    "market_for_equity": "Market for the stock", "directors_officers": "Directors and officers",
+    "cover": "Cover page", "properties": "Properties", "unknown": "Filing text",
+}  # fmt: skip
+
+
+def source_of(n: int, hit, docs: dict) -> dict:
+    d = docs.get(hit.doc_id, {})
+    return {
+        "n": n,
+        "company": d.get("company", hit.doc_id),
+        "form": d.get("form", ""),
+        "filed": d.get("filed", ""),
+        "url": d.get("url", ""),
+        "section": SECTION_NAMES.get(hit.section, hit.section.replace("_", " ").capitalize()),
+        "text": hit.text,  # plain text; the UI renders it as text, never as HTML
+    }
+
+
+def build_state(config: Path = CONFIG) -> dict:
+    from plexus.agents.flow import build_flow
+    from plexus.baseline.naive import NaiveRAG
+    from plexus.config import ExperimentConfig
+    from plexus.llm import LLMClient
+    from plexus.retrieve.pipeline import make_retriever
+
+    s = Settings.load()
+    cfg = ExperimentConfig.load(config)
+    retriever = make_retriever(cfg, s.data_dir)
+    flow = build_flow(NaiveRAG(cfg, retriever, LLMClient.from_settings(s)))
+    return {"flow": flow, "retriever": retriever, "config": cfg.name, **load_meta()}
+
+
+def run_question(flow, question: str, docs: dict):
+    """The events for one question (sync generator, runs in FastAPI's threadpool)."""
+    from plexus.agents.flow import ask_events
+
+    for kind, data in ask_events(flow, question):
+        if kind == "token":
+            yield ServerSentEvent(event="token", data={"text": data})
+        elif kind == "step":
+            yield ServerSentEvent(event="step", data=data)
+        else:
+            ans = data["answer"]
+            yield ServerSentEvent(event="done", data={
+                "answer": ans.text,
+                "sources": [source_of(i, h, docs) for i, h in enumerate(ans.hits, 1)],
+                "checks": ans.checks,
+                "trace": data["trace"],
+            })  # fmt: skip
+
+
+def create_app(state_factory=build_state) -> FastAPI:
+    state: dict = {}
+    limiter = RateLimiter(RATE_PER_MIN)
+    gpu = GpuQueue(MAX_WAITING)
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        state.update(state_factory())
+        yield
+        r = state.get("retriever")
+        if r is not None and hasattr(r, "close"):
+            r.close()
+
+    app = FastAPI(title="Plexus", lifespan=lifespan, docs_url=None, redoc_url=None)
+
+    if os.getenv("PLEXUS_DEV_CORS"):  # only for `next dev` on another port
+        from fastapi.middleware.cors import CORSMiddleware
+
+        app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"],
+                           allow_methods=["GET"], allow_headers=[])  # fmt: skip
+
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' "
+            "'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; "
+            "frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        )
+        return response
+
+    @app.get("/api/health")
+    def health():
+        return {"ok": bool(state), "config": state.get("config")}
+
+    @app.get("/api/meta")
+    def meta():
+        names = state.get("names", {})
+        return {"companies": sorted(names.values(), key=str.lower), "filings": len(state.get("docs", {})),
+                "years": "2025"}  # fmt: skip
+
+    def admit(request: Request, q: str = Query(min_length=3, max_length=1000)) -> tuple[str, int]:
+        """Runs before streaming starts, so limits return proper status codes. FastAPI validates
+        `q` first: an invalid question never takes a place in the queue."""
+        client = request.client.host if request.client else "unknown"
+        if not limiter.allow(client):
+            raise HTTPException(429, "Too many questions. Wait a minute, then ask again.",
+                                headers={"Retry-After": "60"})  # fmt: skip
+        position = gpu.join()
+        if position is None:
+            raise HTTPException(503, "Plexus is busy answering other questions. Try again shortly.",
+                                headers={"Retry-After": "20"})  # fmt: skip
+        return q.strip(), position
+
+    @app.get("/api/ask", response_class=EventSourceResponse)
+    def ask(admitted: tuple[str, int] = Depends(admit)):
+        question, position = admitted
+        yield ServerSentEvent(event="queued", data={"position": position})
+        if not gpu.acquire(timeout=DEADLINE_S):
+            yield ServerSentEvent(
+                event="error", data={"message": "Plexus is busy. Try again shortly."}
+            )
+            return
+        start = time.monotonic()
+        try:
+            for ev in run_question(state["flow"], question, state["docs"]):
+                if time.monotonic() - start > DEADLINE_S:
+                    yield ServerSentEvent(event="error", data={
+                        "message": "This answer took too long. Try a shorter or more specific question."})  # fmt: skip
+                    return
+                yield ev
+        except Exception:  # details stay in the local log; the reader gets a clear next step
+            log.exception("question failed")
+            yield ServerSentEvent(event="error", data={
+                "message": "Plexus could not answer. Check that Ollama is running (ollama serve), then ask again."})  # fmt: skip
+        finally:
+            gpu.release()  # also runs when the reader closes the page
+
+    @app.exception_handler(HTTPException)
+    async def http_error(request: Request, exc: HTTPException):
+        return JSONResponse(
+            {"message": exc.detail}, status_code=exc.status_code, headers=exc.headers
+        )
+
+    if UI_DIR.exists():
+        from fastapi.staticfiles import StaticFiles
+
+        app.mount("/", StaticFiles(directory=UI_DIR, html=True), name="ui")
+    return app
+
+
+app = create_app()

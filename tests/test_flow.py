@@ -88,3 +88,14 @@ def test_ask_events_streams_steps_tokens_and_done(tmp_path):
     assert [e["step"] for k, e in events if k == "step"] == ["route", "retrieve", "answer"]
     text = "".join(t for k, t in events if k == "token")
     assert text == events[-1][1]["answer"].text == "TSMC makes the chips for us [1]."
+
+
+def test_verify_skips_refusals(tmp_path, monkeypatch):
+    import plexus.agents.verifier as v
+    from plexus.baseline.naive import NOT_ENOUGH
+
+    monkeypatch.setattr(v, "load_minicheck", lambda name="roberta": None)
+    rag = _rag(tmp_path, lambda r: NOT_ENOUGH)
+    rag.cfg.guard.verify = True
+    ans, trace = ask(build_flow(rag), "Who makes the chips?")
+    assert ans.checks == [] and trace[-1]["sentences"] == 0

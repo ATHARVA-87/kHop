@@ -108,8 +108,15 @@ def build_flow(rag: NaiveRAG):
         ans = s["answer"]
         if scorer is None:
             scorer = load_minicheck(rag.cfg.guard.verifier_model)
+        from plexus.baseline.naive import is_refusal
+
         passages = [index_text(h.header, h.text) for h in ans.hits]
-        checks = check_answer(ans.text, passages, scorer) if ans.hits else []
+        # a refusal ("not enough evidence") makes no claim, so there is nothing to check
+        checks = (
+            check_answer(ans.text, passages, scorer)
+            if ans.hits and not is_refusal(ans.text)
+            else []
+        )
         ans.checks = [{"sentence": c.sentence, "cited": c.cited, "supported": c.supported,
                        "support": None if c.support is None else round(c.support, 3)}
                       for c in checks]  # fmt: skip

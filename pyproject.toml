@@ -34,6 +34,13 @@ graph = [
     # the PyPI name "ladybug" was transferred from an unrelated 2014 project.
     "ladybug==0.21.2",
 ]
+serve = [
+    # web service (Phase 6): FastAPI's built-in Server-Sent Events (>= 0.135); versions already
+    # in the env, no advisories on 2026-10-29
+    "fastapi==0.143.1",
+    "uvicorn==0.54.0",
+    "starlette==1.8.0",  # the tested version in the env (lock would pick a newer one)
+]
 agents = [
     # wiring only (route -> retrieve -> answer), in-memory, no checkpointer, LangSmith off.
     # >= 1.2.14 for GHSA-3fx2-cqw9-xr3c (2026-10-28); ADK/LangGraph/plain-Python compared 2026-10-29
