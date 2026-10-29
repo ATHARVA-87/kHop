@@ -104,6 +104,26 @@ class HybridRetriever:
                 r.close()
 
 
+class OneCompanyFilter:
+    """If the question names exactly one corpus company, search only that company's filings.
+    Found by using the app (2026-10-29): "Which foundry does NVIDIA rely on?" was answered from
+    MaxLinear passages, because the single-company route searched every filing."""
+
+    def __init__(self, base, linker, doc_ids: list[str]):
+        self.base, self.linker = base, linker
+        self.by_ticker: dict[str, list[str]] = {}
+        for d in sorted(set(doc_ids)):
+            self.by_ticker.setdefault(d.split("_", 1)[0], []).append(d)
+
+    def retrieve(self, question: str, k: int) -> list[Hit]:
+        filers = [e for e in self.linker.link(question) if e in self.linker.filer_ids]
+        if len(filers) == 1:
+            ids = self.by_ticker.get(filers[0].split(":", 1)[-1])
+            if ids:
+                return self.base.retrieve(question, k, ids)
+        return self.base.retrieve(question, k)
+
+
 def make_linker(cfg: ExperimentConfig, data_dir: Path):
     """One entity linker for A2-RR, A4 and A5: alias table + SEC/filer names + graph entities
     (when the graph exists), so all three see the same companies in a question."""
@@ -140,7 +160,13 @@ def _routed(cfg: ExperimentConfig, data_dir: Path, index_path: Path, hybrid: Ret
         raise ValueError("routed retrieval needs retrieval.rerank (used on the local route)")
     linker = make_linker(cfg, data_dir)
     retrievers = {
-        "local": RerankingRetriever(hybrid, CrossEncoderScorer(r.rerank), r.rerank.candidates),
+        "local": RerankingRetriever(
+            OneCompanyFilter(hybrid, linker, [c["doc_id"] for c in load_chunks(index_path)])
+            if r.local_company_filter
+            else hybrid,
+            CrossEncoderScorer(r.rerank),
+            r.rerank.candidates,
+        ),
         "multi_hop": _graph_hybrid(cfg, data_dir, index_path, hybrid),
         "global": CompanyDiverseRetriever(hybrid, linker),
     }

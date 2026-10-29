@@ -67,3 +67,25 @@ def test_sector_cue_and_lowercase_distinctive_names():
     assert r.route("What are the main risks for qualcomm?") == "local"
     assert r.route("Which companies depend on TSMC for wafers?") == "global"
     assert r.route("What does Qualcomm say about TSMC?") == "local"
+
+
+def test_one_company_filter_restricts_to_that_company():
+    from plexus.retrieve.pipeline import OneCompanyFilter
+
+    class Linker:
+        filer_ids = frozenset({"company:NVDA", "company:AMD"})
+
+        def link(self, q):
+            return [e for e in ("company:NVDA", "company:AMD") if e.split(":")[1] in q]
+
+    class Base:
+        def retrieve(self, q, k, doc_ids=None):
+            self.seen = doc_ids
+            return []
+
+    b = Base()
+    f = OneCompanyFilter(b, Linker(), ["NVDA_10K_x", "NVDA_10Q_y", "AMD_10K_z"])
+    f.retrieve("NVDA foundry?", 5)
+    assert b.seen == ["NVDA_10K_x", "NVDA_10Q_y"]
+    f.retrieve("NVDA vs AMD", 5)
+    assert b.seen is None  # two companies: the filter stays out of it

@@ -63,6 +63,8 @@ class RetrievalConfig(_Strict):
     router: Literal["rules", "local", "multi_hop", "global"] = "rules"
     # A5: questions naming no company get one passage per company first
     company_diverse: bool = False
+    # A6 local route: search only the named company's filings when exactly one is named
+    local_company_filter: bool = False
 
 
 class GenerationConfig(_Strict):
