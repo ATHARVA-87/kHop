@@ -247,6 +247,9 @@ Research first (2026-10-29). Built: FastAPI service with live answers (SSE; `mak
 - First run (writer 35% on CPU, before the load-order fix) is in docs/failures.md.
 - Found by the load test: cache hits were being turned away as "busy" because the queue was checked before the cache; fixed (cache first, then queue), test added.
 
+## Phase 7 to-do noted during Phase 6
+- Demo container: install the Debian word list `wamerican` (the reframe layer switches itself off without one: measured 10/225 correct questions changed without it), start uvicorn with `--proxy-headers --forwarded-allow-ips` behind the Space proxy, Groq writer config.
+
 ## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
 `results/test/*.json`. No design decision was made on these numbers.
 

@@ -9,7 +9,7 @@ VOCAB = Counter({"what": 500, "does": 500, "say": 300, "about": 900, "revenue": 
 FORMS = {"NVIDIA": "NVIDIA", "Micron Technology": "Micron Technology", "Micron": "Micron Technology",
          "Lattice Semiconductor": "Lattice Semiconductor", "Texas Instruments": "Texas Instruments",
          "TI": "Texas Instruments", "Skyworks Solutions": "Skyworks Solutions", "Amkor Technology": "Amkor Technology"}  # fmt: skip
-R = Reframer(VOCAB, FORMS)
+R = Reframer(VOCAB, FORMS, english=frozenset({"zzz"}))  # a tiny list: same on every machine
 
 
 def test_three_owner_phrasings_become_one_question():
@@ -60,7 +60,7 @@ def test_v2_fixes_possessives_mixed_case_names_and_valid_words():
 
 def test_trailing_inc_only_as_a_whole_word():
     r = Reframer(VOCAB | Counter({"expenses": 300, "include": 900, "research": 800, "development": 700}),
-                 FORMS | {"Silicon Labs": "Silicon Labs"})  # fmt: skip
+                 FORMS | {"Silicon Labs": "Silicon Labs"}, english=frozenset({"zzz"}))  # fmt: skip
     q = "What expenses does Silicon Labs include in research and development?"
     assert not r(q).changed and r(q).question == q
     assert (
@@ -82,7 +82,7 @@ def test_v3_short_targets_question_words_and_three_letter_typos():
             "show": 800,
         }
     )
-    r3 = Reframer(v, FORMS)
+    r3 = Reframer(v, FORMS, english=frozenset({"zzz"}))
     assert r3("Ihat does NVIDIA say about revenue?").question.startswith("What does")
     assert "for" in r3("What does NVIDIA say fovr revenue?").question.split()
     assert (
@@ -92,3 +92,9 @@ def test_v3_short_targets_question_words_and_three_letter_typos():
         r3("What does NVIDIA hve about revenue?").question == "What does NVIDIA have about revenue?"
     )
     assert not r3("What does TSM say about KLA?").changed  # 3-letter capitals are codes
+
+
+def test_switches_itself_off_without_a_word_list():
+    r = Reframer(VOCAB, FORMS, english=frozenset())
+    q = "How are the nvdia companies performed in 2024"
+    assert r(q).question == q and not r(q).changed

@@ -210,7 +210,9 @@ def test_reframe_endpoint(monkeypatch):
     from plexus.serve.reframe import Reframer
 
     rf = Reframer(
-        Counter({"what": 9, "does": 9, "say": 9, "about": 9, "revenue": 90}), {"NVIDIA": "NVIDIA"}
+        Counter({"what": 9, "does": 9, "say": 9, "about": 9, "revenue": 90}),
+        {"NVIDIA": "NVIDIA"},
+        english=frozenset({"zzz"}),  # same on machines without a system word list (CI)
     )
     state = {"flow": FakeFlow(), "config": "test", "reframer": rf, **srv.load_meta()}
     with TestClient(srv.create_app(lambda: state)) as c:

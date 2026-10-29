@@ -33,6 +33,10 @@ MIN_FREQ_KNOWN = 2  # a corpus word seen at least this often is never "corrected
 MIN_FREQ_TARGET = 20  # a correction must be a word the filings use at least this often
 MIN_FREQ_SHORT = 500  # short words (2-3 letters) are targets only if very common: for, the, how
 # the first word of a question is usually one of these, so there they win ties ("Ihat" -> What)
+# never changed, with or without a system word list (CI and the demo image have none)
+PROTECTED = frozenset(
+    {"inc", "corp", "ltd", "llc", "plc", "co", "nv", "sa", "ag", "gmbh", "bv", "lp"}
+)
 QUESTION_WORDS = frozenset({"what", "how", "which", "why", "who", "when", "where", "does", "do", "did",
                             "is", "are", "was", "were", "can", "will", "has", "have", "list", "describe", "compare"})  # fmt: skip
 WORD = re.compile(r"[A-Za-z][A-Za-z'’-]*")
@@ -94,14 +98,18 @@ def company_forms() -> dict[str, str]:
 
 
 class Reframer:
-    def __init__(self, vocab: Counter, forms: dict[str, str]):
+    def __init__(
+        self, vocab: Counter, forms: dict[str, str], english: frozenset[str] | None = None
+    ):
         self.vocab = vocab
         self.forms = forms
         # correction targets: frequent corpus words + every word of every company form
         name_words = {w.lower(): w for f in forms for w in f.split() if len(w) >= 4}
         self.proper = name_words  # lowercase -> how the name is written
         self.name_targets = sorted(name_words)
-        self.english = english_words()  # recognise valid words only, never a correction source
+        # recognise valid words only, never a correction source; tests pass frozenset() so they
+        # behave the same on machines without a system word list
+        self.english = english_words() if english is None else english
         targets = (
             {
                 w
@@ -133,6 +141,8 @@ class Reframer:
         if len(core) == 3 and core.isupper():
             return None  # tickers and short codes (TSM, KLA, AMD) are never changed
         low = core.lower()
+        if low in PROTECTED:
+            return None
         if self.vocab.get(low, 0) >= MIN_FREQ_KNOWN or low in self.proper or low in self.english:
             return None  # a known word is never changed
         # words with capitals inside (CoWoS, EBITDA, "NVIDbA") may only become a company name
@@ -158,6 +168,11 @@ class Reframer:
         return fixed + word[len(core) :]
 
     def __call__(self, question: str) -> Reframed:
+        if not self.english:
+            # without a word list the layer changed 10/225 correct questions and every trap word
+            # (measured 2026-10-29), so it switches itself off: questions pass exactly as typed.
+            # The demo image installs one (Debian package `wamerican`).
+            return Reframed(question, question)
         changes: list[dict] = []
         out, last = [], 0
         quoted = [m.span() for m in re.finditer(r"\"[^\"]*\"|“[^”]*”", question)]
