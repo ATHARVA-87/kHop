@@ -1,0 +1,600 @@
+{
+  "threshold": 0.935,
+  "tune": {
+    "reused_rewordings": "13/20",
+    "reuse_rate": 0.65,
+    "wrong_reuses": "0/20",
+    "wrong_reuse_rate": 0.0,
+    "wrong_reuse_upper_95": 0.15
+  },
+  "test": {
+    "reused_rewordings": "10/20",
+    "reuse_rate": 0.5,
+    "wrong_reuses": "0/20",
+    "wrong_reuse_rate": 0.0,
+    "wrong_reuse_upper_95": 0.15
+  },
+  "test_without_key": {
+    "reused_rewordings": "10/20",
+    "reuse_rate": 0.5,
+    "wrong_reuses": "0/20",
+    "wrong_reuse_rate": 0.0,
+    "wrong_reuse_upper_95": 0.15
+  },
+  "near_misses_blocked_by_key_on_test": 10,
+  "per_pair": [
+    {
+      "pid": "C-01p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9206
+    },
+    {
+      "pid": "C-01n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.9267
+    },
+    {
+      "pid": "C-02p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9703
+    },
+    {
+      "pid": "C-02n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.8574
+    },
+    {
+      "pid": "C-03p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9526
+    },
+    {
+      "pid": "C-03n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.8188
+    },
+    {
+      "pid": "C-04p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9634
+    },
+    {
+      "pid": "C-04n",
+      "kind": "new",
+      "what_changed": "period",
+      "same_key": false,
+      "sim": 0.9729
+    },
+    {
+      "pid": "C-05p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.953
+    },
+    {
+      "pid": "C-05n",
+      "kind": "new",
+      "what_changed": "period",
+      "same_key": false,
+      "sim": 0.9615
+    },
+    {
+      "pid": "C-06p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.897
+    },
+    {
+      "pid": "C-06n",
+      "kind": "new",
+      "what_changed": "metric",
+      "same_key": true,
+      "sim": 0.913
+    },
+    {
+      "pid": "C-07p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.967
+    },
+    {
+      "pid": "C-07n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.8291
+    },
+    {
+      "pid": "C-08p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9643
+    },
+    {
+      "pid": "C-08n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.9435
+    },
+    {
+      "pid": "C-09p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9292
+    },
+    {
+      "pid": "C-09n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.8587
+    },
+    {
+      "pid": "C-10p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9268
+    },
+    {
+      "pid": "C-10n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.8832
+    },
+    {
+      "pid": "C-11p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9662
+    },
+    {
+      "pid": "C-11n",
+      "kind": "new",
+      "what_changed": "metric",
+      "same_key": true,
+      "sim": 0.9257
+    },
+    {
+      "pid": "C-12p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9504
+    },
+    {
+      "pid": "C-12n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.8236
+    },
+    {
+      "pid": "C-13p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": false,
+      "sim": 0.9079
+    },
+    {
+      "pid": "C-13n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.8304
+    },
+    {
+      "pid": "C-14p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9165
+    },
+    {
+      "pid": "C-14n",
+      "kind": "new",
+      "what_changed": "metric",
+      "same_key": true,
+      "sim": 0.8999
+    },
+    {
+      "pid": "C-15p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.8316
+    },
+    {
+      "pid": "C-15n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.7453
+    },
+    {
+      "pid": "C-16p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9386
+    },
+    {
+      "pid": "C-16n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.8954
+    },
+    {
+      "pid": "C-17p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.975
+    },
+    {
+      "pid": "C-17n",
+      "kind": "new",
+      "what_changed": "partner",
+      "same_key": false,
+      "sim": 0.9285
+    },
+    {
+      "pid": "C-18p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9596
+    },
+    {
+      "pid": "C-18n",
+      "kind": "new",
+      "what_changed": "partner",
+      "same_key": false,
+      "sim": 0.9363
+    },
+    {
+      "pid": "C-19p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9794
+    },
+    {
+      "pid": "C-19n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.9339
+    },
+    {
+      "pid": "C-20p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9427
+    },
+    {
+      "pid": "C-20n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.9427
+    },
+    {
+      "pid": "C-21p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9599
+    },
+    {
+      "pid": "C-21n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.849
+    },
+    {
+      "pid": "C-22p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9707
+    },
+    {
+      "pid": "C-22n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.9299
+    },
+    {
+      "pid": "C-23p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9567
+    },
+    {
+      "pid": "C-23n",
+      "kind": "new",
+      "what_changed": "partner",
+      "same_key": false,
+      "sim": 0.8993
+    },
+    {
+      "pid": "C-24p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9851
+    },
+    {
+      "pid": "C-24n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.8555
+    },
+    {
+      "pid": "C-25p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9547
+    },
+    {
+      "pid": "C-25n",
+      "kind": "new",
+      "what_changed": "partner",
+      "same_key": false,
+      "sim": 0.9125
+    },
+    {
+      "pid": "C-26p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9503
+    },
+    {
+      "pid": "C-26n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.9272
+    },
+    {
+      "pid": "C-27p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9691
+    },
+    {
+      "pid": "C-27n",
+      "kind": "new",
+      "what_changed": "partner",
+      "same_key": false,
+      "sim": 0.8778
+    },
+    {
+      "pid": "C-28p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.969
+    },
+    {
+      "pid": "C-28n",
+      "kind": "new",
+      "what_changed": "company",
+      "same_key": false,
+      "sim": 0.8146
+    },
+    {
+      "pid": "C-29p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9584
+    },
+    {
+      "pid": "C-29n",
+      "kind": "new",
+      "what_changed": "partner",
+      "same_key": false,
+      "sim": 0.9079
+    },
+    {
+      "pid": "C-30p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9702
+    },
+    {
+      "pid": "C-30n",
+      "kind": "new",
+      "what_changed": "partner",
+      "same_key": false,
+      "sim": 0.8257
+    },
+    {
+      "pid": "C-31p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.8959
+    },
+    {
+      "pid": "C-31n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.9059
+    },
+    {
+      "pid": "C-32p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.8724
+    },
+    {
+      "pid": "C-32n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.8528
+    },
+    {
+      "pid": "C-33p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.8908
+    },
+    {
+      "pid": "C-33n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.8873
+    },
+    {
+      "pid": "C-34p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.851
+    },
+    {
+      "pid": "C-34n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.8446
+    },
+    {
+      "pid": "C-35p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.9082
+    },
+    {
+      "pid": "C-35n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.8671
+    },
+    {
+      "pid": "C-36p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.8918
+    },
+    {
+      "pid": "C-36n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.9263
+    },
+    {
+      "pid": "C-37p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.8852
+    },
+    {
+      "pid": "C-37n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.9163
+    },
+    {
+      "pid": "C-38p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.8863
+    },
+    {
+      "pid": "C-38n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.9144
+    },
+    {
+      "pid": "C-39p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.8595
+    },
+    {
+      "pid": "C-39n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.8914
+    },
+    {
+      "pid": "C-40p",
+      "kind": "reuse",
+      "what_changed": "reworded",
+      "same_key": true,
+      "sim": 0.8929
+    },
+    {
+      "pid": "C-40n",
+      "kind": "new",
+      "what_changed": "topic",
+      "same_key": true,
+      "sim": 0.9271
+    }
+  ],
+  "followup_all_40_pairs": {
+    "note": "post-hoc, all 80 pairs: what the key buys",
+    "no_key_safe_threshold_must_exceed": 0.973,
+    "rewordings_reused_without_key": "3/40",
+    "rewordings_reused_with_key": "23/40",
+    "near_misses_above_threshold_blocked_only_by_key": [
+      "C-04n",
+      "C-05n",
+      "C-08n",
+      "C-18n",
+      "C-20n"
+    ]
+  }
+}

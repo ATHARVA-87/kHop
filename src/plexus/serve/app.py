@@ -42,6 +42,7 @@ MAX_WAITING = 4  # questions allowed to wait for the GPU
 RATE_PER_MIN = 10  # questions per client per minute
 DEADLINE_S = 120  # one question, start to finish
 UI_DIR = REPO_ROOT / "web" / "out"  # the static Next.js export
+CACHE_THRESHOLD = 0.935  # chosen on cache pairs C-01..C-20, results/a8_cache.json
 
 
 class RateLimiter:
@@ -87,6 +88,11 @@ class GpuQueue:
         finally:
             with self.lock:
                 self.waiting -= 1
+
+    def leave(self) -> None:
+        """Give up a place in the queue without running (the answer came from the cache)."""
+        with self.lock:
+            self.waiting -= 1
 
     def release(self) -> None:
         self.slot.release()
@@ -215,7 +221,29 @@ def build_state(config: Path = CONFIG) -> dict:
     cfg = ExperimentConfig.load(config)
     retriever = make_retriever(cfg, s.data_dir)
     flow = build_flow(NaiveRAG(cfg, retriever, LLMClient.from_settings(s)))
-    return {"flow": flow, "retriever": retriever, "config": cfg.name, **load_meta()}
+    cache = None
+    router = getattr(retriever, "router", None)
+    if router is not None:  # the cache key needs the company linker of the A6 router
+        from plexus.index.dense import Embedder
+        from plexus.serve.semantic_cache import SemanticCache, bge_encoder, scope_of
+
+        cache = SemanticCache(s.data_dir / "cache" / "semantic.sqlite", bge_encoder(Embedder(cfg.embedder)),
+                              router.linker, scope_of(cfg.snapshot, config), CACHE_THRESHOLD)  # fmt: skip
+    return {"flow": flow, "retriever": retriever, "config": cfg.name, "cache": cache, **load_meta()}
+
+
+def cacheable(payload: dict) -> bool:
+    """Store only clean answers: something was claimed and every sentence passed the check."""
+    from plexus.baseline.naive import is_refusal
+
+    refused = any(t.get("refused") for t in payload.get("trace", []))
+    checks = payload.get("checks") or []
+    return (
+        not refused
+        and not is_refusal(payload["answer"])
+        and bool(checks)
+        and all(c["supported"] for c in checks)
+    )
 
 
 def run_question(flow, question: str, docs: dict):
@@ -302,6 +330,22 @@ def create_app(state_factory=build_state) -> FastAPI:
     def ask(admitted: tuple[str, int] = Depends(admit)):
         question, position = admitted
         yield ServerSentEvent(event="queued", data={"position": position})
+        cache = state.get("cache")
+        if cache is not None:
+            t0 = time.perf_counter()
+            try:
+                hit = cache.lookup(question)
+            except Exception:  # a broken cache must never block an answer
+                log.exception("cache lookup failed")
+                hit = None
+            if hit is not None:
+                gpu.leave()  # answered from the cache: no GPU needed
+                payload, sim, original = hit
+                yield ServerSentEvent(event="step", data={
+                    "step": "cache", "ms": round((time.perf_counter() - t0) * 1000, 1),
+                    "similar_to": original, "similarity": round(sim, 3)})  # fmt: skip
+                yield ServerSentEvent(event="done", data={**payload, "from_cache": True})
+                return
         if not gpu.acquire(timeout=DEADLINE_S):
             yield ServerSentEvent(
                 event="error", data={"message": "Plexus is busy. Try again shortly."}
@@ -314,6 +358,11 @@ def create_app(state_factory=build_state) -> FastAPI:
                     yield ServerSentEvent(event="error", data={
                         "message": "This answer took too long. Try a shorter or more specific question."})  # fmt: skip
                     return
+                if ev.event == "done" and cache is not None and cacheable(ev.data):
+                    try:
+                        cache.store(question, ev.data)
+                    except Exception:
+                        log.exception("cache store failed")
                 yield ev
         except Exception:  # details stay in the local log; the reader gets a clear next step
             log.exception("question failed")

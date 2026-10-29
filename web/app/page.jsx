@@ -179,6 +179,12 @@ function stepView(name, step, running, result) {
   }
   const sec = (ms) => (ms >= 1000 ? `${(ms / 1000).toFixed(1)} s` : `${Math.max(1, Math.round(ms))} ms`);
   switch (name) {
+    case "cache":
+      return {
+        title: "Reused a recent answer",
+        detail: `Asked before in other words: "${step.similar_to}". Same companies and dates, checked sentence by sentence then.`,
+        state: "is-done",
+      };
     case "guard":
       return step.refused
         ? { title: "Declined the question", detail: REASONS[step.reason] || "Outside what Plexus answers.", state: "is-flagged" }
@@ -211,7 +217,7 @@ function stepView(name, step, running, result) {
 
 function Trace({ steps, phase, queued, result }) {
   const refused = steps.guard?.refused;
-  const names = refused ? ["guard"] : STEP_ORDER;
+  const names = steps.cache ? ["cache"] : refused ? ["guard"] : STEP_ORDER;
   const nextName = names.find((n) => !steps[n]);
   return (
     <aside className="trace" aria-labelledby="trace-title">

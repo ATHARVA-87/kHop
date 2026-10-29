@@ -90,3 +90,41 @@ def test_about_figures_come_from_results(monkeypatch):
     with _client(monkeypatch) as c:
         figs = c.get("/api/about").json()["figures"]
         assert figs and all(f["source"] and f["value"] for f in figs)
+
+
+class FakeCache:
+    def __init__(self):
+        self.stored = {}
+
+    def lookup(self, q):
+        hit = self.stored.get(q.lower().rstrip("?"))
+        return (hit, 0.97, "earlier question") if hit else None
+
+    def store(self, q, payload):
+        self.stored[q.lower().rstrip("?")] = payload
+
+
+def test_cache_stores_clean_answers_and_serves_repeats(monkeypatch):
+    import plexus.agents.flow as flow_mod
+
+    monkeypatch.setattr(flow_mod, "ask_events", fake_events)
+    cache = FakeCache()
+    state = {"flow": FakeFlow(), "config": "test", "cache": cache, **srv.load_meta()}
+    with TestClient(srv.create_app(lambda: state)) as c:
+        first = _events(c.get("/api/ask", params={"q": "Who makes NVIDIA chips?"}).text)
+        assert first[-1][0] == "done" and cache.stored
+        again = _events(c.get("/api/ask", params={"q": "who makes nvidia chips"}).text)
+        assert [k for k, _ in again] == ["queued", "step", "done"]
+        assert again[1][1]["step"] == "cache" and again[-1][1]["from_cache"] is True
+
+
+def test_refusals_are_not_cached():
+    assert not srv.cacheable(
+        {
+            "answer": "I can't help with investment advice.",
+            "checks": [],
+            "trace": [{"step": "guard", "refused": True}],
+        }
+    )
+    assert not srv.cacheable({"answer": "x [1].", "checks": [{"supported": False}], "trace": []})
+    assert srv.cacheable({"answer": "x [1].", "checks": [{"supported": True}], "trace": []})
