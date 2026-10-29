@@ -77,6 +77,8 @@ class Answer:
     retrieval_ms: float = 0.0
     generation_ms: float = 0.0
     cached: bool = False
+    # Verifier (Phase 5): one entry per checked sentence {sentence, cited, supported, support}
+    checks: list[dict] = field(default_factory=list)
 
 
 class NaiveRAG:

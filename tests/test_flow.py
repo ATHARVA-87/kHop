@@ -57,3 +57,18 @@ def test_gate_refuses_before_search(tmp_path):
     assert ans.text.startswith("I can't help with investment advice")
     ans, trace = ask(build_flow(rag), "What risks does TSMC face?")
     assert [t["step"] for t in trace] == ["guard", "route", "retrieve", "answer"]
+
+
+def test_verify_marks_sentences_without_changing_the_answer(tmp_path, monkeypatch):
+    import plexus.agents.verifier as v
+
+    class Fake:
+        def score(self, doc, claim):
+            return 0.9
+
+    monkeypatch.setattr(v, "MiniCheck", lambda: Fake())
+    rag = _rag(tmp_path, lambda r: "TSMC makes the chips for us [1].")
+    rag.cfg.guard.verify = True
+    ans, trace = ask(build_flow(rag), "Who makes the chips?")
+    assert ans.text == "TSMC makes the chips for us [1]."
+    assert ans.checks[0]["supported"] and trace[-1]["step"] == "verify"

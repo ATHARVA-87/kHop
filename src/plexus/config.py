@@ -90,6 +90,7 @@ class GuardConfig(_Strict):
 
     input_gate: bool = False  # refuse advice / off-scope / rule-breaking before search
     datamark: bool = False  # ^ between words of retrieved text (prompt-injection defence)
+    verify: bool = False  # mark each cited sentence as supported or not (MiniCheck); no LLM call
 
 
 class ExperimentConfig(_Strict):

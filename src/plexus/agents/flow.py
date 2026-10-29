@@ -82,6 +82,28 @@ def build_flow(rag: NaiveRAG):
         ans.retrieval_ms = next(t["ms"] for t in s["trace"] if t["step"] == "retrieve")
         return {"answer": ans, **_step("answer", t0, cited=ans.cited_chunk_ids)}
 
+    scorer = None
+
+    def verify(s: FlowState) -> dict:
+        """Mark each sentence as supported by its cited passages or not. It does NOT delete
+        or replace anything: replacing answers with no supported sentence would have blanked a
+        human-correct answer (docs/failures.md), so the verifier only informs the reader."""
+        nonlocal scorer
+        from plexus.agents.verifier import MiniCheck, check_answer
+        from plexus.ingest.headers import index_text
+
+        t0 = time.perf_counter()
+        ans = s["answer"]
+        if scorer is None:
+            scorer = MiniCheck()
+        passages = [index_text(h.header, h.text) for h in ans.hits]
+        checks = check_answer(ans.text, passages, scorer) if ans.hits else []
+        ans.checks = [{"sentence": c.sentence, "cited": c.cited, "supported": c.supported,
+                       "support": None if c.support is None else round(c.support, 3)}
+                      for c in checks]  # fmt: skip
+        n_sup = sum(c["supported"] for c in ans.checks)
+        return {"answer": ans, **_step("verify", t0, sentences=len(checks), supported=n_sup)}
+
     g = StateGraph(FlowState)
     g.add_node("route", route)
     g.add_node("retrieve", retrieve)
@@ -96,7 +118,12 @@ def build_flow(rag: NaiveRAG):
         g.add_edge(START, "route")
     g.add_edge("route", "retrieve")
     g.add_edge("retrieve", "answer")
-    g.add_edge("answer", END)
+    if rag.cfg.guard.verify:
+        g.add_node("verify", verify)
+        g.add_edge("answer", "verify")
+        g.add_edge("verify", END)
+    else:
+        g.add_edge("answer", END)
     return g.compile()  # no checkpointer: state lives only for one question
 
 
