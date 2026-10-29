@@ -70,7 +70,7 @@ def test_verify_marks_sentences_without_changing_the_answer(tmp_path, monkeypatc
         def score(self, doc, claim):
             return 0.9
 
-    monkeypatch.setattr(v, "load_minicheck", lambda name="roberta": Fake())
+    monkeypatch.setattr(v, "load_minicheck", lambda *a, **k: Fake())
     rag = _rag(tmp_path, lambda r: "TSMC makes the chips for us [1].")
     rag.cfg.guard.verify = True
     ans, trace = ask(build_flow(rag), "Who makes the chips?")
@@ -94,7 +94,7 @@ def test_verify_skips_refusals(tmp_path, monkeypatch):
     import plexus.agents.verifier as v
     from plexus.baseline.naive import NOT_ENOUGH
 
-    monkeypatch.setattr(v, "load_minicheck", lambda name="roberta": None)
+    monkeypatch.setattr(v, "load_minicheck", lambda *a, **k: None)
     rag = _rag(tmp_path, lambda r: NOT_ENOUGH)
     rag.cfg.guard.verify = True
     ans, trace = ask(build_flow(rag), "Who makes the chips?")

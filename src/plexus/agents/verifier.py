@@ -158,11 +158,18 @@ class MiniCheck:
 _LOADED: dict[str, MiniCheck] = {}
 
 
-def load_minicheck(name: str = "roberta") -> MiniCheck:
-    """One MiniCheck per variant per process (the attack eval and the API build many flows)."""
-    if name not in _LOADED:
-        _LOADED[name] = MiniCheck(MODELS / f"minicheck-{name}-large")
-    return _LOADED[name]
+def load_minicheck(name: str = "roberta", device: str | None = None, threads: int = 4) -> MiniCheck:
+    """One MiniCheck per variant and device per process (the attack eval and the API build many
+    flows). On the CPU, torch uses at most `threads` cores so the laptop stays responsive
+    (owner, 2026-10-29: keep a 10% safety margin)."""
+    key = f"{name}:{device}"
+    if key not in _LOADED:
+        if device == "cpu":
+            import torch
+
+            torch.set_num_threads(max(1, threads))
+        _LOADED[key] = MiniCheck(MODELS / f"minicheck-{name}-large", device=device)
+    return _LOADED[key]
 
 
 def check_answer(answer: str, passages: list[str], scorer: MiniCheck | None) -> list[SentenceCheck]:

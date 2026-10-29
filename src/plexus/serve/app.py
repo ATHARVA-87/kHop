@@ -206,6 +206,39 @@ def about_figures() -> list[dict]:
     return out
 
 
+def ollama_writer(config: Path = CONFIG) -> tuple[str, str] | None:
+    """(api base, model) when the app's writer runs on Ollama, else None."""
+    from plexus.config import ExperimentConfig
+
+    g = ExperimentConfig.load(config).generation
+    return (Settings.load().ollama_api_base, g.model) if g.provider == "ollama" else None
+
+
+def ollama_load(base: str, model: str, keep_alive: int) -> None:
+    """Load (keep_alive=-1: until told otherwise) or unload (0) the writer model. A model
+    management request with no prompt: it generates nothing, so it is not an LLM call."""
+    import httpx
+
+    try:
+        httpx.post(
+            f"{base}/api/generate", json={"model": model, "keep_alive": keep_alive}, timeout=120
+        )
+    except httpx.HTTPError:
+        log.warning(
+            "could not reach Ollama at %s to %s %s", base, "load" if keep_alive else "unload", model
+        )
+
+
+def shared_embedder(retriever):
+    """The search's own bge-small model, reused by the cache instead of a second copy on the
+    GPU (each copy ~100 MB; the app was 20 MB over the owner's 10% GPU margin)."""
+    for base in getattr(retriever, "closables", None) or []:
+        for r in getattr(base, "retrievers", None) or []:
+            if hasattr(r, "embedder"):
+                return r.embedder
+    return None
+
+
 def build_state(config: Path = CONFIG) -> dict:
     from plexus.agents.flow import build_flow
     from plexus.baseline.naive import NaiveRAG
@@ -226,7 +259,7 @@ def build_state(config: Path = CONFIG) -> dict:
         cache_path = Path(
             os.getenv("PLEXUS_SEMANTIC_CACHE", s.data_dir / "cache" / "semantic.sqlite")
         )
-        cache = SemanticCache(cache_path, bge_encoder(Embedder(cfg.embedder)),
+        cache = SemanticCache(cache_path, bge_encoder(shared_embedder(retriever) or Embedder(cfg.embedder)),
                               router.linker, scope_of(cfg.snapshot, config), CACHE_THRESHOLD)  # fmt: skip
     return {"flow": flow, "retriever": retriever, "config": cfg.name, "cache": cache, **load_meta()}
 
@@ -289,11 +322,21 @@ def create_app(state_factory=build_state) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        writer = ollama_writer()
+        if writer and state_factory is build_state:
+            # the writer goes on the GPU FIRST, while it is empty: qwen3.5:4b also reserves
+            # ~0.9 GB for an image encoder we never use, so loaded after the search models it
+            # spilled 35% onto the CPU and the laptop lagged (2026-10-29). It stays loaded while
+            # the app runs and is unloaded when the app stops.
+            os.environ.setdefault("PLEXUS_OLLAMA_KEEP_ALIVE", "-1")
+            ollama_load(*writer, keep_alive=-1)
         state.update(state_factory())
         yield
         r = state.get("retriever")
         if r is not None and hasattr(r, "close"):
             r.close()
+        if writer and state_factory is build_state:
+            ollama_load(*writer, keep_alive=0)  # free the GPU
 
     app = FastAPI(title="Plexus", lifespan=lifespan, docs_url=None, redoc_url=None)
 

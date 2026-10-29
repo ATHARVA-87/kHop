@@ -107,7 +107,8 @@ def build_flow(rag: NaiveRAG):
         t0 = time.perf_counter()
         ans = s["answer"]
         if scorer is None:
-            scorer = load_minicheck(rag.cfg.guard.verifier_model)
+            g = rag.cfg.guard
+            scorer = load_minicheck(g.verifier_model, g.verifier_device, g.verifier_threads)
         from plexus.baseline.naive import is_refusal
 
         passages = [index_text(h.header, h.text) for h in ans.hits]

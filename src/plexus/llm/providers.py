@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import time
 from collections.abc import Callable
 from typing import Protocol
@@ -100,6 +101,11 @@ class LiteLLMProvider:
         # one attempt per call with a hard timeout; LLMClient owns the retry policy
         kwargs.setdefault("timeout", 120)
         kwargs.setdefault("num_retries", 0)
+        keep = os.getenv("PLEXUS_OLLAMA_KEEP_ALIVE")
+        if keep and self.name == "ollama":
+            # how long Ollama keeps the model in GPU memory; a runtime setting, deliberately NOT
+            # part of request.params, so cached answers keep their keys
+            kwargs["keep_alive"] = int(keep) if keep.lstrip("-").isdigit() else keep
         return kwargs
 
     def stream(self, request: LLMRequest):
