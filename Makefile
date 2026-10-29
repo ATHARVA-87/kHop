@@ -3,7 +3,7 @@
 PY ?= python
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas extract serve ui
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask extract serve ui
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -58,6 +58,9 @@ graph: ## Re-validate stored extractions (no LLM), resolve entities, build the L
 RAGAS_PY ?= /home/atharva/miniconda3/envs/ragas/bin/python
 ragas: ## RAGAS Faithfulness + FactualCorrectness in the separate `ragas` env (RESULTS=results/a6_router.json)
 	RAGAS_DO_NOT_TRACK=true $(RAGAS_PY) -m plexus.eval.ragas_eval --results $${RESULTS:-results/a6_router.json}
+
+ask: ## One question through the LangGraph flow with its step trace (Q="...", CONFIG=configs/a6_router.yaml)
+	$(PY) -m plexus.agents.flow --config $${CONFIG:-configs/a6_router.yaml} "$(Q)"
 
 golden-test: ## Build data/golden/golden_test.jsonl from your reviewed review_test.csv
 	$(PY) -m plexus.eval.golden build --split test

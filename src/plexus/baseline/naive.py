@@ -101,6 +101,15 @@ class NaiveRAG:
             raise RuntimeError("NaiveRAG.answer needs an LLMClient")
         t0 = time.perf_counter()
         hits = self.retrieve(question)
+        ans = self.generate(question, hits)
+        ans.retrieval_ms = (time.perf_counter() - t0) * 1000 - ans.generation_ms
+        return ans
+
+    def generate(self, question: str, hits: list[Hit]) -> Answer:
+        """Write the cited answer from the top `context_chunks` hits (the LangGraph "answer"
+        node calls this too, so both paths give the same answer)."""
+        if self.llm is None:
+            raise RuntimeError("NaiveRAG.generate needs an LLMClient")
         t1 = time.perf_counter()
         context = hits[: self.cfg.generation.context_chunks]
         resp = self.llm.complete(self.build_request(question, context))
@@ -112,7 +121,6 @@ class NaiveRAG:
             text=text,
             hits=context,
             cited_chunk_ids=[context[n - 1].chunk_id for n in cited if 1 <= n <= len(context)],
-            retrieval_ms=(t1 - t0) * 1000,
             generation_ms=(t2 - t1) * 1000,
             cached=resp.cached,
         )
