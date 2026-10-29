@@ -1,4 +1,4 @@
-# ADR 0008: The Phase 5 comparison baseline is A6, not A7
+# ADR 0007: The Phase 5 comparison baseline is A6, not A7
 
 Status: **proposed, needs the owner's sign-off** (2026-10-29)
 
