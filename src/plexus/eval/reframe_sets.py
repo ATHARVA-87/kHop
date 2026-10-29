@@ -96,6 +96,33 @@ def main() -> int:
             typos.append({"qid": q["qid"], "kind": kind, "original": target, "typo": bad,
                           "question": q["question"], "typo_question": q["question"].replace(target, bad, 1)})  # fmt: skip
     (OUT / "typos.jsonl").write_text("".join(json.dumps(t) + "\n" for t in typos))
+    # fresh set for the second version (v1 failed; its fixes were made after seeing typos.jsonl):
+    # dev questions, seed 1, never looked at before the v2 run
+    rng2 = random.Random(1)
+    dev = [
+        json.loads(x)
+        for x in (REPO_ROOT / "data/golden/golden.jsonl").read_text().splitlines()
+        if x.strip()
+    ]
+    fresh = []
+    for q in dev:
+        words = re.findall(r"[A-Za-z]+", q["question"])
+        name_words = [w for w in words if w in names]
+        content = [
+            w
+            for w in words
+            if len(w) >= 5 and w.lower() not in STOP and w not in names and w.islower()
+        ]
+        for kind, pool in (("company", name_words), ("word", content)):
+            if not pool:
+                continue
+            target = rng2.choice(pool)
+            bad = one_edit(target, rng2)
+            if bad.lower() in known or bad == target:
+                continue
+            fresh.append({"qid": q["qid"], "kind": kind, "original": target, "typo": bad,
+                          "question": q["question"], "typo_question": q["question"].replace(target, bad, 1)})  # fmt: skip
+    (OUT / "typos_fresh.jsonl").write_text("".join(json.dumps(t) + "\n" for t in fresh))
     (OUT / "traps.json").write_text(json.dumps({"words": TRAPS, "questions": [
         f"What does the filing say about {w} in 2025?" for w in TRAPS]}, indent=2) + "\n")  # fmt: skip
     with open(REPO_ROOT / "data/golden/cache_pairs.csv", newline="", encoding="utf-8-sig") as fh:
