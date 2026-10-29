@@ -3,7 +3,7 @@
 PY ?= $(shell test -x $(HOME)/miniconda3/envs/torch/bin/python && echo $(HOME)/miniconda3/envs/torch/bin/python || echo python)
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask flow-check security ui-dev stop extract serve ui
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask flow-check security ui-dev stop extract serve ui refresh drift
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -40,6 +40,14 @@ process: ## Parse the snapshot into sections + write the parse report
 
 index: ## Chunk, embed and index the parsed snapshot for $(CONFIG)
 	$(PY) -m plexus.index.build --config $(CONFIG)
+
+refresh: ## Drift check data: download, parse and index the 2026 snapshot (configs/corpus_2026.yaml; resumable)
+	$(PY) -m plexus.ingest.edgar --config configs/corpus_2026.yaml
+	$(PY) -m plexus.ingest.process --snapshot semis-2026
+	$(PY) -m plexus.index.build --config configs/a3h_rerank_2026.yaml
+
+drift: ## Golden set on semis-2025 vs semis-2026, same settings, no retuning -> results/drift.json
+	$(PY) -m plexus.eval.drift
 
 candidates: ## Generate ~200 golden-set candidates into data/golden/review.csv (LLM, cached)
 	$(PY) -m plexus.eval.candidates --config configs/golden_candidates.yaml
