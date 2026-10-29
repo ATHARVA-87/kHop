@@ -8,11 +8,12 @@ and our LLM judges caught only 3 of 5 wrong answers):
    + claim; support probability = softmax over the first decoder token's logits for ids
    3 (not supported) and 209 (supported); passages split into ~400-word chunks, max over chunks.
    Weights: converted once to safetensors in data/models/ (the hub only ships a pickle).
-2. Deterministic checks: the sentence cites at least one passage, every cited number exists,
-   and every number in the sentence appears in the cited text.
+2. Deterministic checks: the sentence cites at least one passage and every citation exists.
 
-A sentence is SUPPORTED if it has valid citations, no missing numbers and support >= 0.5
-(MiniCheck's threshold; fixed before validation).
+A sentence is SUPPORTED if it has valid citations and support >= 0.5 (MiniCheck's threshold,
+fixed before validation). Validated on 60 blind human-labelled pairs (results/
+verifier_validation.json): catches 15/15 unsupported, passes 42/45 supported, kappa 0.88.
+A number-in-source check was measured on the same pairs, added nothing, and was removed.
 """
 
 from __future__ import annotations
@@ -107,8 +108,6 @@ def check_answer(answer: str, passages: list[str], scorer: MiniCheck | None) -> 
             sc.issues.append("bad_citation")
         if valid:
             doc = "\n\n".join(passages[n - 1] for n in valid)
-            if numbers(claim) - numbers(doc):
-                sc.issues.append("number_not_in_source")
             if scorer is not None:
                 sc.support = scorer.score(doc, claim)
         out.append(sc)

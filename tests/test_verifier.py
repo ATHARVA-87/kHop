@@ -19,6 +19,6 @@ def test_check_answer_rules():
     ans = "TSMC makes most of our chips [1]. Revenue was 9,999 million dollars [2]. Margins rose sharply this year overall. Intel builds factories everywhere [7]."
     out = {c.sentence.split()[0]: c for c in v.check_answer(ans, passages, FakeScorer())}
     assert out["TSMC"].supported
-    assert out["Revenue"].issues == ["number_not_in_source"] and not out["Revenue"].supported
+    assert out["Revenue"].issues == [] and out["Revenue"].supported  # MiniCheck decides
     assert out["Margins"].issues == ["no_citation"]
     assert out["Intel"].issues == ["bad_citation"]
