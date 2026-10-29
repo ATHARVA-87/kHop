@@ -87,3 +87,11 @@ def test_refusal_means_declining_not_a_caveat():
         "Wolfspeed's liquidity came from cash and marketable securities [1]. " * 4
     ) + NOT_ENOUGH
     assert not is_refusal(long_answer)
+
+
+def test_datamarking_marks_excerpts_and_adds_the_rule(tmp_path):
+    rag = _rag(tmp_path, lambda r: "ok [1]")
+    rag.cfg.guard.datamark = True
+    req = rag.build_request("q", HITS[:1])
+    system, user = req.messages
+    assert "chunk^text^0" in user.content and "^" in system.content
