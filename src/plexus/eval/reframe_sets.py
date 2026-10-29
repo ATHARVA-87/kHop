@@ -188,6 +188,11 @@ def main() -> int:
     english = set(english_words())
     anywhere, dropped_any = anywhere_set(dev + test, known | english)
     (OUT / "typos_anywhere.jsonl").write_text("".join(json.dumps(t) + "\n" for t in anywhere))
+    # second fresh set (seed 3) for the version fixed after seeing typos_anywhere.jsonl
+    anywhere2, _ = anywhere_set(dev + test, known | english, seed=3)
+    (OUT / "typos_anywhere_fresh.jsonl").write_text(
+        "".join(json.dumps(t) + "\n" for t in anywhere2)
+    )
     print(f"anywhere {len(anywhere)} (dropped {dropped_any} typos that were real words)")
     (OUT / "traps.json").write_text(json.dumps({"words": TRAPS, "questions": [
         f"What does the filing say about {w} in 2025?" for w in TRAPS]}, indent=2) + "\n")  # fmt: skip
