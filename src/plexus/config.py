@@ -89,6 +89,9 @@ class GuardConfig(_Strict):
     """Phase 5 guardrails; all off by default so earlier configs are unchanged."""
 
     input_gate: bool = False  # refuse advice / off-scope / rule-breaking before search
+    joke: bool = (
+        False  # owner's "nah, I'd win." reply to rule-breaking requests (off: plain refusal)
+    )
     datamark: bool = False  # ^ between words of retrieved text (prompt-injection defence)
     verify: bool = False  # mark each cited sentence as supported or not (MiniCheck); no LLM call
 

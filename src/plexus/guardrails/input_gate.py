@@ -10,7 +10,11 @@ from __future__ import annotations
 
 import re
 
-JAILBREAK_REPLY = "nah, I'd win."  # the owner's joke for "ignore your rules" (2026-10-29)
+JOKE_REPLY = "nah, I'd win."  # the owner's joke, only with guard.joke: true (off by default)
+JAILBREAK_REPLY = (
+    "I can't help with that request. Ask a question about the SEC filings of the semiconductor "
+    "companies in the corpus."
+)
 ADVICE_REPLY = (
     "I can't help with investment advice. Plexus answers factual questions about what "
     "semiconductor companies say in their SEC filings."
@@ -56,12 +60,12 @@ MAX_CHARS = 1000  # docs/security.md: question length cap
 TOO_LONG_REPLY = f"Please ask a shorter question (at most {MAX_CHARS} characters)."
 
 
-def gate(question: str, linker=None) -> tuple[str, str] | None:
+def gate(question: str, linker=None, joke: bool = False) -> tuple[str, str] | None:
     """(kind, reply) to refuse with, or None to let the question through."""
     if len(question) > MAX_CHARS:
         return "too_long", TOO_LONG_REPLY
     if JAILBREAK.search(question):
-        return "jailbreak", JAILBREAK_REPLY
+        return "jailbreak", JOKE_REPLY if joke else JAILBREAK_REPLY
     if ADVICE.search(question):
         return "advice", ADVICE_REPLY
     if linker is not None and not linker.link(question) and not IN_DOMAIN.search(question):

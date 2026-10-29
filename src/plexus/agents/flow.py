@@ -59,7 +59,7 @@ def build_flow(rag: NaiveRAG):
         from plexus.guardrails.input_gate import gate
 
         t0 = time.perf_counter()
-        hit = gate(s["question"], getattr(router, "linker", None))
+        hit = gate(s["question"], getattr(router, "linker", None), rag.cfg.guard.joke)
         if hit is None:
             return _step("guard", t0, refused=False)
         ans = Answer(question=s["question"], text=hit[1], hits=[])
