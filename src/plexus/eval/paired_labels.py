@@ -74,14 +74,27 @@ def mcnemar_exact(b_only: int, a_only: int) -> float:
     return min(1.0, 2 * sum(comb(n, i) for i in range(k + 1)) / 2**n)
 
 
-def score(labels: Path) -> dict:
+def stray_refusal_lines(path: Path, qids: list[str]) -> int:
+    """Answers that give content AND contain the "not enough evidence" sentence (not refusals)."""
+    from plexus.baseline.naive import NOT_ENOUGH, _norm, is_refusal
+
+    ans = _answers(path)
+    return sum(_norm(NOT_ENOUGH) in _norm(ans[q]["answer"]) and not is_refusal(ans[q]["answer"])
+               for q in qids)  # fmt: skip
+
+
+def score(labels: Path, flips: list[str] = ()) -> dict:
+    """flips: "qid:1" / "qid:2" sheet cells re-marked partially_correct (sensitivity run)."""
     key = json.loads(KEY.read_text())
+    flip = {tuple(f.split(":")) for f in flips}
     human = _labels(labels)
     with open(SHEET, newline="", encoding="utf-8-sig") as fh:
         sheet = list(csv.DictReader(fh))
     va, vb = {}, {}
     for r in sheet:
         v1, v2 = r["verdict_1"].strip().lower(), r["verdict_2"].strip().lower()
+        v1 = "partially_correct" if (r["qid"], "1") in flip and v1 == "correct" else v1
+        v2 = "partially_correct" if (r["qid"], "2") in flip and v2 == "correct" else v2
         bad = [v for v in (v1, v2) if v not in VERDICTS]
         if bad:
             raise ValueError(f"{r['qid']}: verdict must be one of {VERDICTS}, got {bad}")
@@ -108,6 +121,9 @@ def score(labels: Path) -> dict:
         "only_b_correct": b_only,
         "only_a_correct": a_only,
         "mcnemar_exact_p": round(mcnemar_exact(b_only, a_only), 4),
+        "flips": sorted(flips),
+        "stray_not_enough_lines": {"a": stray_refusal_lines(Path(key["a"]), qids),
+                                   "b": stray_refusal_lines(Path(key["b"]), qids)},
         "per_query": [{"qid": q, "a": va[q], "b": vb[q]} for q in qids],
     }  # fmt: skip
 
@@ -118,13 +134,17 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--a", type=Path, default=REPO_ROOT / "results/a6_router.json")
     ap.add_argument("--b", type=Path, default=REPO_ROOT / "results/a6_router_ctx10.json")
     ap.add_argument("--labels", type=Path, default=GOLDEN / "judge_labels.csv")
+    ap.add_argument(
+        "--flip", nargs="*", default=[], help='sensitivity run: "qid:1" cells -> partial'
+    )
     a = ap.parse_args(argv)
     if a.cmd == "export":
         n, same = export(a.a, a.b, a.labels)
         print(f"{SHEET}: {n} questions to label ({same} identical answers keep their label)")
         return 0
-    out = score(a.labels)
-    path = REPO_ROOT / "results" / f"paired_{a.b.stem}_vs_{a.a.stem}.json"
+    out = score(a.labels, a.flip)
+    tag = "_penalise_stray" if a.flip else ""
+    path = REPO_ROOT / "results" / f"paired_{a.b.stem}_vs_{a.a.stem}{tag}.json"
     path.write_text(json.dumps(out, indent=2) + "\n")
     print(json.dumps({k: v for k, v in out.items() if k != "per_query"}, indent=2))
     return 0
