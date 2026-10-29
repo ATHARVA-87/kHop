@@ -3,7 +3,7 @@
 Full brief: `PLEXUS_BUILD_PROMPT.md`. Live state: `PROGRESS.md`. Read both at session start.
 
 ## Environment
-- Python work runs in the conda env **`torch`** (`/home/atharva/miniconda3/envs/torch`, Python 3.11, torch 2.5.1 + CUDA, RTX 4050 6 GB).
+- Python work runs in the conda env **`torch`** (`~/miniconda3/envs/torch`, Python 3.11, torch 2.5.1 + CUDA, RTX 4050 6 GB).
 - **Never change torch.** Always install with `-c constraints.txt` (pins torch 2.5.1, numpy 1.26.4). Dry-run first if unsure. If something cannot fit, make a separate env.
 - Repo path contains a trailing space (`.../Desktop/RAG /`): always quote it.
 - npm registry is flaky here: use `NODE_OPTIONS=--dns-result-order=ipv4first` and `--fetch-timeout=120000`.

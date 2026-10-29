@@ -37,3 +37,4 @@ ui/out/
 logs/
 *.log
 data/graph/
+.cache/

@@ -24,3 +24,8 @@ repos:
         language: pygrep
         entry: '(AIza[0-9A-Za-z_-]{30,}|gsk_[0-9A-Za-z]{20,}|sk-[A-Za-z0-9_-]{20,}|ghp_[0-9A-Za-z]{30,}|github_pat_[0-9A-Za-z_]{20,}|hf_[A-Za-z0-9]{30,}|xox[baprs]-[0-9A-Za-z-]{10,}|[A-Za-z0-9._%+-]+@(gmail|yahoo|outlook|hotmail)\.com)'
         exclude: ^\.pre-commit-config\.yaml$
+      - id: no-home-paths
+        name: block absolute home paths (username / machine layout)
+        language: pygrep
+        entry: '(/home/[a-z_][a-z0-9_-]*/|/Users/[A-Za-z0-9._-]+/|[A-Za-z]:\\Users\\)'
+        exclude: ^\.pre-commit-config\.yaml$
