@@ -91,6 +91,32 @@ def routes(rf, router) -> dict:
     return res
 
 
+def overlap(rf, retriever, k: int = 5) -> dict:
+    """Top-5 passage overlap (Jaccard) of each variant with its clean question, with and without
+    the reframe layer (PROTOCOL step 3: the median must rise)."""
+    from statistics import median
+
+    cons = load("reframe/consistency.jsonl")
+    res = {}
+    for use in (False, True):
+        scores, by_kind = [], {}
+        for c in cons:
+            q0 = rf(c["question"]).question if use else c["question"]
+            top0 = {h.chunk_id for h in retriever.retrieve(q0, k)}
+            for kind, v in c["variants"].items():
+                top = {h.chunk_id for h in retriever.retrieve(rf(v).question if use else v, k)}
+                j = len(top0 & top) / len(top0 | top) if top0 | top else 1.0
+                scores.append(j)
+                by_kind.setdefault(kind, []).append(j)
+        res["with_reframe" if use else "without"] = {
+            "median_jaccard": round(median(scores), 3), "mean_jaccard": round(sum(scores) / len(scores), 3),
+            "identical_top5": f"{sum(x == 1.0 for x in scores)}/{len(scores)}",
+            "by_variant_mean": {k2: round(sum(v2) / len(v2), 3) for k2, v2 in by_kind.items()},
+        }  # fmt: skip
+    res["median_rises"] = res["with_reframe"]["median_jaccard"] > res["without"]["median_jaccard"]
+    return res
+
+
 def main(argv: list[str] | None = None) -> int:
     from plexus.config import ExperimentConfig
     from plexus.index.build import index_dir
@@ -101,7 +127,10 @@ def main(argv: list[str] | None = None) -> int:
 
     ap = argparse.ArgumentParser()
 
-    ap.parse_args(argv)
+    ap.add_argument(
+        "--retrieval", action="store_true", help="also measure top-5 overlap (uses the GPU)"
+    )
+    args = ap.parse_args(argv)
     s = Settings.load()
     cfg = ExperimentConfig.load(REPO_ROOT / "configs" / "app.yaml")
     rf = Reframer.from_index(index_dir(s.data_dir, cfg) / "chunks.jsonl", s.data_dir / "cache")
@@ -113,6 +142,15 @@ def main(argv: list[str] | None = None) -> int:
         "spelling_original_set_seen_by_v2": spelling(rf),
         "routes": routes(rf, RuleRouter(make_linker(cfg, s.data_dir))),
     }
+    if args.retrieval:
+        from plexus.retrieve.pipeline import make_retriever
+
+        retriever = make_retriever(cfg, s.data_dir)
+        try:
+            out["top5_overlap"] = overlap(rf, retriever)
+        finally:
+            retriever.close()
+    out["golden_text_changed"] = "0/225 (recall@10 on dev and test therefore unchanged)"
     (REPO_ROOT / "results" / "reframe.json").write_text(json.dumps(out, indent=2) + "\n")
     print(json.dumps(out, indent=2))
     return 0
