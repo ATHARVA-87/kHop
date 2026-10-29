@@ -98,6 +98,15 @@ h1, h2, h3 { line-height: 1.2; margin: 0; text-wrap: balance; }
 .helper { color: var(--pencil); font-size: 0.9375rem; margin: var(--space-2) 0 0; }
 .field-error { color: var(--red); font-size: 0.9375rem; margin: var(--space-2) 0 0; display: flex; gap: var(--space-2); align-items: center; }
 
+/* ---- reframe: "Did you mean this?" (reader chooses before anything is searched) ---- */
+.reframe { border: 2px solid var(--ink); border-radius: var(--radius-control); padding: var(--space-3); margin: 0 0 var(--space-4); max-width: var(--reading); }
+.reframe h2 { font-size: 1.125rem; margin-bottom: var(--space-2); }
+.reframe-question { font-family: var(--font-read), Georgia, serif; font-size: 1.125rem; margin: 0 0 var(--space-2); }
+.reframe-question mark.changed { background: var(--highlight); color: var(--ink); text-decoration: underline; text-decoration-color: var(--red); text-underline-offset: 3px; }
+.reframe-note { color: var(--pencil); font-size: 0.9375rem; margin: 0 0 var(--space-3); }
+.reframe-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.reframe-actions .ask-button { min-width: 0; }
+
 /* ---- session history (this tab only) ---- */
 .history { margin: 0 0 var(--space-4); max-width: var(--reading); }
 .history summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 600; }

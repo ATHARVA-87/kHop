@@ -202,3 +202,23 @@ def test_leaving_mid_answer_does_not_block_others_or_leak(monkeypatch):
             _t.sleep(0.1)
         else:
             raise AssertionError("GPU slot or queue place leaked")
+
+
+def test_reframe_endpoint(monkeypatch):
+    from collections import Counter
+
+    from plexus.serve.reframe import Reframer
+
+    rf = Reframer(
+        Counter({"what": 9, "does": 9, "say": 9, "about": 9, "revenue": 90}), {"NVIDIA": "NVIDIA"}
+    )
+    state = {"flow": FakeFlow(), "config": "test", "reframer": rf, **srv.load_meta()}
+    with TestClient(srv.create_app(lambda: state)) as c:
+        r = c.get("/api/reframe", params={"q": "What does nvdia say about revenue?"}).json()
+        assert r["changed"] and r["question"] == "What does NVIDIA say about revenue?"
+        assert (
+            c.get("/api/reframe", params={"q": "What does NVIDIA say about revenue?"}).json()[
+                "changed"
+            ]
+            is False
+        )

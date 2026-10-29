@@ -176,6 +176,15 @@ function Answer({ text, busy, result, current, onCite }) {
   );
 }
 
+// the reframed question with its changed words marked (text, never HTML)
+function Marked({ text, words }) {
+  const uniq = [...new Set(words)].filter(Boolean).sort((a, b) => b.length - a.length);
+  if (!uniq.length) return text;
+  const esc = uniq.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  return text.split(new RegExp(`(${esc.join("|")})`, "g")).map((part, i) =>
+    uniq.includes(part) ? <mark key={i} className="changed">{part}<span className="visually-hidden"> (changed)</span></mark> : <span key={i}>{part}</span>);
+}
+
 function formatDate(iso) {
   if (!iso) return "";
   const d = new Date(`${iso}T00:00:00`);
@@ -286,6 +295,8 @@ export default function AskPage() {
   const [current, setCurrent] = useState(null);
   const [meta, setMeta] = useState(null);
   const [history, setHistory] = useState([]);
+  const [suggestion, setSuggestion] = useState(null); // {typed, question, changes}
+  const useBtn = useRef(null);
   const [metaError, setMetaError] = useState(false);
   const abort = useRef(null);
   const inputRef = useRef(null);
@@ -298,6 +309,40 @@ export default function AskPage() {
       .catch(() => setMetaError(true));
     return () => abort.current?.abort();
   }, []);
+
+  // Reframe first: fix spelling and company names so the same question always searches the
+  // same way. If a word would change, the reader chooses; nothing is searched until then.
+  async function submit(q) {
+    const clean = q.trim();
+    if (clean.length < 3) {
+      setFieldError("Type at least 3 characters.");
+      inputRef.current?.focus();
+      return;
+    }
+    setFieldError("");
+    let r = null;
+    try {
+      const res = await fetch(`${API}/api/reframe?q=${encodeURIComponent(clean)}`);
+      if (res.ok) r = await res.json();
+    } catch {
+      // reframing is a help, not a requirement: ask as typed
+    }
+    if (r && r.changed) {
+      setSuggestion({ typed: clean, question: r.question, changes: r.changes });
+      return;
+    }
+    ask(r ? r.question : clean);
+  }
+
+  function choose(q) {
+    setSuggestion(null);
+    setQuestion(q);
+    ask(q);
+  }
+
+  useEffect(() => {
+    if (suggestion) useBtn.current?.focus();
+  }, [suggestion]);
 
   async function ask(q) {
     const clean = q.trim();
@@ -402,7 +447,7 @@ export default function AskPage() {
         </section>
       )}
 
-      <form className="ask" onSubmit={(e) => { e.preventDefault(); ask(question); }} noValidate>
+      <form className="ask" onSubmit={(e) => { e.preventDefault(); submit(question); }} noValidate>
         <label htmlFor="question">Your question</label>
         <div className="ask-row">
           <input id="question" ref={inputRef} className="ask-input" type="text" enterKeyHint="search"
@@ -422,6 +467,21 @@ export default function AskPage() {
           Name one or more companies, or ask about the whole sector. Plexus does not give investment advice.
         </p>
       </form>
+
+      {suggestion && (
+        <section className="reframe" aria-labelledby="reframe-title">
+          <h2 id="reframe-title">Did you mean this?</h2>
+          <p className="reframe-question"><Marked text={suggestion.question} words={suggestion.changes.map((c) => c.to)} /></p>
+          <p className="reframe-note">
+            You typed: "{suggestion.typed}". Plexus fixed the spelling and used the official company
+            name, so the same question always searches the same filings.
+          </p>
+          <div className="reframe-actions">
+            <button ref={useBtn} type="button" className="ask-button" onClick={() => choose(suggestion.question)}>Use this version</button>
+            <button type="button" className="retry" onClick={() => choose(suggestion.typed)}>Ask as I typed</button>
+          </div>
+        </section>
+      )}
 
       {history.length > 0 && (
         <details className="history" open={phase === "start"}>
@@ -452,7 +512,7 @@ export default function AskPage() {
             <ul className="examples">
               {EXAMPLES.map((e) => (
                 <li key={e.q}>
-                  <button type="button" className="example" onClick={() => { setQuestion(e.q); ask(e.q); }}>
+                  <button type="button" className="example" onClick={() => { setQuestion(e.q); submit(e.q); }}>
                     <span className="example-kind">{e.kind}</span>
                     {e.q}
                   </button>
@@ -495,7 +555,7 @@ export default function AskPage() {
                 <p>Try one of these instead:</p>
                 <ul className="examples">
                   {EXAMPLES.slice(0, 2).map((e) => (
-                    <li key={e.q}><button type="button" className="example" onClick={() => { setQuestion(e.q); ask(e.q); }}>{e.q}</button></li>
+                    <li key={e.q}><button type="button" className="example" onClick={() => { setQuestion(e.q); submit(e.q); }}>{e.q}</button></li>
                   ))}
                 </ul>
               </div>
