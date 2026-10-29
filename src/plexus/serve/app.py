@@ -299,7 +299,9 @@ def cacheable(payload: dict) -> bool:
     from plexus.baseline.naive import is_refusal
 
     refused = any(t.get("refused") for t in payload.get("trace", []))
-    checks = payload.get("checks") or []
+    checks = [
+        c for c in payload.get("checks") or [] if c.get("cited")
+    ]  # uncited lines are not claims
     return (
         not refused
         and not is_refusal(payload["answer"])

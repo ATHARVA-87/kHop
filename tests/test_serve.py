@@ -14,7 +14,7 @@ class FakeHit:
 class FakeAnswer:
     text, checks = (
         "TSMC makes our chips [1].",
-        [{"sentence": "TSMC makes our chips.", "supported": True}],
+        [{"sentence": "TSMC makes our chips.", "supported": True, "cited": [1]}],
     )
     hits: ClassVar[list] = [FakeHit()]
 
@@ -133,8 +133,20 @@ def test_refusals_are_not_cached():
             "trace": [{"step": "guard", "refused": True}],
         }
     )
-    assert not srv.cacheable({"answer": "x [1].", "checks": [{"supported": False}], "trace": []})
-    assert srv.cacheable({"answer": "x [1].", "checks": [{"supported": True}], "trace": []})
+    assert not srv.cacheable(
+        {"answer": "x [1].", "checks": [{"supported": False, "cited": [1]}], "trace": []}
+    )
+    assert srv.cacheable(
+        {"answer": "x [1].", "checks": [{"supported": True, "cited": [1]}], "trace": []}
+    )
+    # an uncited summary line does not block caching (it is not a claim to check)
+    assert srv.cacheable(
+        {
+            "answer": "Summary. x [1].",
+            "trace": [],
+            "checks": [{"supported": False, "cited": []}, {"supported": True, "cited": [1]}],
+        }
+    )
 
 
 def test_cache_hit_needs_no_queue_place(monkeypatch):

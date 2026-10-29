@@ -99,3 +99,22 @@ def test_verify_skips_refusals(tmp_path, monkeypatch):
     rag.cfg.guard.verify = True
     ans, trace = ask(build_flow(rag), "Who makes the chips?")
     assert ans.checks == [] and trace[-1]["sentences"] == 0
+
+
+def test_verify_counts_only_cited_sentences(tmp_path, monkeypatch):
+    import plexus.agents.verifier as v
+
+    class Fake:
+        def score(self, doc, claim):
+            return 0.9
+
+    monkeypatch.setattr(v, "load_minicheck", lambda *a, **k: Fake())
+    rag = _rag(
+        tmp_path,
+        lambda r: "Based on the excerpts, here is the answer. TSMC makes the chips for us [1].",
+    )
+    rag.cfg.guard.verify = True
+    _ans, trace = ask(build_flow(rag), "Who makes the chips?")
+    assert (
+        trace[-1]["sentences"] == 1 and trace[-1]["supported"] == 1
+    )  # the summary line is not counted

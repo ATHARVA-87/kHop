@@ -137,7 +137,8 @@ function Inline({ text, nSources, current, onCite }) {
 
 function Answer({ text, busy, result, current, onCite }) {
   const blocks = blocksOf(text);
-  const unsupported = (result?.checks || []).filter((c) => !c.supported);
+  // only sentences that cite a passage and failed the check (an uncited summary line is not flagged)
+  const unsupported = (result?.checks || []).filter((c) => !c.supported && c.cited && c.cited.length);
   const nSources = result?.sources?.length || 0;
   const items = [];
   let list = [];
@@ -146,16 +147,19 @@ function Answer({ text, busy, result, current, onCite }) {
     list = [];
   };
   blocks.forEach((b, i) => {
-    const flagged = unsupported.some((c) => norm(b.text).includes(norm(c.sentence).slice(0, 60)));
+    const flaggedChecks = unsupported.filter((c) => norm(b.text).includes(norm(c.sentence)));
     const body = (
       <>
         <Inline text={b.text} nSources={nSources} current={current} onCite={onCite} />
-        {flagged && (
-          <span className="flag">
+        {flaggedChecks.map((c) => (
+          <span className="flag" key={c.sentence}>
             <WarnIcon />
-            Not backed by its source. Check the cited passage before relying on this.
+            <span>
+              Not backed by its cited passage: "{c.sentence.length > 90 ? c.sentence.slice(0, 90) + "…" : c.sentence}"
+              Check that passage before relying on this sentence.
+            </span>
           </span>
-        )}
+        ))}
       </>
     );
     if (b.bullet) list.push(<li key={i} className="line">{body}</li>);
