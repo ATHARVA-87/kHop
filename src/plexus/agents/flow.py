@@ -89,13 +89,13 @@ def build_flow(rag: NaiveRAG):
         or replace anything: replacing answers with no supported sentence would have blanked a
         human-correct answer (docs/failures.md), so the verifier only informs the reader."""
         nonlocal scorer
-        from plexus.agents.verifier import MiniCheck, check_answer
+        from plexus.agents.verifier import check_answer, load_minicheck
         from plexus.ingest.headers import index_text
 
         t0 = time.perf_counter()
         ans = s["answer"]
         if scorer is None:
-            scorer = MiniCheck()
+            scorer = load_minicheck()
         passages = [index_text(h.header, h.text) for h in ans.hits]
         checks = check_answer(ans.text, passages, scorer) if ans.hits else []
         ans.checks = [{"sentence": c.sentence, "cited": c.cited, "supported": c.supported,

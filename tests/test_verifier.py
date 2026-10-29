@@ -22,3 +22,11 @@ def test_check_answer_rules():
     assert out["Revenue"].issues == [] and out["Revenue"].supported  # MiniCheck decides
     assert out["Margins"].issues == ["no_citation"]
     assert out["Intel"].issues == ["bad_citation"]
+
+
+def test_splitter_review_cases():
+    s = v.split_sentences(
+        "The U.S. Department of Commerce added rules [1]. Revenue rose. [2] Next item [3]."
+    )
+    assert s[0].startswith("The U.S. Department") and s[0].endswith("[1].")
+    assert s[1] == "Revenue rose. [2]" and s[2] == "Next item [3]."

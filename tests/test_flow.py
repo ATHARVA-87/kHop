@@ -66,7 +66,7 @@ def test_verify_marks_sentences_without_changing_the_answer(tmp_path, monkeypatc
         def score(self, doc, claim):
             return 0.9
 
-    monkeypatch.setattr(v, "MiniCheck", lambda: Fake())
+    monkeypatch.setattr(v, "load_minicheck", lambda: Fake())
     rag = _rag(tmp_path, lambda r: "TSMC makes the chips for us [1].")
     rag.cfg.guard.verify = True
     ans, trace = ask(build_flow(rag), "Who makes the chips?")

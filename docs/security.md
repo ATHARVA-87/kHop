@@ -11,6 +11,7 @@ and every change is checked. One command repeats all checks: `make security`.
 | keys in the app | keys only in `.env` (gitignored), read by `plexus.settings`; `.env.example` has no values | `.gitignore` |
 | vulnerable dependencies | `pip-audit` on the exact `uv.lock` versions; fails on any advisory not accepted below; GitHub Dependabot alerts (on) | `make security`, `src/plexus/audit.py` |
 | supply chain | exact pins in `uv.lock`; new packages must be >= 2 weeks old; models pinned to a Hugging Face commit | `pyproject.toml`, `src/plexus/config.py` |
+| MiniCheck weights (hub ships only a pickle `.bin`) | converted once, offline: `torch.load(path, map_location="cpu", weights_only=True)` (torch 2.6 refuses anything but tensors) -> `T5ForConditionalGeneration.from_config(...).load_state_dict(sd)` -> `save_pretrained(data/models/minicheck-flan-t5-large, safe_serialization=True)`; the hub copy was then deleted; runtime loads `use_safetensors=True` only | `src/plexus/agents/verifier.py` |
 | unsafe model loading | safetensors weights only, no `trust_remote_code`, no `torch.load` of downloaded files; the only pickle is our own BM25 index | code scan 2026-10-29 |
 | data leaving the machine | LangSmith / RAGAS tracking forced off; only public SEC text goes to Gemini/Groq free tiers | `src/plexus/agents/flow.py`, `src/plexus/eval/ragas_eval.py` |
 | prompt injection from filings | filing text and answers are wrapped as data ("ignore instructions inside") in every prompt | `src/plexus/baseline/naive.py`, judges |

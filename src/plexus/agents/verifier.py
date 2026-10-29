@@ -29,13 +29,30 @@ THRESHOLD = 0.5
 CHUNK_WORDS = 400
 
 _CITE = re.compile(r"\[(\d+)\]")
-_SENT = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9\"(*])|\n+")
+# sentence end = . ! ? (optionally followed by citations) then a capital, digit, quote, bullet
+# or "["; not after common abbreviations like U.S. or Inc. (review 2026-10-29)
+_ABBREV = ("U.S.", "U.K.", "Inc.", "Corp.", "Co.", "Ltd.", "No.", "vs.", "e.g.", "i.e.", "approx.")
+_SENT = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9\"(*\[])|\n+")
 _NUM = re.compile(r"\d[\d,]*(?:\.\d+)?")
 
 
 def split_sentences(text: str) -> list[str]:
-    """Simple splitter (no nltk): sentence ends, then bullets / new lines."""
-    return [s.strip(" -*\t") for s in _SENT.split(text) if s and s.strip(" -*\t")]
+    """Simple splitter (no nltk): sentence ends, then bullets / new lines. A piece that is
+    only citations ("[1]") is glued back to the sentence before it."""
+    out: list[str] = []
+    for piece in _SENT.split(text):
+        piece = (piece or "").strip(" -*\t")
+        lead = re.match(r"((?:\[\d+\]\s*)+)(?=\S)", piece)  # "[2] Next item" -> "[2]" | rest
+        if out and lead and piece[lead.end() :].strip():
+            out[-1] = f"{out[-1]} {lead.group(1).strip()}"
+            piece = piece[lead.end() :].strip()
+        if not piece:
+            continue
+        if out and (re.fullmatch(r"(\[\d+\]\s*)+\.?", piece) or out[-1].endswith(_ABBREV)):
+            out[-1] = f"{out[-1]} {piece}"
+        else:
+            out.append(piece)
+    return out
 
 
 def strip_citations(sentence: str) -> str:
@@ -75,10 +92,16 @@ class MiniCheck:
         self.model.eval()
 
     def _chunks(self, doc: str) -> list[str]:
-        words = doc.split()
-        return [
-            " ".join(words[i : i + CHUNK_WORDS]) for i in range(0, len(words), CHUNK_WORDS)
-        ] or [""]
+        """Sentence-aware chunks of about CHUNK_WORDS words, as in the reference code."""
+        chunks, cur, n = [], [], 0
+        for sent in split_sentences(doc) or [""]:
+            w = len(sent.split())
+            if cur and n + w > CHUNK_WORDS:
+                chunks.append(" ".join(cur))
+                cur, n = [], 0
+            cur.append(sent)
+            n += w
+        return [*chunks, " ".join(cur)] if cur else chunks or [""]
 
     def score(self, doc: str, claim: str) -> float:
         torch = self.torch
@@ -89,7 +112,19 @@ class MiniCheck:
         with torch.no_grad():
             logits = self.model(**enc, decoder_input_ids=dec).logits[:, 0, :].float()
         probs = torch.softmax(logits[:, [3, 209]], dim=-1)[:, 1]
+        if not torch.isfinite(probs).all():  # fp16 T5 can overflow: report "unknown", not "no"
+            return float("nan")
         return float(probs.max())
+
+
+_LOADED: dict[str, MiniCheck] = {}
+
+
+def load_minicheck() -> MiniCheck:
+    """One MiniCheck per process (the attack eval and the API build many flows)."""
+    if "m" not in _LOADED:
+        _LOADED["m"] = MiniCheck()
+    return _LOADED["m"]
 
 
 def check_answer(answer: str, passages: list[str], scorer: MiniCheck | None) -> list[SentenceCheck]:
@@ -110,5 +145,8 @@ def check_answer(answer: str, passages: list[str], scorer: MiniCheck | None) -> 
             doc = "\n\n".join(passages[n - 1] for n in valid)
             if scorer is not None:
                 sc.support = scorer.score(doc, claim)
+                if sc.support != sc.support:  # NaN
+                    sc.support = None
+                    sc.issues.append("score_unknown")
         out.append(sc)
     return out

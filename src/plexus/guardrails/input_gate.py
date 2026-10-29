@@ -20,10 +20,13 @@ SCOPE_REPLY = (
     "semiconductor companies in its corpus."
 )
 
+# the object must be the assistant's own rules ("ignore your rules", "ignore all previous
+# instructions"), so filing questions like "bypass export restrictions" pass (review 2026-10-29)
 JAILBREAK = re.compile(
-    r"\b(ignore|disregard|forget|bypass|override)\b.{0,30}\b(rules|instructions|guidelines|"
-    r"system prompt|prompt|restrictions)\b|\bpretend (you are|to be)\b|\bdeveloper mode\b"
-    r"|\bjailbreak\b|\bDAN\b",
+    r"\b(ignore|disregard|forget|bypass|override)\s+(all\s+)?(of\s+)?(your|the|my|any|these|those)?"
+    r"\s*(previous\s+|prior\s+|above\s+|earlier\s+)?(rules|instructions|guidelines|system prompt|"
+    r"prompt|restrictions)\b|\bpretend (you are|to be)\b|\bdeveloper mode\b|\bjailbreak\b"
+    r"|(?-i:\bDAN\b)",  # DAN only in capitals: "Dan Durn" is a CFO, not a jailbreak
     re.IGNORECASE,
 )
 ADVICE = re.compile(
@@ -33,7 +36,7 @@ ADVICE = re.compile(
     r"|\bgood time to (buy|sell|short|invest)\b|\bsmart to (buy|sell|short|invest)\b"
     r"|\bbuy/hold/sell\b|\b(buy|hold|sell) rating\b"
     r"|\b(my|your) (portfolio|savings|retirement)\b|\bhow much of my\b"
-    r"|\b(which|what) (\w+ ){0,4}(stock|shares?) (should|will)\b"
+    r"|\b(which|what) (\w+ ){0,4}(stocks?|shares?) should (i|we)\b"
     r"|\bstock('s)? will go up\b|\b(will|could) .{0,40}\b(shares|stock) (double|go up|rise|soar)\b"
     r"|\bmoney i would make\b|\bbetter buy\b|\bbest dividend stock\b"
     r"|\b(buy|sell|trade) .{0,20}\boptions\b|\bwhich chip stock\b"
@@ -49,8 +52,14 @@ IN_DOMAIN = re.compile(
 )
 
 
+MAX_CHARS = 1000  # docs/security.md: question length cap
+TOO_LONG_REPLY = f"Please ask a shorter question (at most {MAX_CHARS} characters)."
+
+
 def gate(question: str, linker=None) -> tuple[str, str] | None:
     """(kind, reply) to refuse with, or None to let the question through."""
+    if len(question) > MAX_CHARS:
+        return "too_long", TOO_LONG_REPLY
     if JAILBREAK.search(question):
         return "jailbreak", JAILBREAK_REPLY
     if ADVICE.search(question):

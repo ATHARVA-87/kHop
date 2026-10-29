@@ -36,6 +36,9 @@ def score_file(path: Path, scorer) -> dict:
             "n": len(checks),
             "supported": sum(c.supported for c in checks),
             "uncited": sum("no_citation" in c.issues for c in checks),
+            # faithfulness proper: only sentences that cite a passage (review 2026-10-29)
+            "cited": sum(bool(c.cited) for c in checks),
+            "cited_supported": sum(c.supported for c in checks if c.cited),
             "caret": "^" in r["answer"],
         }
     return per
@@ -51,6 +54,12 @@ def summarize(per: dict) -> dict:
         "sentence_support": round(sum(p["supported"] for p in ans) / n, 3) if n else None,
         "fully_supported_answers": round(sum(full) / len(full), 3) if full else None,
         "uncited_sentences": round(sum(p["uncited"] for p in ans) / n, 3) if n else None,
+        "cited_sentence_support": (
+            round(sum(p["cited_supported"] for p in ans) / sum(p["cited"] for p in ans), 3)
+            if sum(p["cited"] for p in ans)
+            else None
+        ),
+        "sentences_per_answer": round(n / len(ans), 2) if ans else None,
         "caret_leak": sum(p["caret"] for p in per.values()),
     }
 
@@ -63,10 +72,18 @@ def paired_diff(base: dict, other: dict, seed: int = 0, n_boot: int = 2000) -> d
     def full(p):
         return float(p["n"] > 0 and p["supported"] == p["n"])
 
+    def cited(p):
+        return p["cited_supported"] / p["cited"] if p["cited"] else 0.0
+
+    cdiffs = [cited(other[q]) - cited(base[q]) for q in qids]
     diffs = [full(other[q]) - full(base[q]) for q in qids]
     rng = random.Random(seed)
     boots = sorted(sum(rng.choice(diffs) for _ in diffs) / len(diffs) for _ in range(n_boot))
-    return {"n": len(qids), "diff_fully_supported": round(sum(diffs) / len(diffs), 3),
+    cboots = sorted(sum(rng.choice(cdiffs) for _ in cdiffs) / len(cdiffs) for _ in range(n_boot))
+    return {"n": len(qids),
+            "diff_cited_support_per_answer": round(sum(cdiffs) / len(cdiffs), 3),
+            "cited_ci95": [round(cboots[int(0.025 * n_boot)], 3), round(cboots[int(0.975 * n_boot)], 3)],
+            "diff_fully_supported": round(sum(diffs) / len(diffs), 3),
             "ci95": [round(boots[int(0.025 * n_boot)], 3), round(boots[int(0.975 * n_boot)], 3)]}  # fmt: skip
 
 

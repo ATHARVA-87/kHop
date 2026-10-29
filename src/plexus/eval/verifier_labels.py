@@ -104,6 +104,11 @@ def score() -> dict:
                               and st["tpr_catches_not_correct"] >= ACCEPT_CATCH
                               and st["tnr_passes_correct"] >= ACCEPT_PASS)  # fmt: skip
         out[name] = st
+    # the 10 swapped pairs are easy negatives; report real answer sentences alone too (review)
+    real = [p for p in per if not p["swapped"]]
+    out["real_pairs_only"] = binary_stats(
+        [p["human_supported"] for p in real], [p["support"] >= THRESHOLD for p in real]
+    )
     return {"summary": out, "per_pair": per}
 
 
