@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 
@@ -117,6 +118,75 @@ def overlap(rf, retriever, k: int = 5) -> dict:
     return res
 
 
+def anywhere(
+    rf, router, retriever=None, k: int = 5, name: str = "reframe/typos_anywhere.jsonl"
+) -> dict:
+    """Typos in any word at any position (owner, 2026-10-29): word-level outcome by word length,
+    sentence restored exactly, same route, and top-5 overlap with the clean question."""
+    from statistics import median
+
+    rows = load(name)
+    buckets = {
+        "1-3": [0, 0, 0, 0],
+        "4-7": [0, 0, 0, 0],
+        "8+": [0, 0, 0, 0],
+    }  # restored, wrong, untouched, total
+    exact = same_route_with = same_route_without = 0
+    jw, jo = [], []
+    for r in rows:
+        clean = rf(r["question"]).question
+        fixed = rf(r["typo_question"])
+        exact += fixed.question == clean
+        changes = {
+            c["from"].rstrip("'’s").lower(): c["to"]
+            for c in fixed.changes
+            if c["kind"] == "spelling"
+        }
+        for e in r["edits"]:
+            b = "1-3" if e["length"] <= 3 else "4-7" if e["length"] <= 7 else "8+"
+            buckets[b][3] += 1
+            to = changes.get(e["typo"].lower())
+            if to is None:
+                buckets[b][2] += 1
+            elif (
+                re.sub(r"['’]s?$", "", to).lower() == e["original"].lower()
+            ):  # "Micron's" == "Micron"
+                buckets[b][0] += 1
+            else:
+                buckets[b][1] += 1
+        route_clean = router.route(r["question"])
+        same_route_with += router.route(fixed.question) == route_clean
+        same_route_without += router.route(r["typo_question"]) == route_clean
+        if retriever is not None:
+            top0 = {h.chunk_id for h in retriever.retrieve(clean, k)}
+            for q, acc in ((fixed.question, jw), (r["typo_question"], jo)):
+                top = {h.chunk_id for h in retriever.retrieve(q, k)}
+                acc.append(len(top0 & top) / len(top0 | top) if top0 | top else 1.0)
+    edits = sum(v[3] for v in buckets.values())
+    wrong = sum(v[1] for v in buckets.values())
+    n = len(rows)
+    out = {
+        "sentences": n,
+        "sentence_restored_exactly": f"{exact}/{n}",
+        "words_by_length": {b: {"restored": v[0], "wrong": v[1], "untouched": v[2], "total": v[3]} for b, v in buckets.items()},
+        "wrong_replacement_rate": round(wrong / edits, 4),
+        "same_route_without": round(same_route_without / n, 3),
+        "same_route_with": round(same_route_with / n, 3),
+    }  # fmt: skip
+    if jw:
+        out["top5_median_jaccard_without"] = round(median(jo), 3)
+        out["top5_median_jaccard_with"] = round(median(jw), 3)
+        out["top5_identical_without"] = f"{sum(x == 1.0 for x in jo)}/{n}"
+        out["top5_identical_with"] = f"{sum(x == 1.0 for x in jw)}/{n}"
+    out["bars"] = {
+        "wrong_max_3pct": out["wrong_replacement_rate"] <= 0.03,
+        "route_95pct": out["same_route_with"] >= 0.95,
+        "overlap_not_worse": (not jw) or median(jw) >= median(jo),
+    }
+    out["passed"] = all(out["bars"].values())
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     from plexus.config import ExperimentConfig
     from plexus.index.build import index_dir
@@ -142,14 +212,24 @@ def main(argv: list[str] | None = None) -> int:
         "spelling_original_set_seen_by_v2": spelling(rf),
         "routes": routes(rf, RuleRouter(make_linker(cfg, s.data_dir))),
     }
+    router = RuleRouter(make_linker(cfg, s.data_dir))
     if args.retrieval:
         from plexus.retrieve.pipeline import make_retriever
 
         retriever = make_retriever(cfg, s.data_dir)
         try:
             out["top5_overlap"] = overlap(rf, retriever)
+            out["typos_anywhere_fresh"] = anywhere(
+                rf, router, retriever, name="reframe/typos_anywhere_fresh.jsonl"
+            )
+            out["typos_anywhere_seen"] = anywhere(rf, router, retriever)
         finally:
             retriever.close()
+    else:
+        out["typos_anywhere_fresh"] = anywhere(
+            rf, router, name="reframe/typos_anywhere_fresh.jsonl"
+        )
+        out["typos_anywhere_seen"] = anywhere(rf, router)
     out["golden_text_changed"] = "0/225 (recall@10 on dev and test therefore unchanged)"
     (REPO_ROOT / "results" / "reframe.json").write_text(json.dumps(out, indent=2) + "\n")
     print(json.dumps(out, indent=2))

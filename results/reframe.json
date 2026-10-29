@@ -8,7 +8,7 @@
     "company_restored": "113/113",
     "word_restored": "114/125",
     "wrong_replacements": [],
-    "p95_ms": 0.38,
+    "p95_ms": 0.4,
     "bars": {
       "golden_spelling_changes": true,
       "trap_changes": true,
@@ -91,6 +91,80 @@
       }
     },
     "median_rises": true
+  },
+  "typos_anywhere_fresh": {
+    "sentences": 338,
+    "sentence_restored_exactly": "228/338",
+    "words_by_length": {
+      "1-3": {
+        "restored": 52,
+        "wrong": 0,
+        "untouched": 57,
+        "total": 109
+      },
+      "4-7": {
+        "restored": 165,
+        "wrong": 6,
+        "untouched": 74,
+        "total": 245
+      },
+      "8+": {
+        "restored": 99,
+        "wrong": 1,
+        "untouched": 45,
+        "total": 145
+      }
+    },
+    "wrong_replacement_rate": 0.014,
+    "same_route_without": 0.82,
+    "same_route_with": 0.979,
+    "top5_median_jaccard_without": 0.667,
+    "top5_median_jaccard_with": 1.0,
+    "top5_identical_without": "74/338",
+    "top5_identical_with": "270/338",
+    "bars": {
+      "wrong_max_3pct": true,
+      "route_95pct": true,
+      "overlap_not_worse": true
+    },
+    "passed": true
+  },
+  "typos_anywhere_seen": {
+    "sentences": 329,
+    "sentence_restored_exactly": "204/329",
+    "words_by_length": {
+      "1-3": {
+        "restored": 57,
+        "wrong": 1,
+        "untouched": 70,
+        "total": 128
+      },
+      "4-7": {
+        "restored": 146,
+        "wrong": 7,
+        "untouched": 71,
+        "total": 224
+      },
+      "8+": {
+        "restored": 85,
+        "wrong": 0,
+        "untouched": 39,
+        "total": 124
+      }
+    },
+    "wrong_replacement_rate": 0.0168,
+    "same_route_without": 0.812,
+    "same_route_with": 0.954,
+    "top5_median_jaccard_without": 0.667,
+    "top5_median_jaccard_with": 1.0,
+    "top5_identical_without": "78/329",
+    "top5_identical_with": "254/329",
+    "bars": {
+      "wrong_max_3pct": true,
+      "route_95pct": true,
+      "overlap_not_worse": true
+    },
+    "passed": true
   },
   "golden_text_changed": "0/225 (recall@10 on dev and test therefore unchanged)"
 }

@@ -67,3 +67,28 @@ def test_trailing_inc_only_as_a_whole_word():
         r("What does Silicon Labs Inc. say about revenue?").question
         == "What does Silicon Labs say about revenue?"
     )
+
+
+def test_v3_short_targets_question_words_and_three_letter_typos():
+    v = VOCAB | Counter(
+        {
+            "for": 9000,
+            "four": 600,
+            "that": 20000,
+            "from": 8000,
+            "have": 5000,
+            "type": 300,
+            "know": 900,
+            "show": 800,
+        }
+    )
+    r3 = Reframer(v, FORMS)
+    assert r3("Ihat does NVIDIA say about revenue?").question.startswith("What does")
+    assert "for" in r3("What does NVIDIA say fovr revenue?").question.split()
+    assert (
+        r3("What revenue fom NVIDIA?").question == "What revenue fom NVIDIA?"
+    )  # from/for: ambiguous, left alone
+    assert (
+        r3("What does NVIDIA hve about revenue?").question == "What does NVIDIA have about revenue?"
+    )
+    assert not r3("What does TSM say about KLA?").changed  # 3-letter capitals are codes

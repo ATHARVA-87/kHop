@@ -31,6 +31,10 @@ from plexus.settings import REPO_ROOT
 
 MIN_FREQ_KNOWN = 2  # a corpus word seen at least this often is never "corrected"
 MIN_FREQ_TARGET = 20  # a correction must be a word the filings use at least this often
+MIN_FREQ_SHORT = 500  # short words (2-3 letters) are targets only if very common: for, the, how
+# the first word of a question is usually one of these, so there they win ties ("Ihat" -> What)
+QUESTION_WORDS = frozenset({"what", "how", "which", "why", "who", "when", "where", "does", "do", "did",
+                            "is", "are", "was", "were", "can", "will", "has", "have", "list", "describe", "compare"})  # fmt: skip
 WORD = re.compile(r"[A-Za-z][A-Za-z'’-]*")
 TRAILING = r"(?:\s+(?:company|companies|corp\.?|corporation|inc\.?)(?![\w-]))?"
 
@@ -98,8 +102,15 @@ class Reframer:
         self.proper = name_words  # lowercase -> how the name is written
         self.name_targets = sorted(name_words)
         self.english = english_words()  # recognise valid words only, never a correction source
-        targets = {w for w, n in vocab.items() if n >= MIN_FREQ_TARGET and len(w) >= 4} | set(
-            name_words
+        targets = (
+            {
+                w
+                for w, n in vocab.items()
+                if (len(w) >= 4 and n >= MIN_FREQ_TARGET)
+                or (2 <= len(w) <= 3 and n >= MIN_FREQ_SHORT)
+            }
+            | QUESTION_WORDS
+            | set(name_words)
         )
         self.targets = sorted(targets)
         self.patterns = []
@@ -115,10 +126,12 @@ class Reframer:
     def from_index(cls, chunks_path: Path, cache_dir: Path) -> Reframer:
         return cls(build_vocab(chunks_path, cache_dir / "reframe_vocab.json"), company_forms())
 
-    def _fix_word(self, word: str) -> str | None:
+    def _fix_word(self, word: str, first: bool = False) -> str | None:
         core = re.sub(r"(['’]s?)$", "", word)  # possessives: "Micron's", "Texas Instruments'"
-        if len(core) < 4 or any(c.isdigit() for c in core):
+        if len(core) < 3 or any(c.isdigit() for c in core):
             return None
+        if len(core) == 3 and core.isupper():
+            return None  # tickers and short codes (TSM, KLA, AMD) are never changed
         low = core.lower()
         if self.vocab.get(low, 0) >= MIN_FREQ_KNOWN or low in self.proper or low in self.english:
             return None  # a known word is never changed
@@ -129,7 +142,13 @@ class Reframer:
         found = process.extract(low, pool, scorer=OSA.distance, score_cutoff=max_d, limit=None)
         if not found:
             return None
-        freq = lambda w: self.vocab.get(w, 0) + (10**6 if w in self.proper else 0)  # noqa: E731
+
+        def freq(w: str) -> int:
+            boost = 10**6 if w in self.proper else 0
+            if first and w in QUESTION_WORDS:
+                boost += 10**7  # a question usually starts with a question word
+            return self.vocab.get(w, 0) + boost
+
         found.sort(key=lambda x: (x[1], -freq(x[0])))
         best, dist = found[0][0], found[0][1]
         ties = [f for f in found[1:] if f[1] == dist]
@@ -145,7 +164,7 @@ class Reframer:
         for m in WORD.finditer(question):
             if any(a <= m.start() < b for a, b in quoted):
                 continue
-            fixed = self._fix_word(m.group())
+            fixed = self._fix_word(m.group(), first=not question[: m.start()].strip())
             if fixed and fixed != m.group():
                 out.append(question[last : m.start()] + fixed)
                 last = m.end()
