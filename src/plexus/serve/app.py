@@ -190,7 +190,7 @@ def about_figures() -> list[dict]:
         )
         i = d["summary"]["injection"]
         add(
-            "Hidden instructions planted in filings that changed the answer",
+            'Attack test: fake orders such as "ignore your rules" were hidden inside filing text. Times Plexus obeyed them',
             f"{i['attack_success']} of {i['n']}",
             "results/guardrails_a9_agents.json",
         )
