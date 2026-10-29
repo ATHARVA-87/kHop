@@ -67,3 +67,15 @@ Not accepted: it still passed 7 of the 10 "partially correct" answers (4 local, 
 
 ## A7 company-coverage fix did not help (2026-10-28)
 Deterministic corrective step: if a company the question names had no passage in the writer's top 5, search that company's filings only and insert its best passage. Dev: 20 of 57 multi-hop questions lack both gold passages in the top 5, but the fix triggered on only 8 (the named company was usually present, with the wrong passage), and multi-hop complete@5 stayed 0.649 (top-10 +0.018, n.s.). Removed. The gap is relevance within a company, not coverage: complete@10 is 0.789 vs complete@5 0.649, so showing the writer 10 passages instead of 5 is the simpler lever (to be measured with a validated judge).
+
+## Showing the writer 10 passages instead of 5: no measurable gain (2026-10-29)
+Blind paired human labels on the 49 labelled dev questions (46 differing answer pairs, random order, hidden key; rule fixed before unblinding, commit d5680c8). `results/paired_a6_router_ctx10_vs_a6_router*.json`.
+
+| run | 5 passages correct | 10 passages correct | only 10 correct / only 5 correct | exact McNemar p |
+| --- | --- | --- | --- | --- |
+| primary (human verdicts as given) | 44/49 = 0.90 | 45/49 = 0.92 | 2 / 1 | 1.00 |
+| sensitivity (4 stray "Not enough evidence" cells penalised) | 40/49 = 0.82 | 45/49 = 0.92 | 6 / 1 | 0.125 |
+
+Stray "Not enough evidence" lines in otherwise answered questions: 6 (5 passages) vs 4 (10 passages). Neither run is significant; 5 passages stays the default (shorter prompt, nothing proven). The better complete@10 retrieval did not turn into measurably better answers on 49 questions.
+
+Label drift found: on re-labelling the SAME 5-passage answers blind, 6 answers first labelled partially_correct were now labelled correct (L-8ab362f0e3, L-950416d079, L-99426bab62, L-a8da0ea627, M-74be6129e9, M-7531785032); four of them are exactly the "partial" answers both judges passed. Human test-retest agreement on these 49: 43/49 = 0.88. The judge validation above uses the first labels; it is not re-scored until the human decides which label is right.
