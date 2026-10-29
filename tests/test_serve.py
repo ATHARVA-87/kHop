@@ -34,8 +34,12 @@ def fake_events(flow, question):
 
 
 def _client(monkeypatch, fail=False):
+    import tempfile
+    from pathlib import Path
+
     import plexus.agents.flow as flow_mod
 
+    monkeypatch.setattr(srv, "TRACE_LOG", Path(tempfile.mkdtemp()) / "t.jsonl")
     monkeypatch.setattr(flow_mod, "ask_events", fake_events)
     state = {"flow": FakeFlow(fail), "config": "test", **srv.load_meta()}
     return TestClient(srv.create_app(lambda: state))
@@ -108,6 +112,9 @@ def test_cache_stores_clean_answers_and_serves_repeats(monkeypatch):
     import plexus.agents.flow as flow_mod
 
     monkeypatch.setattr(flow_mod, "ask_events", fake_events)
+    monkeypatch.setattr(
+        srv, "TRACE_LOG", __import__("pathlib").Path(__import__("tempfile").mkdtemp()) / "t.jsonl"
+    )
     cache = FakeCache()
     state = {"flow": FakeFlow(), "config": "test", "cache": cache, **srv.load_meta()}
     with TestClient(srv.create_app(lambda: state)) as c:

@@ -39,10 +39,11 @@ log = logging.getLogger("plexus.serve")
 
 CONFIG = Path(os.getenv("PLEXUS_CONFIG", REPO_ROOT / "configs" / "app.yaml"))
 MAX_WAITING = 4  # questions allowed to wait for the GPU
-RATE_PER_MIN = 10  # questions per client per minute
+RATE_PER_MIN = int(os.getenv("PLEXUS_RATE_PER_MIN", "10"))  # per client; the load test raises it
 DEADLINE_S = 120  # one question, start to finish
 UI_DIR = REPO_ROOT / "web" / "out"  # the static Next.js export
 CACHE_THRESHOLD = 0.935  # chosen on cache pairs C-01..C-20, results/a8_cache.json
+TRACE_LOG = Path(os.getenv("PLEXUS_TRACE_LOG", REPO_ROOT / "data" / "logs" / "traces.jsonl"))
 
 
 class RateLimiter:
@@ -227,9 +228,30 @@ def build_state(config: Path = CONFIG) -> dict:
         from plexus.index.dense import Embedder
         from plexus.serve.semantic_cache import SemanticCache, bge_encoder, scope_of
 
-        cache = SemanticCache(s.data_dir / "cache" / "semantic.sqlite", bge_encoder(Embedder(cfg.embedder)),
+        cache_path = Path(
+            os.getenv("PLEXUS_SEMANTIC_CACHE", s.data_dir / "cache" / "semantic.sqlite")
+        )
+        cache = SemanticCache(cache_path, bge_encoder(Embedder(cfg.embedder)),
                               router.linker, scope_of(cfg.snapshot, config), CACHE_THRESHOLD)  # fmt: skip
     return {"flow": flow, "retriever": retriever, "config": cfg.name, "cache": cache, **load_meta()}
+
+
+def log_trace(question: str, record: dict) -> None:
+    """One line per finished question: step timings, cache hit, queue wait. No question text,
+    only a short hash (the log stays on this machine; docs/security.md)."""
+    import hashlib
+
+    record = {
+        "ts": round(time.time(), 1),
+        "q": hashlib.sha256(question.encode()).hexdigest()[:10],
+        **record,
+    }
+    try:
+        TRACE_LOG.parent.mkdir(parents=True, exist_ok=True)
+        with open(TRACE_LOG, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(record) + "\n")
+    except Exception:  # the log must never break an answer
+        log.exception("trace log write failed")
 
 
 def cacheable(payload: dict) -> bool:
@@ -329,6 +351,7 @@ def create_app(state_factory=build_state) -> FastAPI:
     @app.get("/api/ask", response_class=EventSourceResponse)
     def ask(admitted: tuple[str, int] = Depends(admit)):
         question, position = admitted
+        t_start = time.perf_counter()
         yield ServerSentEvent(event="queued", data={"position": position})
         cache = state.get("cache")
         if cache is not None:
@@ -345,12 +368,16 @@ def create_app(state_factory=build_state) -> FastAPI:
                     "step": "cache", "ms": round((time.perf_counter() - t0) * 1000, 1),
                     "similar_to": original, "similarity": round(sim, 3)})  # fmt: skip
                 yield ServerSentEvent(event="done", data={**payload, "from_cache": True})
+                log_trace(question, {"cache_hit": True, "queue_ms": 0,
+                                     "total_ms": round((time.perf_counter() - t_start) * 1000, 1)})  # fmt: skip
                 return
+        t_wait = time.perf_counter()
         if not gpu.acquire(timeout=DEADLINE_S):
             yield ServerSentEvent(
                 event="error", data={"message": "Plexus is busy. Try again shortly."}
             )
             return
+        queue_ms = round((time.perf_counter() - t_wait) * 1000, 1)
         start = time.monotonic()
         try:
             for ev in run_question(state["flow"], question, state["docs"]):
@@ -358,6 +385,14 @@ def create_app(state_factory=build_state) -> FastAPI:
                     yield ServerSentEvent(event="error", data={
                         "message": "This answer took too long. Try a shorter or more specific question."})  # fmt: skip
                     return
+                if ev.event == "done":
+                    trace = ev.data.get("trace", [])
+                    log_trace(question, {
+                        "cache_hit": False, "queue_ms": queue_ms,
+                        "total_ms": round((time.perf_counter() - t_start) * 1000, 1),
+                        "steps": {t.get("step"): t.get("ms") for t in trace},
+                        "route": next((t.get("route") for t in trace if t.get("step") == "route"), None),
+                    })  # fmt: skip
                 if ev.event == "done" and cache is not None and cacheable(ev.data):
                     try:
                         cache.store(question, ev.data)
