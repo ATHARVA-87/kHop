@@ -1,0 +1,18 @@
+[
+  {
+    "config": "a6_router",
+    "n": 30,
+    "warmup_ms_incl_model_load": 34965,
+    "total_ms_p50": 7764.4,
+    "total_ms_p95": 17097.8,
+    "step_ms_median": {
+      "route": 0.1,
+      "retrieve": 260.3,
+      "answer": 7259.8
+    },
+    "llm_calls_per_question": 1.0,
+    "prompt_tokens_per_question": 1502,
+    "completion_tokens_per_question": 243,
+    "cost_usd": 0.0
+  }
+]

@@ -226,6 +226,8 @@ Research first (2026-10-29): well-tuned single pipelines with a reranker match m
 | 3 datamarking | ^ between words of retrieved text + one prompt rule | 10 attack templates: A6 4/30 -> A9 0/30 (p = 0.125, consistent with, not proof); cited-sentence support 0.820 -> 0.833 (n.s.); fewer uncited sentences | yes |
 | 4 verifier | MiniCheck-RoBERTa-Large (fits the GPU; Flan-T5 ran out of memory), 60 blind human pairs: 15/15 caught, 41/45 passed, kappa 0.84 (real sentences only: 5/5, 41/45, kappa 0.67) | marks each sentence; replacing answers rejected (would blank a human-correct answer) | marks only |
 
+**Gate: A9 vs A6** (A7 not built; ADR 0007 proposed, owner sign-off pending). Cold latency, 30 dev questions, empty LLM cache (`results/latency_a6_router.json`, `latency_a9_agents.json`): p50 7.8 s -> 8.8 s, p95 17.1 s -> 14.4 s; verify step 95 ms; 1 LLM call per question in both; prompt tokens 1,502 -> 2,475 (+65%, datamarking); cost $0. Guardrail metrics as above. Memory: Flan-T5 verifier ran out of GPU memory next to the writer (switched to RoBERTa); once the kernel OOM-killed Ollama when one process held two configs (14 GB RAM): run configs in separate processes; noted for Phase 6.
+
 Not built (research + measurements): LLM planner / sub-question split, LLM researcher, retry loop, grade-and-rewrite.
 
 ## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
