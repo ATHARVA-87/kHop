@@ -13,3 +13,11 @@ Step 3, company-name canonicalisation (kept only if): typo / lowercase / plural 
 Step 6, optional filing-language phrase map (<= 20 hand-written phrases): kept only if dev recall@10 rises >= 1 point and test does not fall. Expected to fail (Kotte 2026, arXiv:2603.13301: prompt rewriting cut nDCG on finance data).
 
 Not built: LLM rewriting (cost, nondeterminism, invented facts), word reordering, corrections of capitals / numbers / tokens of 3 characters or fewer.
+
+## Typos anywhere in the sentence (owner, 2026-10-29; set frozen before measuring)
+`typos_anywhere.jsonl`: all 225 golden questions, one typo in a random word, and two typos in two different words; any word (short ones included), any position (the first letter included); 329 sentences (121 typos dropped because they formed a real word). Measured with the current layer, no tuning on this set:
+- sentence restored exactly to the clean question (reported);
+- wrong word replacements <= 3% (bar);
+- same route as the clean question >= 95% (bar);
+- top-5 passage overlap with the clean question: median with the layer >= without (bar).
+Known limit stated in advance: words of 3 letters or fewer ("teh", "hwo") are never corrected.

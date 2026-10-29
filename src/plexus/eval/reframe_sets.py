@@ -59,6 +59,64 @@ def one_edit(word: str, rng: random.Random) -> str:
     )
 
 
+def edit_anywhere(word: str, rng: random.Random) -> str:
+    """One typo at ANY position, the first letter included (owner, 2026-10-29)."""
+    i = rng.randrange(0, len(word))
+    kind = (
+        rng.choice(["delete", "insert", "substitute", "swap"])
+        if len(word) > 2
+        else rng.choice(["insert", "substitute", "swap"])
+    )
+    letters = "abcdefghijklmnopqrstuvwxyz"
+    keep_case = (lambda c: c.upper()) if word[i].isupper() else (lambda c: c)
+    if kind == "delete":
+        return word[:i] + word[i + 1 :]
+    if kind == "insert":
+        return word[:i] + keep_case(rng.choice(letters)) + word[i:]
+    if kind == "substitute":
+        return (
+            word[:i]
+            + keep_case(rng.choice([c for c in letters if c != word[i].lower()]))
+            + word[i + 1 :]
+        )
+    j = i + 1 if i + 1 < len(word) else i - 1
+    a, b = sorted((i, j))
+    return word[:a] + word[b] + word[a] + word[b + 1 :]
+
+
+def anywhere_set(questions: list[dict], known: set[str], seed: int = 2) -> tuple[list[dict], int]:
+    """Per question: one typo in a random word, and two typos in two different words."""
+    rng = random.Random(seed)
+    out, dropped = [], 0
+    for q in questions:
+        words = [m for m in re.finditer(r"[A-Za-z]{2,}", q["question"])]
+        for n_typos in (1, 2):
+            if len(words) < n_typos:
+                continue
+            picks = sorted(rng.sample(words, n_typos), key=lambda m: m.start())
+            text, edits, ok = q["question"], [], True
+            for m in reversed(picks):
+                bad = edit_anywhere(m.group(), rng)
+                if bad.lower() in known or bad == m.group():
+                    ok = False
+                    break
+                text = text[: m.start()] + bad + text[m.end() :]
+                edits.append({"original": m.group(), "typo": bad, "length": len(m.group())})
+            if not ok:
+                dropped += 1
+                continue
+            out.append(
+                {
+                    "qid": q["qid"],
+                    "typos": n_typos,
+                    "edits": edits,
+                    "question": q["question"],
+                    "typo_question": text,
+                }
+            )
+    return out, dropped
+
+
 def company_names() -> list[str]:
     names = list(yaml.safe_load((REPO_ROOT / "configs" / "companies.yaml").read_text()).values())
     return sorted(
@@ -123,6 +181,14 @@ def main() -> int:
             fresh.append({"qid": q["qid"], "kind": kind, "original": target, "typo": bad,
                           "question": q["question"], "typo_question": q["question"].replace(target, bad, 1)})  # fmt: skip
     (OUT / "typos_fresh.jsonl").write_text("".join(json.dumps(t) + "\n" for t in fresh))
+    # typos ANYWHERE in the sentence (owner, 2026-10-29): any word incl. short ones, any position
+    # incl. the first letter, 1 or 2 typos; dev + test questions; seed 2; frozen before measuring
+    from plexus.serve.reframe import english_words
+
+    english = set(english_words())
+    anywhere, dropped_any = anywhere_set(dev + test, known | english)
+    (OUT / "typos_anywhere.jsonl").write_text("".join(json.dumps(t) + "\n" for t in anywhere))
+    print(f"anywhere {len(anywhere)} (dropped {dropped_any} typos that were real words)")
     (OUT / "traps.json").write_text(json.dumps({"words": TRAPS, "questions": [
         f"What does the filing say about {w} in 2025?" for w in TRAPS]}, indent=2) + "\n")  # fmt: skip
     with open(REPO_ROOT / "data/golden/cache_pairs.csv", newline="", encoding="utf-8-sig") as fh:
