@@ -217,7 +217,7 @@ Plan agreed 2026-10-28 (research scout: Adaptive-RAG, CRAG, IRCoT/Self-Ask, RAGA
 - Also fixed at Phase 4 start: generation returned empty answers (qwen3.5 thinking), now `generation.think: false`.
 
 ## Phase 5 (branch `phase5-agents`): agents + guardrails
-Research first (2026-10-29): well-tuned single pipelines with a reranker match multi-agent RAG at a fraction of the cost (Ferrazzi et al. 2026), so the four roles stay but only the Writer is an LLM call. Planner = A6 rule router; Researcher = the A6 retrievers; Writer = qwen3.5:4b; Verifier = MiniCheck-Flan-T5-Large (no LLM call). Every piece had a keep rule fixed before its run.
+Research first (2026-10-29): well-tuned single pipelines with a reranker match multi-agent RAG at a fraction of the cost (Ferrazzi et al. 2026, "Is Agentic RAG worth it?", arXiv:2601.07711), so the four roles stay but only the Writer is an LLM call. Planner = A6 rule router; Researcher = the A6 retrievers; Writer = qwen3.5:4b; Verifier = MiniCheck-Flan-T5-Large (no LLM call). Every piece had a keep rule fixed before its run.
 
 | step | what | result | kept? |
 | --- | --- | --- | --- |
