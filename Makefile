@@ -71,7 +71,7 @@ ask: ## One question through the LangGraph flow with its step trace (Q="...", CO
 	$(PY) -m plexus.agents.flow --config $${CONFIG:-configs/a6_router.yaml} "$(Q)"
 
 security: ## Secrets/home-path hooks on all files + known-vulnerability audit of uv.lock (docs/security.md)
-	$(dir $(PY))pre-commit run --all-files
+	$(shell test -x $(dir $(PY))pre-commit && echo $(dir $(PY))pre-commit || echo pre-commit) run --all-files
 	@mkdir -p .cache
 	uv export --frozen --all-extras --no-hashes --no-emit-project -q -o .cache/requirements-audit.txt
 	-uvx --from pip-audit==2.9.0 pip-audit -r .cache/requirements-audit.txt --no-deps --disable-pip --progress-spinner off -f json -o .cache/pip-audit.json

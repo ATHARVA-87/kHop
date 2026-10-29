@@ -10,12 +10,14 @@ Three kinds of question need different search: one company (local), two or more 
 Route by counting the corpus companies the entity linker finds in the question:
 - 0 companies: global (company-diverse ranking, A5);
 - 2 or more: multi-hop (hybrid + graph links, A4);
-- otherwise: local (hybrid + reranker, searching only that company's filings).
+- otherwise: local (hybrid + reranker).
+
+The app adds one more step on the local route: search only that company's filings (`configs/app.yaml`, measured in `results/a6_filter.json`).
 
 No LLM call. Results: `results/a6_router.json` (dev), `results/test/a6_router.json` (held out), and the always-local, always-multi-hop, always-global and oracle runs next to them.
 
 ## Alternatives considered
-- **LLM planner that classifies the question.** It costs a call, adds latency, and is not deterministic. The rules already match the oracle route on dev and nearly on test, so there was no gap for a planner to close.
+- **LLM planner that classifies the question.** It costs a call, adds latency, and is not deterministic. On our question sets the rules match the oracle route on dev and nearly on test. Partly this is by construction: the golden questions separate cleanly by how many companies they name, and real users' questions will not always. A planner might help there; that is untested.
 - **One pipeline for every question.** Measured as the always-X baselines. Each one loses on at least one question type.
 
 ## Consequences

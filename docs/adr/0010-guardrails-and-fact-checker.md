@@ -19,7 +19,7 @@ The brief also asks for every guardrail to be measured. Results: `results/guardr
 ## Alternatives considered
 - **An LLM guard or LLM judge.** It costs a call per question. An LLM judge was also measured against the owner's blind labels and did not reach its pre-set bar (docs/failures.md).
 - **Replacing unbacked answers with "not enough evidence".** Rejected: it would have blanked answers the owner labelled correct.
-- **Flan-T5 MiniCheck.** Ran out of GPU memory. The RoBERTa version passed its pre-set bar on 60 blind pairs.
+- **Flan-T5 MiniCheck.** Ran out of GPU memory. The RoBERTa version passed its pre-set bar on 60 blind pairs. Ten of the not-backed pairs are sentences deliberately paired with the wrong passage; on real sentences alone the sample is small (`results/verifier_validation_cpu.json`, `real_pairs_only`).
 
 ## Consequences
 - Rules can be reworded around. The held-out refusal set measures this honestly, and its misses are listed in docs/failures.md.

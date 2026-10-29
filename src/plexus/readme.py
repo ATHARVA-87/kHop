@@ -64,8 +64,9 @@ def ladder() -> str:
         )
     rows.append("")
     rows.append(
-        f"Held-out test set, {n} questions, scored once; no design decision used these numbers. "
-        "Intervals: bootstrap over questions."
+        f"Held-out test set, {n} questions, scored once at the end. One fix was made after seeing "
+        "it (the ticker 'TI' was not linked to Texas Instruments); these numbers are from before "
+        "that fix. Intervals: bootstrap over questions."
     )
     return "\n".join(rows)
 
@@ -73,15 +74,18 @@ def ladder() -> str:
 def answers() -> str:
     s = _load("checklist_judge_a6_router")["summary"]
     h = s["human_accuracy"]
-    v = _load("verifier_validation_cpu")["summary"]["minicheck"]
+    summary = _load("verifier_validation_cpu")["summary"]
+    v, real = summary["minicheck"], summary["real_pairs_only"]
+    swaps = summary["swapped_marked_unsupported_by_human"]
     return "\n".join(
         [
             "| Check | Result |",
             "| --- | --- |",
-            f"| Answers I judged correct (blind labels, A6 writer) | {h['correct']}/{h['n']} = {_pct(h['rate'])} {_wilson(h['wilson_95'])} |",
-            f"| Fact-checker flags sentences I marked as not backed by their passage | {_pct(v['tpr_catches_not_correct'])} {_wilson(v['tpr_ci'])} of {v['human_not_correct']} |",
+            f"| Dev-set answers I judged correct (A6 writer; blind labels, after a blind re-label of borderline cases, see docs/failures.md) | {h['correct']}/{h['n']} = {_pct(h['rate'])} {_wilson(h['wilson_95'])} |",
+            f"| Fact-checker flags real sentences I marked as not backed by their passage | {real['human_not_correct']}/{real['human_not_correct']} caught {_wilson(real['tpr_ci'])} |",
+            f"| ...the same, adding {swaps} test sentences paired with a wrong passage on purpose | {_pct(v['tpr_catches_not_correct'])} {_wilson(v['tpr_ci'])} of {v['human_not_correct']} |",
             f"| Fact-checker passes sentences I marked as backed | {_pct(v['tnr_passes_correct'])} {_wilson(v['tnr_ci'])} of {v['n'] - v['human_not_correct']} |",
-            f"| Fact-checker vs me, agreement (kappa) | {v['binary_kappa']:.2f} |",
+            f"| Fact-checker vs me, agreement (kappa): real sentences / with the swapped ones | {real['binary_kappa']:.2f} / {v['binary_kappa']:.2f} |",
             f"| LLM judge accepted as a stand-in for me | {'yes' if s['accepted'] else 'no (below its pre-set bar)'} |",
         ]
     )
@@ -97,8 +101,8 @@ def guardrails() -> str:
             f"| Investment-advice requests refused (held-out) | {h['refuse_advice']['ok']}/{h['refuse_advice']['n']} {_wilson(h['refuse_advice']['wilson_95'])} |",
             f"| Fair questions answered, not refused (held-out) | {h['answer']['ok']}/{h['answer']['n']} {_wilson(h['answer']['wilson_95'])} |",
             f"| Off-topic requests refused (tuning set) | {t['refuse_scope']['ok']}/{t['refuse_scope']['n']} {_wilson(t['refuse_scope']['wilson_95'])} |",
-            f"| Questions the filings cannot answer: declined | {u['declined']}/{u['n']} {_wilson(u['wilson_95'])} |",
-            f"| Hidden instructions planted in passages that changed the answer | {i['attack_success']}/{i['n']} {_wilson(i['wilson_95'])} |",
+            f"| Questions the filings cannot answer: declined (eval set, not held out) | {u['declined']}/{u['n']} {_wilson(u['wilson_95'])} |",
+            f"| Hidden instructions planted in passages that changed the answer (the set that decided to keep datamarking) | {i['attack_success']}/{i['n']} {_wilson(i['wilson_95'])} |",
         ]
     )
 
@@ -143,13 +147,13 @@ def reframe() -> str:
     wrong = sum(v["wrong"] for v in a["words_by_length"].values())
     return "\n".join(
         [
-            "| Check (fresh typo set, never used for tuning) | Without the layer | With it |",
-            "| --- | --- | --- |",
-            f"| Same search route as the correctly spelled question | {_pct(a['same_route_without'])} | {_pct(a['same_route_with'])} |",
-            f"| Same top-5 passages | {a['top5_identical_without']} | {a['top5_identical_with']} |",
-            f"| Typo words changed to a wrong word | | {wrong}/{words} |",
-            f"| Correct questions changed (all {sp['golden_questions']}) | | {len(sp['golden_spelling_changes'])} |",
-            f"| Company-name typos fixed | | {sp['company_restored']} |",
+            "| Check | Set | Without the layer | With it |",
+            "| --- | --- | --- | --- |",
+            f"| Same search route as the correctly spelled question | fresh typos-anywhere set ({a['sentences']} sentences), not used for tuning | {_pct(a['same_route_without'])} | {_pct(a['same_route_with'])} |",
+            f"| Same top-5 passages | same fresh set | {a['top5_identical_without']} | {a['top5_identical_with']} |",
+            f"| Typo words changed to a wrong word | same fresh set | | {wrong}/{words} |",
+            f"| Correct questions changed | all {sp['golden_questions']} golden questions, a keep bar used while building | | {len(sp['golden_spelling_changes'])} |",
+            f"| Company-name typos fixed | one-typo set, a keep bar used while building | | {sp['company_restored']} |",
         ]
     )
 
@@ -161,17 +165,21 @@ def drift() -> str:
     d = json.loads(path.read_text())
     c = d["carry_over"]["all"]
     rows = [
-        "| Snapshot | Filings | Companies |",
-        "| --- | --- | --- |",
+        "| Snapshot | Filings | By form | Companies |",
+        "| --- | --- | --- | --- |",
     ]
     for k in ("old", "new"):
         x = d["corpus"][k]
-        rows.append(f"| {d['configs'][k]} | {x['filings']} | {x['companies']} |")
+        forms = ", ".join(f"{n} {f}" for f, n in sorted(x["by_form"].items()))
+        rows.append(f"| {d['configs'][k]} | {x['filings']} | {forms} | {x['companies']} |")
     rows += [
         "",
         f"Of {d['golden_questions']} golden questions, {c.get('carried', 0)} have every evidence quote "
         f"repeated word for word in the same company's newer filings; {c.get('partly', 0)} partly; "
-        f"{c.get('gone', 0)} not at all; {c.get('no_filings', 0)} have no newer filing.",
+        f"{c.get('gone', 0)} not at all; {c.get('no_filings', 0)} have no newer filing. "
+        "Only carried-over questions can be scored on the new index, so the comparison below "
+        "measures how search copes with a new corpus, not whether changed facts are found. "
+        "All question types are scored by quote recall here, including global ones.",
     ]
     s = d["search_on_carried_questions"].get("recall@10")
     if s:

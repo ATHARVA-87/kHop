@@ -2,7 +2,10 @@
 
 Ask questions about the 2025 SEC filings (10-K and 10-Q) of 39 US semiconductor companies. Plexus answers with numbered citations to the passages it used, fact-checks each cited sentence, and shows every step it took.
 
-It is also a measurement project. A hand-checked question set decided every design choice: each component had to beat a simpler baseline to stay in, and the experiments that lost are written up in [docs/failures.md](docs/failures.md).
+It is also a measurement project:
+- Each component was compared with a simpler baseline on a dev question set I checked by hand.
+- A separate held-out test set was scored once, at the end.
+- Experiments that lost are written up in [docs/failures.md](docs/failures.md), and so are the components whose gain was not proven.
 
 Answers are research output over public filings, **not investment advice**.
 
@@ -41,7 +44,7 @@ flowchart LR
 
 ## Results
 
-All numbers below are generated from `results/*.json` by `python -m plexus.readme`, and a test fails if they drift. Each result file records the config, the corpus checksum and the git commit that produced it.
+All numbers below are generated from `results/*.json` by `python -m plexus.readme`, and a test fails if they drift. The search result files also record the config, the corpus checksum and the git commit. A commit marked `-dirty` had uncommitted changes in the working tree.
 
 ### Search: what each step adds
 
@@ -56,7 +59,7 @@ All numbers below are generated from `results/*.json` by `python -m plexus.readm
 | A5 | Company-diverse ranking for sector-wide questions | 0.56 [0.43, 0.69] | 0.95 | 0.67 | 0.43 | 0.67 |
 | A6 | Rule router picks the route per question (the app's base) | 0.58 [0.45, 0.72] | 1.00 | 0.67 | 0.43 | 0.67 |
 
-Held-out test set, 91 questions, scored once; no design decision used these numbers. Intervals: bootstrap over questions.
+Held-out test set, 91 questions, scored once at the end. One fix was made after seeing it (the ticker 'TI' was not linked to Texas Instruments); these numbers are from before that fix. Intervals: bootstrap over questions.
 <!-- /table -->
 
 "Multi-hop, both facts" counts a question only when the passages for both of its facts are in the top 10. Global questions span the whole sector, so they are scored by how many relevant companies the top 10 covers, not by single quotes.
@@ -66,10 +69,11 @@ Held-out test set, 91 questions, scored once; no design decision used these numb
 <!-- table:answers -->
 | Check | Result |
 | --- | --- |
-| Answers I judged correct (blind labels, A6 writer) | 44/49 = 90% [78%, 96%] |
-| Fact-checker flags sentences I marked as not backed by their passage | 100% [80%, 100%] of 15 |
+| Dev-set answers I judged correct (A6 writer; blind labels, after a blind re-label of borderline cases, see docs/failures.md) | 44/49 = 90% [78%, 96%] |
+| Fact-checker flags real sentences I marked as not backed by their passage | 5/5 caught [57%, 100%] |
+| ...the same, adding 10 test sentences paired with a wrong passage on purpose | 100% [80%, 100%] of 15 |
 | Fact-checker passes sentences I marked as backed | 91% [79%, 96%] of 45 |
-| Fact-checker vs me, agreement (kappa) | 0.84 |
+| Fact-checker vs me, agreement (kappa): real sentences / with the swapped ones | 0.67 / 0.84 |
 | LLM judge accepted as a stand-in for me | no (below its pre-set bar) |
 <!-- /table -->
 
@@ -81,8 +85,8 @@ Held-out test set, 91 questions, scored once; no design decision used these numb
 | Investment-advice requests refused (held-out) | 25/28 [73%, 96%] |
 | Fair questions answered, not refused (held-out) | 28/32 [72%, 95%] |
 | Off-topic requests refused (tuning set) | 20/20 [84%, 100%] |
-| Questions the filings cannot answer: declined | 18/20 [70%, 97%] |
-| Hidden instructions planted in passages that changed the answer | 0/30 [0%, 11%] |
+| Questions the filings cannot answer: declined (eval set, not held out) | 18/20 [70%, 97%] |
+| Hidden instructions planted in passages that changed the answer (the set that decided to keep datamarking) | 0/30 [0%, 11%] |
 <!-- /table -->
 
 ### Serving on one laptop
@@ -112,13 +116,13 @@ One RTX 4050 laptop GPU (6 GB). Small samples: the slowest time is the maximum, 
 ### Spelling layer
 
 <!-- table:reframe -->
-| Check (fresh typo set, never used for tuning) | Without the layer | With it |
-| --- | --- | --- |
-| Same search route as the correctly spelled question | 82% | 98% |
-| Same top-5 passages | 74/338 | 270/338 |
-| Typo words changed to a wrong word | | 7/499 |
-| Correct questions changed (all 225) | | 0 |
-| Company-name typos fixed | | 113/113 |
+| Check | Set | Without the layer | With it |
+| --- | --- | --- | --- |
+| Same search route as the correctly spelled question | fresh typos-anywhere set (338 sentences), not used for tuning | 82% | 98% |
+| Same top-5 passages | same fresh set | 74/338 | 270/338 |
+| Typo words changed to a wrong word | same fresh set | | 7/499 |
+| Correct questions changed | all 225 golden questions, a keep bar used while building | | 0 |
+| Company-name typos fixed | one-typo set, a keep bar used while building | | 113/113 |
 <!-- /table -->
 
 ### Drift: the same questions on newer filings
@@ -152,14 +156,16 @@ make serve           # http://127.0.0.1:8000
 make stop            # free the GPU afterwards
 ```
 
-Re-run one experiment: `make eval CONFIG=configs/a5_diverse.yaml`. Re-run the drift check: `make refresh drift`.
+Re-run one experiment: `make eval CONFIG=configs/a5_diverse.yaml`. Run the drift check: `make refresh drift`.
 
 ## Reproducibility
 
 - **Dependencies** are locked in `uv.lock`. Local installs use `constraints.txt`, so the torch env never changes.
 - **Every LLM call** goes through one client with a disk cache keyed by provider, model, prompt and parameters. CI runs cache-only (`PLEXUS_LLM_OFFLINE=1`), so reruns cost nothing.
 - **The corpus snapshot is frozen:** `data/snapshots/*.manifest.jsonl` holds a sha256 per filing and a corpus checksum.
-- **Fixed seeds and a fixed question set.** A dev set (for building) and a held-out test set (scored once) were drafted by an LLM and accepted or fixed by me.
+- **Fixed seeds and a fixed question set.** Both sets were drafted by an LLM and pre-reviewed by AI reviewer agents.
+  - The dev set (for building) was checked by me question by question.
+  - For the held-out test set (scored once), I approved the AI pre-review as a whole.
 - **A retrieval regression gate runs on every PR,** and it has blocked a planted regression.
 
 ## LLM providers

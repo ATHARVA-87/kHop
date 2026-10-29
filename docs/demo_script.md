@@ -1,9 +1,9 @@
 # Three-minute demo
 
-For a live demo of `make serve` (or the recorded video). Times are targets. Before starting, ask each question once so the semantic cache answers instantly on stage, except question 2.
+For a live demo of `make serve` (or the recorded video). Times are targets. Try every question once the day before, so you know what it answers. But clear the cache before the demo: a cached answer shows only a "cache" step, not the live trace. A fresh answer takes about ten seconds, so talk over it.
 
 ## 0:00–0:20 What it is
-"Plexus answers questions about the 2025 SEC filings of 39 chip companies. Every claim cites the passage it came from, and a separate model checks each cited sentence. But the real project is the measurement: every component had to beat a simpler version on a question set I checked by hand."
+"Plexus answers questions about the 2025 SEC filings of 39 chip companies. Every claim cites the passage it came from, and a separate model checks each cited sentence. But the real project is the measurement: every component was compared with a simpler version on a question set I checked by hand, and a held-out set was scored once at the end."
 
 ## 0:20–1:10 One-company question, with a typo (the reframe layer and the trace)
 Type: `How did nvdia companies perform in 2024`
@@ -24,7 +24,7 @@ Ask a comparison: `Which suppliers do NVIDIA and AMD both depend on?`
 
 ## 2:20–2:50 The numbers (README)
 Show the search-ladder table:
-- "Each row is one idea. The test set was scored once, at the end."
+- "Each row is one idea. The test set was scored once, at the end. One linker fix came after it, and the table shows the numbers from before that fix."
 - "The graph's own gain is not proven on the test set, and I say so."
 - "Answer quality comes from my blind labels, because the LLM judge failed its bar."
 
