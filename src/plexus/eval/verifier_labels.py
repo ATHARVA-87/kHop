@@ -69,7 +69,7 @@ def export(results: Path, seed: int = 0, per_type: int = 20, swapped: int = 10) 
     return len(sheet)
 
 
-def score() -> dict:
+def score(model: str = "roberta") -> dict:
     from plexus.agents.verifier import THRESHOLD, MiniCheck, numbers
     from plexus.eval.checklist_judge import binary_stats
     from plexus.eval.ragas_eval import auroc
@@ -80,7 +80,7 @@ def score() -> dict:
     bad = [r["pid"] for r in sheet if r["supported"].strip().lower() not in ("yes", "no")]
     if bad:
         raise ValueError(f"`supported` must be yes/no; missing or invalid: {bad}")
-    m = MiniCheck()
+    m = MiniCheck(REPO_ROOT / "data" / "models" / f"minicheck-{model}-large")
     per = []
     for r in sheet:
         doc = "\n\n".join(p.split("] ", 1)[1] if p.startswith("[") else p
@@ -116,12 +116,15 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=("export", "score"))
     ap.add_argument("--results", type=Path, default=REPO_ROOT / "results/a6_router.json")
+    ap.add_argument("--model", choices=("flan-t5", "roberta"), default="roberta")
     a = ap.parse_args(argv)
     if a.cmd == "export":
         print(f"{SHEET}: {export(a.results.resolve())} pairs to label")
         return 0
-    out = score()
-    (REPO_ROOT / "results" / "verifier_validation.json").write_text(
+    out = score(a.model)
+    out["summary"]["model"] = a.model
+    suffix = "_flan_t5" if a.model == "flan-t5" else ""
+    (REPO_ROOT / "results" / f"verifier_validation{suffix}.json").write_text(
         json.dumps(out, indent=2) + "\n"
     )
     print(json.dumps(out["summary"], indent=2))

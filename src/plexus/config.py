@@ -94,6 +94,7 @@ class GuardConfig(_Strict):
     )
     datamark: bool = False  # ^ between words of retrieved text (prompt-injection defence)
     verify: bool = False  # mark each cited sentence as supported or not (MiniCheck); no LLM call
+    verifier_model: Literal["roberta", "flan-t5"] = "roberta"  # roberta fits the 6 GB GPU
 
 
 class ExperimentConfig(_Strict):

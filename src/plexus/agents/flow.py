@@ -95,7 +95,7 @@ def build_flow(rag: NaiveRAG):
         t0 = time.perf_counter()
         ans = s["answer"]
         if scorer is None:
-            scorer = load_minicheck()
+            scorer = load_minicheck(rag.cfg.guard.verifier_model)
         passages = [index_text(h.header, h.text) for h in ans.hits]
         checks = check_answer(ans.text, passages, scorer) if ans.hits else []
         ans.checks = [{"sentence": c.sentence, "cited": c.cited, "supported": c.supported,

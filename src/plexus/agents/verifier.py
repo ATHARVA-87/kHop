@@ -24,7 +24,8 @@ from pathlib import Path
 
 from plexus.settings import REPO_ROOT
 
-MODEL_DIR = REPO_ROOT / "data" / "models" / "minicheck-flan-t5-large"
+MODELS = REPO_ROOT / "data" / "models"
+MODEL_DIR = MODELS / "minicheck-roberta-large"  # default since 2026-10-29 (fits the GPU)
 THRESHOLD = 0.5
 CHUNK_WORDS = 400
 
@@ -76,27 +77,51 @@ class SentenceCheck:
 
 
 class MiniCheck:
+    """Two MiniCheck variants from the same authors (both MIT, converted to safetensors):
+    - "flan-t5": Flan-T5-Large 770M (~1.5 GB fp16). Input "predict: " + chunk </s> claim,
+      support = softmax over first-token logits for ids 3 / 209; chunks ~400 words.
+    - "roberta": RoBERTa-Large 355M (~0.7 GB fp16), fits the 6 GB GPU next to the local
+      writer (flan-t5 ran out of memory there, 2026-10-29). Input chunk </s> claim, 2-class
+      head, max 512 tokens; chunks ~400 tokens, as in the reference code."""
+
     def __init__(self, model_dir: Path = MODEL_DIR, device: str | None = None):
         import torch
-        from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+        from transformers import (
+            AutoConfig,
+            AutoModelForSeq2SeqLM,
+            AutoModelForSequenceClassification,
+            AutoTokenizer,
+        )
 
         if not (model_dir / "model.safetensors").exists():
             raise FileNotFoundError(f"no MiniCheck weights at {model_dir}")
         self.torch = torch
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         dtype = torch.float16 if self.device == "cuda" else torch.float32
+        self.kind = (
+            "flan-t5" if AutoConfig.from_pretrained(model_dir).model_type == "t5" else "roberta"
+        )
         self.tok = AutoTokenizer.from_pretrained(model_dir)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(
-            model_dir, dtype=dtype, use_safetensors=True
-        ).to(self.device)
+        cls = (
+            AutoModelForSeq2SeqLM if self.kind == "flan-t5" else AutoModelForSequenceClassification
+        )
+        self.model = cls.from_pretrained(model_dir, dtype=dtype, use_safetensors=True).to(
+            self.device
+        )
         self.model.eval()
+        self.max_len = 2048 if self.kind == "flan-t5" else 512
 
-    def _chunks(self, doc: str) -> list[str]:
-        """Sentence-aware chunks of about CHUNK_WORDS words, as in the reference code."""
+    def _size(self, text: str) -> int:
+        if self.kind == "flan-t5":
+            return len(text.split())  # words, as the reference code does for T5
+        return len(self.tok(text, add_special_tokens=False)["input_ids"])
+
+    def _chunks(self, doc: str, budget: int) -> list[str]:
+        """Sentence-aware chunks within `budget` (words for T5, tokens for RoBERTa)."""
         chunks, cur, n = [], [], 0
         for sent in split_sentences(doc) or [""]:
-            w = len(sent.split())
-            if cur and n + w > CHUNK_WORDS:
+            w = self._size(sent)
+            if cur and n + w > budget:
                 chunks.append(" ".join(cur))
                 cur, n = [], 0
             cur.append(sent)
@@ -105,14 +130,27 @@ class MiniCheck:
 
     def score(self, doc: str, claim: str) -> float:
         torch = self.torch
-        texts = [f"predict: {c}{self.tok.eos_token}{claim}" for c in self._chunks(doc)]
-        enc = self.tok(texts, max_length=2048, truncation=True, padding=True, return_tensors="pt")
+        if self.kind == "flan-t5":
+            texts = [
+                f"predict: {c}{self.tok.eos_token}{claim}" for c in self._chunks(doc, CHUNK_WORDS)
+            ]
+        else:  # leave room for the claim inside 512 tokens
+            budget = max(64, self.max_len - self._size(claim) - 16)
+            texts = [f"{c}{self.tok.eos_token}{claim}" for c in self._chunks(doc, min(400, budget))]
+        enc = self.tok(
+            texts, max_length=self.max_len, truncation=True, padding=True, return_tensors="pt"
+        )
         enc = {k: v.to(self.device) for k, v in enc.items()}
-        dec = torch.zeros((len(texts), 1), dtype=torch.long, device=self.device)
         with torch.no_grad():
-            logits = self.model(**enc, decoder_input_ids=dec).logits[:, 0, :].float()
-        probs = torch.softmax(logits[:, [3, 209]], dim=-1)[:, 1]
-        if not torch.isfinite(probs).all():  # fp16 T5 can overflow: report "unknown", not "no"
+            if self.kind == "flan-t5":
+                dec = torch.zeros((len(texts), 1), dtype=torch.long, device=self.device)
+                logits = (
+                    self.model(**enc, decoder_input_ids=dec).logits[:, 0, :].float()[:, [3, 209]]
+                )
+            else:
+                logits = self.model(**enc).logits.float()
+        probs = torch.softmax(logits, dim=-1)[:, 1]
+        if not torch.isfinite(probs).all():  # fp16 can overflow: report "unknown", not "no"
             return float("nan")
         return float(probs.max())
 
@@ -120,11 +158,11 @@ class MiniCheck:
 _LOADED: dict[str, MiniCheck] = {}
 
 
-def load_minicheck() -> MiniCheck:
-    """One MiniCheck per process (the attack eval and the API build many flows)."""
-    if "m" not in _LOADED:
-        _LOADED["m"] = MiniCheck()
-    return _LOADED["m"]
+def load_minicheck(name: str = "roberta") -> MiniCheck:
+    """One MiniCheck per variant per process (the attack eval and the API build many flows)."""
+    if name not in _LOADED:
+        _LOADED[name] = MiniCheck(MODELS / f"minicheck-{name}-large")
+    return _LOADED[name]
 
 
 def check_answer(answer: str, passages: list[str], scorer: MiniCheck | None) -> list[SentenceCheck]:
