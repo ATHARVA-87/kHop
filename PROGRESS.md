@@ -230,6 +230,22 @@ Research first (2026-10-29): well-tuned single pipelines with a reranker match m
 
 Not built (research + measurements): LLM planner / sub-question split, LLM researcher, retry loop, grade-and-rewrite.
 
+## Phase 6 (branch `phase6-app`): the app
+Research first (2026-10-29). Built: FastAPI service with live answers (SSE; `make serve`, 127.0.0.1:8000), static Next.js 16.4.1 page (ADR 0008; design plan approved by the owner: white / filing red / highlighter yellow, light by default, dark only by switch, remembered), one-company filter for single-company questions (found by using the app; dev recall@10 +0.015, kept; `configs/app.yaml`), A8 semantic cache, per-question trace log, load test.
+
+**Gate evidence** (cold caches, `results/phase6_load.json`, `phase6_load_mix.json`, `phase6_stages.json`, `a8_cache.json`):
+| people asking at once | answered | told "busy" (503) | first words p50 / p95 | full answer p50 / p95 |
+| --- | --- | --- | --- | --- |
+| 1 | 2/2 | 0 | 18.3 s | 21.8 s |
+| 2 | 4/4 | 0 | 6.0 / 15.8 s | 14.3 / 25.5 s |
+| 4 | 8/8 | 0 | 21.0 / 28.8 s | 24.2 / 39.2 s |
+| 8 | 10/16 | 6 (queue limit 4, by design) | 21.9 / 33.1 s | 25.5 / 36.2 s |
+- Per step (fresh answers): retrieve p50 0.62 s, writer p50 5.3 s / p95 20.5 s, verify p50 0.07 s; queue wait p50 6.6 s; cached answers p50 31 ms.
+- Semantic cache: owner-checked pairs, 23/40 rewordings reused with 0/40 wrong reuses (threshold 0.935). Mixed load round (6 rewordings + 4 new, sent together, after the fix below): 7 answered, 2 cache hits, 3 told busy.
+- Cost per question: $0 (local model); 1 LLM call per fresh question, 0 per cache hit.
+- **Caveat:** during the load test the GPU was too full for the whole writer model: Ollama ran 35% of it on the CPU, which explains the slow single-user times (18-22 s vs ~8 s when the GPU is free) and the laptop lag. One GPU = one answer at a time; more people means longer waits, not more throughput.
+- Found by the load test: cache hits were being turned away as "busy" because the queue was checked before the cache; fixed (cache first, then queue), test added.
+
 ## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
 `results/test/*.json`. No design decision was made on these numbers.
 

@@ -90,11 +90,6 @@ class GpuQueue:
             with self.lock:
                 self.waiting -= 1
 
-    def leave(self) -> None:
-        """Give up a place in the queue without running (the answer came from the cache)."""
-        with self.lock:
-            self.waiting -= 1
-
     def release(self) -> None:
         self.slot.release()
 
@@ -331,28 +326,16 @@ def create_app(state_factory=build_state) -> FastAPI:
         return {"companies": sorted(names.values(), key=str.lower), "filings": len(state.get("docs", {})),
                 "years": "2025"}  # fmt: skip
 
-    def admit(request: Request, q: str = Query(min_length=3, max_length=1000)) -> tuple[str, int]:
+    def admit(request: Request, q: str = Query(min_length=3, max_length=1000)) -> tuple:
         """Runs before streaming starts, so limits return proper status codes. FastAPI validates
-        `q` first: an invalid question never takes a place in the queue."""
+        `q` first: an invalid question never takes a place in the queue. The semantic cache is
+        checked BEFORE the queue, so a reused answer never waits for or blocks the GPU (load
+        test 2026-10-29: hits were being turned away as busy)."""
         client = request.client.host if request.client else "unknown"
         if not limiter.allow(client):
             raise HTTPException(429, "Too many questions. Wait a minute, then ask again.",
                                 headers={"Retry-After": "60"})  # fmt: skip
-        position = gpu.join()
-        if position is None:
-            raise HTTPException(503, "Plexus is busy answering other questions. Try again shortly.",
-                                headers={"Retry-After": "20"})  # fmt: skip
-        return q.strip(), position
-
-    @app.get("/api/about")
-    def about():
-        return {"figures": about_figures()}
-
-    @app.get("/api/ask", response_class=EventSourceResponse)
-    def ask(admitted: tuple[str, int] = Depends(admit)):
-        question, position = admitted
-        t_start = time.perf_counter()
-        yield ServerSentEvent(event="queued", data={"position": position})
+        question = q.strip()
         cache = state.get("cache")
         if cache is not None:
             t0 = time.perf_counter()
@@ -362,15 +345,30 @@ def create_app(state_factory=build_state) -> FastAPI:
                 log.exception("cache lookup failed")
                 hit = None
             if hit is not None:
-                gpu.leave()  # answered from the cache: no GPU needed
-                payload, sim, original = hit
-                yield ServerSentEvent(event="step", data={
-                    "step": "cache", "ms": round((time.perf_counter() - t0) * 1000, 1),
-                    "similar_to": original, "similarity": round(sim, 3)})  # fmt: skip
-                yield ServerSentEvent(event="done", data={**payload, "from_cache": True})
-                log_trace(question, {"cache_hit": True, "queue_ms": 0,
-                                     "total_ms": round((time.perf_counter() - t_start) * 1000, 1)})  # fmt: skip
-                return
+                return question, None, (hit, round((time.perf_counter() - t0) * 1000, 1))
+        position = gpu.join()
+        if position is None:
+            raise HTTPException(503, "Plexus is busy answering other questions. Try again shortly.",
+                                headers={"Retry-After": "20"})  # fmt: skip
+        return question, position, None
+
+    @app.get("/api/about")
+    def about():
+        return {"figures": about_figures()}
+
+    @app.get("/api/ask", response_class=EventSourceResponse)
+    def ask(admitted: tuple = Depends(admit)):
+        question, position, cached = admitted
+        t_start = time.perf_counter()
+        cache = state.get("cache")
+        if cached is not None:  # answered from the cache: no queue, no GPU
+            (payload, sim, original), lookup_ms = cached
+            yield ServerSentEvent(event="step", data={
+                "step": "cache", "ms": lookup_ms, "similar_to": original, "similarity": round(sim, 3)})  # fmt: skip
+            yield ServerSentEvent(event="done", data={**payload, "from_cache": True})
+            log_trace(question, {"cache_hit": True, "queue_ms": 0, "total_ms": lookup_ms})
+            return
+        yield ServerSentEvent(event="queued", data={"position": position})
         t_wait = time.perf_counter()
         if not gpu.acquire(timeout=DEADLINE_S):
             yield ServerSentEvent(

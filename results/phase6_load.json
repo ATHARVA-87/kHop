@@ -1,0 +1,61 @@
+{
+  "levels": {
+    "1": {
+      "requests": 2,
+      "answered": 2,
+      "busy_503": 0,
+      "errors": 0,
+      "first_token_p50_s": 18.28,
+      "first_token_p95_s": 18.28,
+      "total_p50_s": 21.81,
+      "total_p95_s": 21.81,
+      "cache_hits": 0
+    },
+    "2": {
+      "requests": 4,
+      "answered": 4,
+      "busy_503": 0,
+      "errors": 0,
+      "first_token_p50_s": 5.95,
+      "first_token_p95_s": 15.79,
+      "total_p50_s": 14.3,
+      "total_p95_s": 25.52,
+      "cache_hits": 0
+    },
+    "4": {
+      "requests": 8,
+      "answered": 8,
+      "busy_503": 0,
+      "errors": 0,
+      "first_token_p50_s": 21.02,
+      "first_token_p95_s": 28.79,
+      "total_p50_s": 24.21,
+      "total_p95_s": 39.19,
+      "cache_hits": 0
+    },
+    "8": {
+      "requests": 16,
+      "answered": 10,
+      "busy_503": 6,
+      "errors": 0,
+      "first_token_p50_s": 21.91,
+      "first_token_p95_s": 33.12,
+      "total_p50_s": 25.48,
+      "total_p95_s": 36.18,
+      "cache_hits": 0
+    }
+  },
+  "mix_30pct_rewordings": {
+    "requests": 10,
+    "answered": 4,
+    "busy_503": 6,
+    "errors": 0,
+    "first_token_p50_s": 39.2,
+    "first_token_p95_s": 48.23,
+    "total_p50_s": 46.11,
+    "total_p95_s": 52.17,
+    "cache_hits": 1
+  },
+  "mix_note": "6 rewordings of questions answered just before + 4 new questions, sent together",
+  "cost_usd": 0.0
+}

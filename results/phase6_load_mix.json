@@ -1,0 +1,16 @@
+{
+  "levels": {},
+  "mix_30pct_rewordings": {
+    "requests": 10,
+    "answered": 7,
+    "busy_503": 3,
+    "errors": 0,
+    "first_token_p50_s": 7.12,
+    "first_token_p95_s": 27.1,
+    "total_p50_s": 13.08,
+    "total_p95_s": 31.15,
+    "cache_hits": 2
+  },
+  "mix_note": "6 rewordings of questions answered just before + 4 new questions, sent together",
+  "cost_usd": 0.0
+}

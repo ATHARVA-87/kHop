@@ -121,8 +121,8 @@ def test_cache_stores_clean_answers_and_serves_repeats(monkeypatch):
         first = _events(c.get("/api/ask", params={"q": "Who makes NVIDIA chips?"}).text)
         assert first[-1][0] == "done" and cache.stored
         again = _events(c.get("/api/ask", params={"q": "who makes nvidia chips"}).text)
-        assert [k for k, _ in again] == ["queued", "step", "done"]
-        assert again[1][1]["step"] == "cache" and again[-1][1]["from_cache"] is True
+        assert [k for k, _ in again] == ["step", "done"]  # no queue for a cache hit
+        assert again[0][1]["step"] == "cache" and again[-1][1]["from_cache"] is True
 
 
 def test_refusals_are_not_cached():
@@ -135,3 +135,20 @@ def test_refusals_are_not_cached():
     )
     assert not srv.cacheable({"answer": "x [1].", "checks": [{"supported": False}], "trace": []})
     assert srv.cacheable({"answer": "x [1].", "checks": [{"supported": True}], "trace": []})
+
+
+def test_cache_hit_needs_no_queue_place(monkeypatch):
+    import plexus.agents.flow as flow_mod
+
+    monkeypatch.setattr(flow_mod, "ask_events", fake_events)
+    monkeypatch.setattr(
+        srv, "TRACE_LOG", __import__("pathlib").Path(__import__("tempfile").mkdtemp()) / "t.jsonl"
+    )
+    monkeypatch.setattr(srv, "MAX_WAITING", 0)  # queue full: new questions get 503
+    cache = FakeCache()
+    cache.store("old question", {"answer": "A [1].", "sources": [], "checks": [], "trace": []})
+    state = {"flow": FakeFlow(), "config": "test", "cache": cache, **srv.load_meta()}
+    with TestClient(srv.create_app(lambda: state)) as c:
+        assert c.get("/api/ask", params={"q": "brand new question"}).status_code == 503
+        ev = _events(c.get("/api/ask", params={"q": "old question"}).text)
+        assert ev[-1][1]["from_cache"] is True

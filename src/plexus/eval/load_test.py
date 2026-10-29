@@ -118,9 +118,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--levels", default="1,2,4,8")
     ap.add_argument("--rounds", type=int, default=2)
     a = ap.parse_args(argv)
-    out = asyncio.run(run(a.base, [int(x) for x in a.levels.split(",")], a.rounds))
+    levels = [] if a.levels == "none" else [int(x) for x in a.levels.split(",")]
+    out = asyncio.run(run(a.base, levels, a.rounds))
     out["cost_usd"] = 0.0
-    (REPO_ROOT / "results" / "phase6_load.json").write_text(json.dumps(out, indent=2) + "\n")
+    name = "phase6_load_mix.json" if not levels else "phase6_load.json"
+    (REPO_ROOT / "results" / name).write_text(json.dumps(out, indent=2) + "\n")
     print(json.dumps(out, indent=2))
     return 0
 
