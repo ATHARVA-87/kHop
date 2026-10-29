@@ -246,6 +246,12 @@ Research first (2026-10-29). Built: FastAPI service with live answers (SSE; `mak
 - **Caveat:** during the load test the GPU was too full for the whole writer model: Ollama ran 35% of it on the CPU, which explains the slow single-user times (18-22 s vs ~8 s when the GPU is free) and the laptop lag. One GPU = one answer at a time; more people means longer waits, not more throughput.
 - Found by the load test: cache hits were being turned away as "busy" because the queue was checked before the cache; fixed (cache first, then queue), test added.
 
+## Resume here (2026-10-29, owner restarting the PC)
+Branch `phase6-app`, all work committed. Next, when the owner says "continue":
+1. Run the fact-checker (MiniCheck-RoBERTa) on the CPU in the app (owner's choice: the app's 1.8 GB + the writer's 3.1-3.7 GB exceed the 6 GB card minus the 10% safety margin; CPU check measured at ~3.0 s per answer on 4 threads). Make it a config setting (`guard.verifier_device`, default cpu), cap CPU threads, re-check VRAM with the writer loaded (target: Ollama 100% GPU), then re-run the cold load test.
+2. Owner rule (memory): check CPU/GPU/RAM before every heavy task, keep a 10% margin, ask the owner to free resources if more VRAM is needed; unload Ollama (`ollama stop qwen3.5:4b`) and stop servers when done.
+3. Then: reviewer agent on Phase 6, update Walkthrough (simple words), open the Phase 6 PR, run CI.
+
 ## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
 `results/test/*.json`. No design decision was made on these numbers.
 
