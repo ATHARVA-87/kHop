@@ -1,0 +1,33 @@
+name: a9_agents
+description: >
+  A9 final: input gate + datamarking + verifier marks (A9 step 2: A6 + input gate (advice / off-scope / rule-breaking refused before search). A6: rule router (0 companies -> global, 2+ filers -> multi-hop, else local) choosing
+  hybrid+reranker (local), graph traversal (multi-hop) or company-diverse ranking (global).
+snapshot: semis-2025
+seed: 0
+chunker:
+  type: structured
+  child_words: 200
+  child_chars: 1400
+  parent_words: 800
+  headers: true
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: routed
+  router: rules
+  graph_max_edges: 12
+  rerank:
+    model: BAAI/bge-reranker-base
+    candidates: 50
+  top_k: 20
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 5
+judge:
+  provider: gemini
+  model: gemini-3.6-flash
+guard:
+  input_gate: true
+  datamark: true
+  verify: true

@@ -1,0 +1,489 @@
+{
+  "summary": {
+    "n": 60,
+    "human_unsupported": 15,
+    "threshold": 0.5,
+    "acceptance_bar": {
+      "catch_unsupported": 0.7,
+      "pass_supported": 0.85
+    },
+    "auroc_minicheck": 1.0,
+    "swapped_marked_unsupported_by_human": 10,
+    "minicheck": {
+      "n": 60,
+      "human_not_correct": 15,
+      "tpr_catches_not_correct": 1.0,
+      "tpr_ci": [
+        0.796,
+        1.0
+      ],
+      "tnr_passes_correct": 0.911,
+      "tnr_ci": [
+        0.793,
+        0.965
+      ],
+      "raw_agreement": 0.933,
+      "binary_kappa": 0.837,
+      "gwet_ac1": 0.888,
+      "accepted": true
+    },
+    "minicheck_plus_numbers": {
+      "n": 60,
+      "human_not_correct": 15,
+      "tpr_catches_not_correct": 1.0,
+      "tpr_ci": [
+        0.796,
+        1.0
+      ],
+      "tnr_passes_correct": 0.911,
+      "tnr_ci": [
+        0.793,
+        0.965
+      ],
+      "raw_agreement": 0.933,
+      "binary_kappa": 0.837,
+      "gwet_ac1": 0.888,
+      "accepted": true
+    },
+    "real_pairs_only": {
+      "n": 50,
+      "human_not_correct": 5,
+      "tpr_catches_not_correct": 1.0,
+      "tpr_ci": [
+        0.566,
+        1.0
+      ],
+      "tnr_passes_correct": 0.911,
+      "tnr_ci": [
+        0.793,
+        0.965
+      ],
+      "raw_agreement": 0.92,
+      "binary_kappa": 0.672,
+      "gwet_ac1": 0.895
+    },
+    "model": "roberta"
+  },
+  "per_pair": [
+    {
+      "pid": "V-01",
+      "human_supported": true,
+      "support": 0.9841,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-02",
+      "human_supported": false,
+      "support": 0.015,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-03",
+      "human_supported": true,
+      "support": 0.2002,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-04",
+      "human_supported": true,
+      "support": 0.8299,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-05",
+      "human_supported": true,
+      "support": 0.989,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-06",
+      "human_supported": true,
+      "support": 0.694,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-07",
+      "human_supported": true,
+      "support": 0.9887,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-08",
+      "human_supported": true,
+      "support": 0.9737,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-09",
+      "human_supported": false,
+      "support": 0.004,
+      "numbers_ok": true,
+      "swapped": true
+    },
+    {
+      "pid": "V-10",
+      "human_supported": true,
+      "support": 0.9551,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-11",
+      "human_supported": true,
+      "support": 0.9798,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-12",
+      "human_supported": false,
+      "support": 0.0055,
+      "numbers_ok": true,
+      "swapped": true
+    },
+    {
+      "pid": "V-13",
+      "human_supported": true,
+      "support": 0.9736,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-14",
+      "human_supported": true,
+      "support": 0.564,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-15",
+      "human_supported": true,
+      "support": 0.93,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-16",
+      "human_supported": true,
+      "support": 0.9604,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-17",
+      "human_supported": true,
+      "support": 0.9235,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-18",
+      "human_supported": true,
+      "support": 0.983,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-19",
+      "human_supported": true,
+      "support": 0.8701,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-20",
+      "human_supported": true,
+      "support": 0.9812,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-21",
+      "human_supported": true,
+      "support": 0.9673,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-22",
+      "human_supported": true,
+      "support": 0.987,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-23",
+      "human_supported": false,
+      "support": 0.0593,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-24",
+      "human_supported": true,
+      "support": 0.2219,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-25",
+      "human_supported": false,
+      "support": 0.004,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-26",
+      "human_supported": false,
+      "support": 0.003,
+      "numbers_ok": false,
+      "swapped": true
+    },
+    {
+      "pid": "V-27",
+      "human_supported": false,
+      "support": 0.0129,
+      "numbers_ok": true,
+      "swapped": true
+    },
+    {
+      "pid": "V-28",
+      "human_supported": false,
+      "support": 0.0462,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-29",
+      "human_supported": true,
+      "support": 0.9867,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-30",
+      "human_supported": true,
+      "support": 0.9662,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-31",
+      "human_supported": false,
+      "support": 0.0036,
+      "numbers_ok": false,
+      "swapped": true
+    },
+    {
+      "pid": "V-32",
+      "human_supported": true,
+      "support": 0.9767,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-33",
+      "human_supported": true,
+      "support": 0.9511,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-34",
+      "human_supported": false,
+      "support": 0.0038,
+      "numbers_ok": true,
+      "swapped": true
+    },
+    {
+      "pid": "V-35",
+      "human_supported": true,
+      "support": 0.9712,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-36",
+      "human_supported": true,
+      "support": 0.5973,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-37",
+      "human_supported": false,
+      "support": 0.0044,
+      "numbers_ok": false,
+      "swapped": true
+    },
+    {
+      "pid": "V-38",
+      "human_supported": false,
+      "support": 0.0045,
+      "numbers_ok": true,
+      "swapped": true
+    },
+    {
+      "pid": "V-39",
+      "human_supported": true,
+      "support": 0.2825,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-40",
+      "human_supported": true,
+      "support": 0.9771,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-41",
+      "human_supported": true,
+      "support": 0.8637,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-42",
+      "human_supported": true,
+      "support": 0.9789,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-43",
+      "human_supported": true,
+      "support": 0.9651,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-44",
+      "human_supported": true,
+      "support": 0.9677,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-45",
+      "human_supported": true,
+      "support": 0.7616,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-46",
+      "human_supported": true,
+      "support": 0.9004,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-47",
+      "human_supported": true,
+      "support": 0.9799,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-48",
+      "human_supported": true,
+      "support": 0.9881,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-49",
+      "human_supported": false,
+      "support": 0.0041,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-50",
+      "human_supported": true,
+      "support": 0.9809,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-51",
+      "human_supported": true,
+      "support": 0.976,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-52",
+      "human_supported": true,
+      "support": 0.9199,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-53",
+      "human_supported": false,
+      "support": 0.0132,
+      "numbers_ok": false,
+      "swapped": true
+    },
+    {
+      "pid": "V-54",
+      "human_supported": true,
+      "support": 0.9758,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-55",
+      "human_supported": true,
+      "support": 0.9164,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-56",
+      "human_supported": true,
+      "support": 0.9805,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-57",
+      "human_supported": true,
+      "support": 0.7092,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-58",
+      "human_supported": true,
+      "support": 0.7878,
+      "numbers_ok": true,
+      "swapped": false
+    },
+    {
+      "pid": "V-59",
+      "human_supported": false,
+      "support": 0.0066,
+      "numbers_ok": true,
+      "swapped": true
+    },
+    {
+      "pid": "V-60",
+      "human_supported": true,
+      "support": 0.3445,
+      "numbers_ok": true,
+      "swapped": false
+    }
+  ]
+}

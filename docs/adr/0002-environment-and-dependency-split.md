@@ -16,3 +16,7 @@ The dev machine already has a conda env `torch` (Python 3.11, torch 2.5.1 + CUDA
 - The local env has looser pins than `uv.lock`. A drift check (`uv pip compile` vs `pip freeze`) belongs in `make doctor` later.
 - During setup on 2026-10-26, installing into `torch` upgraded five small conda-installed utilities (certifi, click, filelock, platformdirs, PyYAML). torch, numpy and all other existing packages are unchanged and `pip check` is clean.
 - transformers 5.x requires torch>=2.6, so the `ml` extra pins `transformers<5` and `sentence-transformers<6` (see `docs/ai_review_log.md`).
+
+
+## Update 2026-10-29
+The owner approved torch 2.5.1 -> 2.6.0 (security fixes; `pip check` clean, all three other torch users accept it, retrieval and answers reproduce exactly). numpy stays 1.26.4, transformers stays < 5. Rollback: conda env `torch-backup-2.5.1`. Note for other projects in the env: torch 2.6 defaults `torch.load(weights_only=True)`.

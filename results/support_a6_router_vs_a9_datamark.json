@@ -1,0 +1,2455 @@
+{
+  "summary": {
+    "a6_router": {
+      "answers": 134,
+      "refused": 2,
+      "sentence_support": 0.604,
+      "fully_supported_answers": 0.295,
+      "uncited_sentences": 0.263,
+      "cited_sentence_support": 0.82,
+      "sentences_per_answer": 4.98,
+      "caret_leak": 0
+    },
+    "a9_datamark": {
+      "answers": 134,
+      "refused": 0,
+      "sentence_support": 0.654,
+      "fully_supported_answers": 0.373,
+      "uncited_sentences": 0.215,
+      "cited_sentence_support": 0.833,
+      "sentences_per_answer": 4.62,
+      "caret_leak": 0,
+      "vs_a6_router": {
+        "n": 132,
+        "diff_cited_support_per_answer": 0.034,
+        "cited_ci95": [
+          -0.013,
+          0.08
+        ],
+        "diff_fully_supported": 0.083,
+        "ci95": [
+          0.008,
+          0.159
+        ]
+      }
+    }
+  },
+  "per_query": {
+    "a6_router": {
+      "L-204fcb766a": {
+        "refused": false,
+        "n": 8,
+        "supported": 4,
+        "uncited": 3,
+        "cited": 5,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "L-7d894157f4": {
+        "refused": false,
+        "n": 6,
+        "supported": 4,
+        "uncited": 2,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "L-e4a0e66f7b": {
+        "refused": false,
+        "n": 5,
+        "supported": 3,
+        "uncited": 1,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-1a79cd4f92": {
+        "refused": false,
+        "n": 6,
+        "supported": 2,
+        "uncited": 3,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-3b07b5f664": {
+        "refused": false,
+        "n": 6,
+        "supported": 2,
+        "uncited": 1,
+        "cited": 5,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-5cd077cf0c": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-07ebaffcc3": {
+        "refused": false,
+        "n": 7,
+        "supported": 6,
+        "uncited": 1,
+        "cited": 6,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "L-e54d9ddab4": {
+        "refused": false,
+        "n": 2,
+        "supported": 0,
+        "uncited": 1,
+        "cited": 1,
+        "cited_supported": 0,
+        "caret": false
+      },
+      "L-77ed32c36f": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-47aef70f5a": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-e842919f48": {
+        "refused": false,
+        "n": 8,
+        "supported": 3,
+        "uncited": 4,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-446992a76d": {
+        "refused": false,
+        "n": 6,
+        "supported": 5,
+        "uncited": 1,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "L-c27afbbeb5": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-e5b33be7e2": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-701c0708f2": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-551a0e423b": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-eab9a6091b": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-8ea56d0eec": {
+        "refused": false,
+        "n": 7,
+        "supported": 6,
+        "uncited": 1,
+        "cited": 6,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "L-13ae2a142d": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-e7cba04788": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-f0535b3144": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-8f148a4aec": {
+        "refused": false,
+        "n": 6,
+        "supported": 5,
+        "uncited": 1,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "L-a2c00a9f8b": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-923b93519f": {
+        "refused": false,
+        "n": 4,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-41dab0f0e5": {
+        "refused": false,
+        "n": 3,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-d950b1c9df": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-c294db17eb": {
+        "refused": false,
+        "n": 9,
+        "supported": 8,
+        "uncited": 1,
+        "cited": 8,
+        "cited_supported": 8,
+        "caret": false
+      },
+      "L-3a97a4fbfe": {
+        "refused": false,
+        "n": 5,
+        "supported": 4,
+        "uncited": 1,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "L-28673b1f56": {
+        "refused": false,
+        "n": 3,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-f0de3d22fc": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-a8da0ea627": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-e2b8c0ac65": {
+        "refused": false,
+        "n": 3,
+        "supported": 1,
+        "uncited": 2,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-22723db9ff": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-afc82f56bf": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-8ab362f0e3": {
+        "refused": false,
+        "n": 11,
+        "supported": 9,
+        "uncited": 1,
+        "cited": 10,
+        "cited_supported": 9,
+        "caret": false
+      },
+      "L-51c51e5707": {
+        "refused": false,
+        "n": 3,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-23ecce09ca": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 1,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-99426bab62": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "L-5c2f0c36e5": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-950416d079": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-fa19df4328": {
+        "refused": false,
+        "n": 3,
+        "supported": 1,
+        "uncited": 1,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-30f54538b9": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-666b59cbb6": {
+        "refused": false,
+        "n": 5,
+        "supported": 2,
+        "uncited": 1,
+        "cited": 4,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-b3a85d4eda": {
+        "refused": false,
+        "n": 3,
+        "supported": 1,
+        "uncited": 2,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-60504fa849": {
+        "refused": false,
+        "n": 7,
+        "supported": 6,
+        "uncited": 1,
+        "cited": 6,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "L-83be086895": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-bbfc5e240c": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-fa359783b6": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-6ac3514931": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-4e51f48592": {
+        "refused": false,
+        "n": 3,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-a4b3d7b618": {
+        "refused": false,
+        "n": 3,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-fa04780483": {
+        "refused": false,
+        "n": 6,
+        "supported": 5,
+        "uncited": 1,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "L-6c4a8e486c": {
+        "refused": false,
+        "n": 5,
+        "supported": 5,
+        "uncited": 0,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "L-1cafa4e734": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-fc51eb033f": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-9207d5e22c": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-4ecb62cac2": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-d8dc03abc2": {
+        "refused": false,
+        "n": 9,
+        "supported": 7,
+        "uncited": 1,
+        "cited": 8,
+        "cited_supported": 7,
+        "caret": false
+      },
+      "L-d445f5ab12": {
+        "refused": false,
+        "n": 3,
+        "supported": 1,
+        "uncited": 1,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-a18a1e01b3": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-a96c0fbfdf": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-4aa4faa3cd": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-17cd146474": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-ef5160d7d0": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-99a0cb2653": {
+        "refused": false,
+        "n": 12,
+        "supported": 4,
+        "uncited": 6,
+        "cited": 6,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-64fa8028fc": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "M-20b3651156": {
+        "refused": false,
+        "n": 6,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 6,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-02157c08dd": {
+        "refused": false,
+        "n": 3,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-f8199de8b1": {
+        "refused": false,
+        "n": 7,
+        "supported": 4,
+        "uncited": 1,
+        "cited": 6,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-029431a3df": {
+        "refused": false,
+        "n": 6,
+        "supported": 3,
+        "uncited": 1,
+        "cited": 5,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-db8dfe3ed1": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-74be6129e9": {
+        "refused": false,
+        "n": 8,
+        "supported": 4,
+        "uncited": 2,
+        "cited": 6,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-b09984ff8c": {
+        "refused": false,
+        "n": 6,
+        "supported": 4,
+        "uncited": 2,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-581cb54ce2": {
+        "refused": false,
+        "n": 5,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 5,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-f1369e6713": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-ca7eab2723": {
+        "refused": false,
+        "n": 6,
+        "supported": 3,
+        "uncited": 3,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-8a85f3b6b1": {
+        "refused": false,
+        "n": 5,
+        "supported": 3,
+        "uncited": 2,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-4d4d67b2e9": {
+        "refused": false,
+        "n": 6,
+        "supported": 3,
+        "uncited": 1,
+        "cited": 5,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-3a9e7ec6a9": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-54482d18e1": {
+        "refused": false,
+        "n": 7,
+        "supported": 5,
+        "uncited": 2,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "M-fe7ab99e65": {
+        "refused": false,
+        "n": 14,
+        "supported": 4,
+        "uncited": 7,
+        "cited": 7,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-725f6d6c79": {
+        "refused": false,
+        "n": 8,
+        "supported": 2,
+        "uncited": 3,
+        "cited": 5,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-e6c2023ca0": {
+        "refused": false,
+        "n": 9,
+        "supported": 4,
+        "uncited": 3,
+        "cited": 6,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-5517238fa8": {
+        "refused": false,
+        "n": 8,
+        "supported": 5,
+        "uncited": 1,
+        "cited": 7,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "M-5dc8c32e7f": {
+        "refused": false,
+        "n": 6,
+        "supported": 4,
+        "uncited": 1,
+        "cited": 5,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-9d162a27d2": {
+        "refused": false,
+        "n": 4,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-81480ee57d": {
+        "refused": false,
+        "n": 5,
+        "supported": 3,
+        "uncited": 2,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-4ef2df83e8": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 1,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-e2c3874170": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-67bb2be32d": {
+        "refused": false,
+        "n": 4,
+        "supported": 2,
+        "uncited": 1,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-8ad3fe0188": {
+        "refused": false,
+        "n": 6,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 6,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-61fa7dee06": {
+        "refused": false,
+        "n": 9,
+        "supported": 5,
+        "uncited": 4,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "M-283acbdb08": {
+        "refused": false,
+        "n": 7,
+        "supported": 4,
+        "uncited": 3,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-83e2e426cf": {
+        "refused": false,
+        "n": 6,
+        "supported": 3,
+        "uncited": 2,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-a32cfdd0dc": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-03274ff886": {
+        "refused": false,
+        "n": 3,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-f6ccc8e8b7": {
+        "refused": true,
+        "n": 0,
+        "supported": 0,
+        "uncited": 0,
+        "cited": 0,
+        "cited_supported": 0,
+        "caret": false
+      },
+      "M-b0acba683b": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "M-25b9262768": {
+        "refused": false,
+        "n": 5,
+        "supported": 1,
+        "uncited": 2,
+        "cited": 3,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "M-013c95c56d": {
+        "refused": false,
+        "n": 7,
+        "supported": 4,
+        "uncited": 2,
+        "cited": 5,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-73181cfc09": {
+        "refused": false,
+        "n": 9,
+        "supported": 1,
+        "uncited": 7,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "M-f0e475045c": {
+        "refused": false,
+        "n": 9,
+        "supported": 5,
+        "uncited": 3,
+        "cited": 6,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "M-d2a2ce8d2b": {
+        "refused": false,
+        "n": 12,
+        "supported": 6,
+        "uncited": 6,
+        "cited": 6,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "M-accab1e0e6": {
+        "refused": false,
+        "n": 8,
+        "supported": 2,
+        "uncited": 5,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-7531785032": {
+        "refused": false,
+        "n": 5,
+        "supported": 3,
+        "uncited": 1,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-2c6e9e0188": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-11ba8b1fd3": {
+        "refused": false,
+        "n": 13,
+        "supported": 5,
+        "uncited": 5,
+        "cited": 8,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "M-785fbe2558": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "G-354b628368": {
+        "refused": false,
+        "n": 9,
+        "supported": 5,
+        "uncited": 3,
+        "cited": 6,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "G-0be1c04db8": {
+        "refused": false,
+        "n": 9,
+        "supported": 7,
+        "uncited": 2,
+        "cited": 7,
+        "cited_supported": 7,
+        "caret": false
+      },
+      "G-951630b502": {
+        "refused": false,
+        "n": 12,
+        "supported": 8,
+        "uncited": 4,
+        "cited": 8,
+        "cited_supported": 8,
+        "caret": false
+      },
+      "G-0500f0c604": {
+        "refused": false,
+        "n": 14,
+        "supported": 9,
+        "uncited": 4,
+        "cited": 10,
+        "cited_supported": 9,
+        "caret": false
+      },
+      "G-9a28615079": {
+        "refused": false,
+        "n": 12,
+        "supported": 7,
+        "uncited": 4,
+        "cited": 8,
+        "cited_supported": 7,
+        "caret": false
+      },
+      "G-14a37c9367": {
+        "refused": false,
+        "n": 9,
+        "supported": 4,
+        "uncited": 3,
+        "cited": 6,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "G-06cfa36669": {
+        "refused": false,
+        "n": 16,
+        "supported": 13,
+        "uncited": 3,
+        "cited": 13,
+        "cited_supported": 13,
+        "caret": false
+      },
+      "G-821bc5e47e": {
+        "refused": false,
+        "n": 6,
+        "supported": 5,
+        "uncited": 1,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "G-224713cd01": {
+        "refused": false,
+        "n": 13,
+        "supported": 9,
+        "uncited": 3,
+        "cited": 10,
+        "cited_supported": 9,
+        "caret": false
+      },
+      "G-7ba948b373": {
+        "refused": false,
+        "n": 11,
+        "supported": 6,
+        "uncited": 4,
+        "cited": 7,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "G-861bc5b622": {
+        "refused": false,
+        "n": 4,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "G-44fef5ccc2": {
+        "refused": false,
+        "n": 9,
+        "supported": 5,
+        "uncited": 4,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "B-bf5d25e90c": {
+        "refused": false,
+        "n": 1,
+        "supported": 0,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 0,
+        "caret": false
+      },
+      "B-bd576225ae": {
+        "refused": false,
+        "n": 7,
+        "supported": 3,
+        "uncited": 3,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "B-caeac5ceae": {
+        "refused": false,
+        "n": 4,
+        "supported": 1,
+        "uncited": 2,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "B-8a448465a7": {
+        "refused": false,
+        "n": 5,
+        "supported": 2,
+        "uncited": 3,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "B-c778971a2b": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 1,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "B-718f4063aa": {
+        "refused": false,
+        "n": 5,
+        "supported": 2,
+        "uncited": 2,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "B-5eb622f77b": {
+        "refused": false,
+        "n": 4,
+        "supported": 1,
+        "uncited": 2,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "B-d9746d69e7": {
+        "refused": true,
+        "n": 0,
+        "supported": 0,
+        "uncited": 0,
+        "cited": 0,
+        "cited_supported": 0,
+        "caret": false
+      },
+      "B-611217c7b6": {
+        "refused": false,
+        "n": 5,
+        "supported": 2,
+        "uncited": 2,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "B-2fc851c6ef": {
+        "refused": false,
+        "n": 5,
+        "supported": 3,
+        "uncited": 2,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "B-52b2b2ab82": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 1,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "B-0192416a5a": {
+        "refused": false,
+        "n": 4,
+        "supported": 0,
+        "uncited": 2,
+        "cited": 2,
+        "cited_supported": 0,
+        "caret": false
+      },
+      "B-5f50f7a6c2": {
+        "refused": false,
+        "n": 6,
+        "supported": 1,
+        "uncited": 4,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "B-4c11b3e174": {
+        "refused": false,
+        "n": 6,
+        "supported": 2,
+        "uncited": 2,
+        "cited": 4,
+        "cited_supported": 2,
+        "caret": false
+      }
+    },
+    "a9_datamark": {
+      "L-204fcb766a": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 1,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-7d894157f4": {
+        "refused": false,
+        "n": 5,
+        "supported": 4,
+        "uncited": 1,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "L-e4a0e66f7b": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-1a79cd4f92": {
+        "refused": false,
+        "n": 3,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-3b07b5f664": {
+        "refused": false,
+        "n": 4,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-5cd077cf0c": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 1,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-07ebaffcc3": {
+        "refused": false,
+        "n": 6,
+        "supported": 4,
+        "uncited": 1,
+        "cited": 5,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "L-e54d9ddab4": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-77ed32c36f": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-47aef70f5a": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-e842919f48": {
+        "refused": false,
+        "n": 4,
+        "supported": 1,
+        "uncited": 1,
+        "cited": 3,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-446992a76d": {
+        "refused": false,
+        "n": 9,
+        "supported": 6,
+        "uncited": 2,
+        "cited": 7,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "L-c27afbbeb5": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-e5b33be7e2": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-701c0708f2": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-551a0e423b": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-eab9a6091b": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-8ea56d0eec": {
+        "refused": false,
+        "n": 6,
+        "supported": 5,
+        "uncited": 1,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "L-13ae2a142d": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-e7cba04788": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-f0535b3144": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-8f148a4aec": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-a2c00a9f8b": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-923b93519f": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 1,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-41dab0f0e5": {
+        "refused": false,
+        "n": 5,
+        "supported": 5,
+        "uncited": 0,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "L-d950b1c9df": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 1,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-c294db17eb": {
+        "refused": false,
+        "n": 10,
+        "supported": 9,
+        "uncited": 1,
+        "cited": 9,
+        "cited_supported": 9,
+        "caret": false
+      },
+      "L-3a97a4fbfe": {
+        "refused": false,
+        "n": 5,
+        "supported": 4,
+        "uncited": 1,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "L-28673b1f56": {
+        "refused": false,
+        "n": 3,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-f0de3d22fc": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-a8da0ea627": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-e2b8c0ac65": {
+        "refused": false,
+        "n": 3,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-22723db9ff": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-afc82f56bf": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-8ab362f0e3": {
+        "refused": false,
+        "n": 7,
+        "supported": 6,
+        "uncited": 1,
+        "cited": 6,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "L-51c51e5707": {
+        "refused": false,
+        "n": 14,
+        "supported": 2,
+        "uncited": 6,
+        "cited": 8,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-23ecce09ca": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 1,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-99426bab62": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "L-5c2f0c36e5": {
+        "refused": false,
+        "n": 3,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-950416d079": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-fa19df4328": {
+        "refused": false,
+        "n": 2,
+        "supported": 0,
+        "uncited": 1,
+        "cited": 1,
+        "cited_supported": 0,
+        "caret": false
+      },
+      "L-30f54538b9": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-666b59cbb6": {
+        "refused": false,
+        "n": 5,
+        "supported": 3,
+        "uncited": 1,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-b3a85d4eda": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 1,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-60504fa849": {
+        "refused": false,
+        "n": 7,
+        "supported": 6,
+        "uncited": 1,
+        "cited": 6,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "L-83be086895": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-bbfc5e240c": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-fa359783b6": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-6ac3514931": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-4e51f48592": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-a4b3d7b618": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-fa04780483": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "L-6c4a8e486c": {
+        "refused": false,
+        "n": 4,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-1cafa4e734": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-fc51eb033f": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 1,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-9207d5e22c": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-4ecb62cac2": {
+        "refused": false,
+        "n": 9,
+        "supported": 5,
+        "uncited": 1,
+        "cited": 8,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "L-d8dc03abc2": {
+        "refused": false,
+        "n": 11,
+        "supported": 3,
+        "uncited": 1,
+        "cited": 10,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "L-d445f5ab12": {
+        "refused": false,
+        "n": 5,
+        "supported": 2,
+        "uncited": 2,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-a18a1e01b3": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-a96c0fbfdf": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-4aa4faa3cd": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-17cd146474": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "L-ef5160d7d0": {
+        "refused": false,
+        "n": 1,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "L-99a0cb2653": {
+        "refused": false,
+        "n": 8,
+        "supported": 2,
+        "uncited": 4,
+        "cited": 4,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-64fa8028fc": {
+        "refused": false,
+        "n": 3,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "M-20b3651156": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-02157c08dd": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-f8199de8b1": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-029431a3df": {
+        "refused": false,
+        "n": 9,
+        "supported": 4,
+        "uncited": 3,
+        "cited": 6,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-db8dfe3ed1": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-74be6129e9": {
+        "refused": false,
+        "n": 9,
+        "supported": 5,
+        "uncited": 4,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "M-b09984ff8c": {
+        "refused": false,
+        "n": 3,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-581cb54ce2": {
+        "refused": false,
+        "n": 7,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 7,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-f1369e6713": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "M-ca7eab2723": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-8a85f3b6b1": {
+        "refused": false,
+        "n": 5,
+        "supported": 3,
+        "uncited": 2,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-4d4d67b2e9": {
+        "refused": false,
+        "n": 11,
+        "supported": 9,
+        "uncited": 2,
+        "cited": 9,
+        "cited_supported": 9,
+        "caret": false
+      },
+      "M-3a9e7ec6a9": {
+        "refused": false,
+        "n": 5,
+        "supported": 5,
+        "uncited": 0,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "M-54482d18e1": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-fe7ab99e65": {
+        "refused": false,
+        "n": 7,
+        "supported": 4,
+        "uncited": 2,
+        "cited": 5,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-725f6d6c79": {
+        "refused": false,
+        "n": 6,
+        "supported": 2,
+        "uncited": 4,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-e6c2023ca0": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-5517238fa8": {
+        "refused": false,
+        "n": 6,
+        "supported": 6,
+        "uncited": 0,
+        "cited": 6,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "M-5dc8c32e7f": {
+        "refused": false,
+        "n": 8,
+        "supported": 5,
+        "uncited": 1,
+        "cited": 7,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "M-9d162a27d2": {
+        "refused": false,
+        "n": 7,
+        "supported": 6,
+        "uncited": 0,
+        "cited": 7,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "M-81480ee57d": {
+        "refused": false,
+        "n": 4,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-4ef2df83e8": {
+        "refused": false,
+        "n": 5,
+        "supported": 5,
+        "uncited": 0,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "M-e2c3874170": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-67bb2be32d": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-8ad3fe0188": {
+        "refused": false,
+        "n": 4,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-61fa7dee06": {
+        "refused": false,
+        "n": 9,
+        "supported": 6,
+        "uncited": 3,
+        "cited": 6,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "M-283acbdb08": {
+        "refused": false,
+        "n": 10,
+        "supported": 5,
+        "uncited": 5,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "M-83e2e426cf": {
+        "refused": false,
+        "n": 6,
+        "supported": 3,
+        "uncited": 2,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-a32cfdd0dc": {
+        "refused": false,
+        "n": 6,
+        "supported": 5,
+        "uncited": 1,
+        "cited": 5,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "M-03274ff886": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "M-f6ccc8e8b7": {
+        "refused": false,
+        "n": 6,
+        "supported": 2,
+        "uncited": 4,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-b0acba683b": {
+        "refused": false,
+        "n": 3,
+        "supported": 1,
+        "uncited": 1,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "M-25b9262768": {
+        "refused": false,
+        "n": 5,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 5,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "M-013c95c56d": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-73181cfc09": {
+        "refused": false,
+        "n": 9,
+        "supported": 3,
+        "uncited": 5,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-f0e475045c": {
+        "refused": false,
+        "n": 9,
+        "supported": 5,
+        "uncited": 1,
+        "cited": 8,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "M-d2a2ce8d2b": {
+        "refused": false,
+        "n": 10,
+        "supported": 4,
+        "uncited": 5,
+        "cited": 5,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-accab1e0e6": {
+        "refused": false,
+        "n": 8,
+        "supported": 3,
+        "uncited": 5,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "M-7531785032": {
+        "refused": false,
+        "n": 8,
+        "supported": 4,
+        "uncited": 1,
+        "cited": 7,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-2c6e9e0188": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "M-11ba8b1fd3": {
+        "refused": false,
+        "n": 12,
+        "supported": 7,
+        "uncited": 4,
+        "cited": 8,
+        "cited_supported": 7,
+        "caret": false
+      },
+      "M-785fbe2558": {
+        "refused": false,
+        "n": 4,
+        "supported": 4,
+        "uncited": 0,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "G-354b628368": {
+        "refused": false,
+        "n": 7,
+        "supported": 6,
+        "uncited": 1,
+        "cited": 6,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "G-0be1c04db8": {
+        "refused": false,
+        "n": 5,
+        "supported": 4,
+        "uncited": 1,
+        "cited": 4,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "G-951630b502": {
+        "refused": false,
+        "n": 8,
+        "supported": 6,
+        "uncited": 1,
+        "cited": 7,
+        "cited_supported": 6,
+        "caret": false
+      },
+      "G-0500f0c604": {
+        "refused": false,
+        "n": 9,
+        "supported": 7,
+        "uncited": 2,
+        "cited": 7,
+        "cited_supported": 7,
+        "caret": false
+      },
+      "G-9a28615079": {
+        "refused": false,
+        "n": 9,
+        "supported": 7,
+        "uncited": 2,
+        "cited": 7,
+        "cited_supported": 7,
+        "caret": false
+      },
+      "G-14a37c9367": {
+        "refused": false,
+        "n": 8,
+        "supported": 5,
+        "uncited": 1,
+        "cited": 7,
+        "cited_supported": 5,
+        "caret": false
+      },
+      "G-06cfa36669": {
+        "refused": false,
+        "n": 13,
+        "supported": 9,
+        "uncited": 3,
+        "cited": 10,
+        "cited_supported": 9,
+        "caret": false
+      },
+      "G-821bc5e47e": {
+        "refused": false,
+        "n": 11,
+        "supported": 7,
+        "uncited": 3,
+        "cited": 8,
+        "cited_supported": 7,
+        "caret": false
+      },
+      "G-224713cd01": {
+        "refused": false,
+        "n": 15,
+        "supported": 8,
+        "uncited": 7,
+        "cited": 8,
+        "cited_supported": 8,
+        "caret": false
+      },
+      "G-7ba948b373": {
+        "refused": false,
+        "n": 7,
+        "supported": 7,
+        "uncited": 0,
+        "cited": 7,
+        "cited_supported": 7,
+        "caret": false
+      },
+      "G-861bc5b622": {
+        "refused": false,
+        "n": 5,
+        "supported": 3,
+        "uncited": 0,
+        "cited": 5,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "G-44fef5ccc2": {
+        "refused": false,
+        "n": 7,
+        "supported": 4,
+        "uncited": 2,
+        "cited": 5,
+        "cited_supported": 4,
+        "caret": false
+      },
+      "B-bf5d25e90c": {
+        "refused": false,
+        "n": 1,
+        "supported": 0,
+        "uncited": 0,
+        "cited": 1,
+        "cited_supported": 0,
+        "caret": false
+      },
+      "B-bd576225ae": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "B-caeac5ceae": {
+        "refused": false,
+        "n": 9,
+        "supported": 3,
+        "uncited": 5,
+        "cited": 4,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "B-8a448465a7": {
+        "refused": false,
+        "n": 2,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "B-c778971a2b": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 1,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "B-718f4063aa": {
+        "refused": false,
+        "n": 4,
+        "supported": 3,
+        "uncited": 1,
+        "cited": 3,
+        "cited_supported": 3,
+        "caret": false
+      },
+      "B-5eb622f77b": {
+        "refused": false,
+        "n": 2,
+        "supported": 1,
+        "uncited": 1,
+        "cited": 1,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "B-d9746d69e7": {
+        "refused": false,
+        "n": 5,
+        "supported": 2,
+        "uncited": 3,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "B-611217c7b6": {
+        "refused": false,
+        "n": 5,
+        "supported": 1,
+        "uncited": 2,
+        "cited": 3,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "B-2fc851c6ef": {
+        "refused": false,
+        "n": 3,
+        "supported": 2,
+        "uncited": 0,
+        "cited": 3,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "B-52b2b2ab82": {
+        "refused": false,
+        "n": 2,
+        "supported": 0,
+        "uncited": 1,
+        "cited": 1,
+        "cited_supported": 0,
+        "caret": false
+      },
+      "B-0192416a5a": {
+        "refused": false,
+        "n": 4,
+        "supported": 1,
+        "uncited": 2,
+        "cited": 2,
+        "cited_supported": 1,
+        "caret": false
+      },
+      "B-5f50f7a6c2": {
+        "refused": false,
+        "n": 6,
+        "supported": 2,
+        "uncited": 4,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      },
+      "B-4c11b3e174": {
+        "refused": false,
+        "n": 4,
+        "supported": 2,
+        "uncited": 2,
+        "cited": 2,
+        "cited_supported": 2,
+        "caret": false
+      }
+    }
+  }
+}

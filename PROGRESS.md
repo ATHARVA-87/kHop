@@ -216,6 +216,20 @@ Plan agreed 2026-10-28 (research scout: Adaptive-RAG, CRAG, IRCoT/Self-Ask, RAGA
 - **Labels updated (human's choice 2026-10-29: newer labels for the 6 drifted answers).** Human accuracy now 44/49 = 0.90 [0.78, 0.96] (first labels: 38/49 = 0.78; both reported). Judges re-scored from cache: both catch 3/5 not-correct answers (TPR 0.60 [0.23, 0.88]); checklist judge still below its bar; validation underpowered with 5 negatives (docs/failures.md).
 - Also fixed at Phase 4 start: generation returned empty answers (qwen3.5 thinking), now `generation.think: false`.
 
+## Phase 5 (branch `phase5-agents`): agents + guardrails
+Research first (2026-10-29): well-tuned single pipelines with a reranker match multi-agent RAG at a fraction of the cost (Ferrazzi et al. 2026), so the four roles stay but only the Writer is an LLM call. Planner = A6 rule router; Researcher = the A6 retrievers; Writer = qwen3.5:4b; Verifier = MiniCheck-Flan-T5-Large (no LLM call). Every piece had a keep rule fixed before its run.
+
+| step | what | result | kept? |
+| --- | --- | --- | --- |
+| eval sets | 60 refusal + 20 unanswerable questions (human-checked), 30 planted-injection questions (canary, no labels) | A6 baseline: advice 17/17, off-scope 18/20, should-answer 19/23, unanswerable 19/20, attacks 3/30 | |
+| 2 input gate | rules before search: rule-breaking (plain refusal; owner's joke behind `guard.joke`, off), advice, off-scope, 1000-char cap | tuning set: off-scope 20/20, advice 17/17; **held-out (owner-checked; 2 'upside' rows moved to answer): rules alone 4/30 advice, whole system 25/28** (A6 26/28: the prompt already declines); look-alikes answered A9 28/32 vs A6 26/32 | yes (clear message) |
+| 3 datamarking | ^ between words of retrieved text + one prompt rule | 10 attack templates: A6 4/30 -> A9 0/30 (p = 0.125, consistent with, not proof); cited-sentence support 0.820 -> 0.833 (n.s.); fewer uncited sentences | yes |
+| 4 verifier | MiniCheck-RoBERTa-Large (fits the GPU; Flan-T5 ran out of memory), 60 blind human pairs: 15/15 caught, 41/45 passed, kappa 0.84 (real sentences only: 5/5, 41/45, kappa 0.67) | marks each sentence; replacing answers rejected (would blank a human-correct answer) | marks only |
+
+**Gate: A9 vs A6** (A7 not built; ADR 0007 proposed, owner sign-off pending). Cold latency, 30 dev questions, empty LLM cache (`results/latency_a6_router.json`, `latency_a9_agents.json`): p50 7.8 s -> 8.8 s, p95 17.1 s -> 14.4 s; verify step 95 ms; 1 LLM call per question in both; prompt tokens 1,502 -> 2,475 (+65%, datamarking); cost $0. Guardrail metrics as above. Memory: Flan-T5 verifier ran out of GPU memory next to the writer (switched to RoBERTa); once the kernel OOM-killed Ollama when one process held two configs (14 GB RAM): run configs in separate processes; noted for Phase 6.
+
+Not built (research + measurements): LLM planner / sub-question split, LLM researcher, retry loop, grade-and-rewrite.
+
 ## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
 `results/test/*.json`. No design decision was made on these numbers.
 

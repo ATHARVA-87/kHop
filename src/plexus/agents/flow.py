@@ -53,6 +53,18 @@ def build_flow(rag: NaiveRAG):
     router = getattr(retriever, "router", None)  # RoutedRetriever (A6) has one
     k = rag.cfg.retrieval.top_k
 
+    use_gate = rag.cfg.guard.input_gate
+
+    def guard(s: FlowState) -> dict:
+        from plexus.guardrails.input_gate import gate
+
+        t0 = time.perf_counter()
+        hit = gate(s["question"], getattr(router, "linker", None), rag.cfg.guard.joke)
+        if hit is None:
+            return _step("guard", t0, refused=False)
+        ans = Answer(question=s["question"], text=hit[1], hits=[])
+        return {"answer": ans, **_step("guard", t0, refused=True, reason=hit[0])}
+
     def route(s: FlowState) -> dict:
         t0 = time.perf_counter()
         r = router.route(s["question"]) if router else "fixed"
@@ -70,14 +82,48 @@ def build_flow(rag: NaiveRAG):
         ans.retrieval_ms = next(t["ms"] for t in s["trace"] if t["step"] == "retrieve")
         return {"answer": ans, **_step("answer", t0, cited=ans.cited_chunk_ids)}
 
+    scorer = None
+
+    def verify(s: FlowState) -> dict:
+        """Mark each sentence as supported by its cited passages or not. It does NOT delete
+        or replace anything: replacing answers with no supported sentence would have blanked a
+        human-correct answer (docs/failures.md), so the verifier only informs the reader."""
+        nonlocal scorer
+        from plexus.agents.verifier import check_answer, load_minicheck
+        from plexus.ingest.headers import index_text
+
+        t0 = time.perf_counter()
+        ans = s["answer"]
+        if scorer is None:
+            scorer = load_minicheck(rag.cfg.guard.verifier_model)
+        passages = [index_text(h.header, h.text) for h in ans.hits]
+        checks = check_answer(ans.text, passages, scorer) if ans.hits else []
+        ans.checks = [{"sentence": c.sentence, "cited": c.cited, "supported": c.supported,
+                       "support": None if c.support is None else round(c.support, 3)}
+                      for c in checks]  # fmt: skip
+        n_sup = sum(c["supported"] for c in ans.checks)
+        return {"answer": ans, **_step("verify", t0, sentences=len(checks), supported=n_sup)}
+
     g = StateGraph(FlowState)
     g.add_node("route", route)
     g.add_node("retrieve", retrieve)
     g.add_node("answer", answer)
-    g.add_edge(START, "route")
+    if use_gate:  # refused questions end here, before any search or LLM call
+        g.add_node("guard", guard)
+        g.add_edge(START, "guard")
+        g.add_conditional_edges(
+            "guard", lambda s: END if "answer" in s else "route", ["route", END]
+        )
+    else:
+        g.add_edge(START, "route")
     g.add_edge("route", "retrieve")
     g.add_edge("retrieve", "answer")
-    g.add_edge("answer", END)
+    if rag.cfg.guard.verify:
+        g.add_node("verify", verify)
+        g.add_edge("answer", "verify")
+        g.add_edge("verify", END)
+    else:
+        g.add_edge("answer", END)
     return g.compile()  # no checkpointer: state lives only for one question
 
 

@@ -20,8 +20,8 @@ dependencies = [
 
 [project.optional-dependencies]
 ml = [
-    "torch==2.5.1",
-    # transformers 5.x needs torch>=2.6; we keep torch 2.5.1 (ADR 0002)
+    "torch==2.6.0",
+    # 2.5.1 -> 2.6.0 on 2026-10-29 (owner approved; security fixes). transformers stays < 5 (ADR 0002)
     "transformers>=4.41,<5",
     "sentence-transformers>=3,<6",
     "qdrant-client>=1.12",

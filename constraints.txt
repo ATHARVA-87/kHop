@@ -1,4 +1,4 @@
 # Pins applied to every local install so the shared `torch` conda env never changes.
 #   pip install -c constraints.txt -e '.[ml,dev]'
-torch==2.5.1
+torch==2.6.0
 numpy==1.26.4

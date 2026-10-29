@@ -85,6 +85,18 @@ class JudgeConfig(_Strict):
     fallback_models: list[str] = ["gemini-3.5-flash-lite"]  # tried when the main one fails
 
 
+class GuardConfig(_Strict):
+    """Phase 5 guardrails; all off by default so earlier configs are unchanged."""
+
+    input_gate: bool = False  # refuse advice / off-scope / rule-breaking before search
+    joke: bool = (
+        False  # owner's "nah, I'd win." reply to rule-breaking requests (off: plain refusal)
+    )
+    datamark: bool = False  # ^ between words of retrieved text (prompt-injection defence)
+    verify: bool = False  # mark each cited sentence as supported or not (MiniCheck); no LLM call
+    verifier_model: Literal["roberta", "flan-t5"] = "roberta"  # roberta fits the 6 GB GPU
+
+
 class ExperimentConfig(_Strict):
     name: str
     description: str = ""
@@ -95,6 +107,7 @@ class ExperimentConfig(_Strict):
     retrieval: RetrievalConfig = RetrievalConfig()
     generation: GenerationConfig = GenerationConfig()
     judge: JudgeConfig = JudgeConfig()
+    guard: GuardConfig = GuardConfig()
 
     @classmethod
     def load(cls, path: Path | str) -> ExperimentConfig:

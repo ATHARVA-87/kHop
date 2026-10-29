@@ -1,0 +1,443 @@
+{
+  "results": "results/a6_router.json",
+  "rows": {
+    "V-01": {
+      "qid": "L-d8dc03abc2",
+      "cited": [
+        1
+      ],
+      "swapped": false
+    },
+    "V-02": {
+      "qid": "M-25b9262768",
+      "cited": [
+        5
+      ],
+      "swapped": false
+    },
+    "V-03": {
+      "qid": "G-224713cd01",
+      "cited": [
+        2
+      ],
+      "swapped": false
+    },
+    "V-04": {
+      "qid": "M-61fa7dee06",
+      "cited": [
+        1
+      ],
+      "swapped": false
+    },
+    "V-05": {
+      "qid": "M-9d162a27d2",
+      "cited": [
+        3
+      ],
+      "swapped": false
+    },
+    "V-06": {
+      "qid": "G-0be1c04db8",
+      "cited": [
+        5
+      ],
+      "swapped": false
+    },
+    "V-07": {
+      "qid": "G-0500f0c604",
+      "cited": [
+        1
+      ],
+      "swapped": false
+    },
+    "V-08": {
+      "qid": "L-c294db17eb",
+      "cited": [
+        2
+      ],
+      "swapped": false
+    },
+    "V-09": {
+      "qid": "M-73181cfc09",
+      "cited": [
+        1
+      ],
+      "swapped": true
+    },
+    "V-10": {
+      "qid": "M-029431a3df",
+      "cited": [
+        3
+      ],
+      "swapped": false
+    },
+    "V-11": {
+      "qid": "M-5517238fa8",
+      "cited": [
+        2,
+        4,
+        5
+      ],
+      "swapped": false
+    },
+    "V-12": {
+      "qid": "L-d8dc03abc2",
+      "cited": [
+        1
+      ],
+      "swapped": true
+    },
+    "V-13": {
+      "qid": "G-0be1c04db8",
+      "cited": [
+        4
+      ],
+      "swapped": false
+    },
+    "V-14": {
+      "qid": "L-bbfc5e240c",
+      "cited": [
+        5
+      ],
+      "swapped": false
+    },
+    "V-15": {
+      "qid": "G-224713cd01",
+      "cited": [
+        1
+      ],
+      "swapped": false
+    },
+    "V-16": {
+      "qid": "L-99426bab62",
+      "cited": [
+        3,
+        4
+      ],
+      "swapped": false
+    },
+    "V-17": {
+      "qid": "G-354b628368",
+      "cited": [
+        1
+      ],
+      "swapped": false
+    },
+    "V-18": {
+      "qid": "M-725f6d6c79",
+      "cited": [
+        3
+      ],
+      "swapped": false
+    },
+    "V-19": {
+      "qid": "G-14a37c9367",
+      "cited": [
+        4
+      ],
+      "swapped": false
+    },
+    "V-20": {
+      "qid": "L-f0535b3144",
+      "cited": [
+        1,
+        2
+      ],
+      "swapped": false
+    },
+    "V-21": {
+      "qid": "G-0500f0c604",
+      "cited": [
+        3
+      ],
+      "swapped": false
+    },
+    "V-22": {
+      "qid": "L-41dab0f0e5",
+      "cited": [
+        4
+      ],
+      "swapped": false
+    },
+    "V-23": {
+      "qid": "G-7ba948b373",
+      "cited": [
+        1,
+        2,
+        3
+      ],
+      "swapped": false
+    },
+    "V-24": {
+      "qid": "B-718f4063aa",
+      "cited": [
+        1
+      ],
+      "swapped": false
+    },
+    "V-25": {
+      "qid": "L-8ab362f0e3",
+      "cited": [
+        2
+      ],
+      "swapped": false
+    },
+    "V-26": {
+      "qid": "M-accab1e0e6",
+      "cited": [
+        1
+      ],
+      "swapped": true
+    },
+    "V-27": {
+      "qid": "L-23ecce09ca",
+      "cited": [
+        1
+      ],
+      "swapped": true
+    },
+    "V-28": {
+      "qid": "M-83e2e426cf",
+      "cited": [
+        2
+      ],
+      "swapped": false
+    },
+    "V-29": {
+      "qid": "L-1cafa4e734",
+      "cited": [
+        1
+      ],
+      "swapped": false
+    },
+    "V-30": {
+      "qid": "G-9a28615079",
+      "cited": [
+        1
+      ],
+      "swapped": false
+    },
+    "V-31": {
+      "qid": "L-4e51f48592",
+      "cited": [
+        1
+      ],
+      "swapped": true
+    },
+    "V-32": {
+      "qid": "M-a32cfdd0dc",
+      "cited": [
+        3,
+        4
+      ],
+      "swapped": false
+    },
+    "V-33": {
+      "qid": "L-3a97a4fbfe",
+      "cited": [
+        1,
+        2,
+        4,
+        5
+      ],
+      "swapped": false
+    },
+    "V-34": {
+      "qid": "M-f1369e6713",
+      "cited": [
+        1
+      ],
+      "swapped": true
+    },
+    "V-35": {
+      "qid": "G-14a37c9367",
+      "cited": [
+        3
+      ],
+      "swapped": false
+    },
+    "V-36": {
+      "qid": "M-74be6129e9",
+      "cited": [
+        4
+      ],
+      "swapped": false
+    },
+    "V-37": {
+      "qid": "M-5517238fa8",
+      "cited": [
+        1
+      ],
+      "swapped": true
+    },
+    "V-38": {
+      "qid": "M-f0e475045c",
+      "cited": [
+        1
+      ],
+      "swapped": true
+    },
+    "V-39": {
+      "qid": "G-354b628368",
+      "cited": [
+        1,
+        3,
+        5
+      ],
+      "swapped": false
+    },
+    "V-40": {
+      "qid": "G-224713cd01",
+      "cited": [
+        4
+      ],
+      "swapped": false
+    },
+    "V-41": {
+      "qid": "M-5dc8c32e7f",
+      "cited": [
+        2
+      ],
+      "swapped": false
+    },
+    "V-42": {
+      "qid": "M-61fa7dee06",
+      "cited": [
+        2,
+        3,
+        5
+      ],
+      "swapped": false
+    },
+    "V-43": {
+      "qid": "L-e842919f48",
+      "cited": [
+        4
+      ],
+      "swapped": false
+    },
+    "V-44": {
+      "qid": "L-07ebaffcc3",
+      "cited": [
+        2
+      ],
+      "swapped": false
+    },
+    "V-45": {
+      "qid": "G-861bc5b622",
+      "cited": [
+        1,
+        3
+      ],
+      "swapped": false
+    },
+    "V-46": {
+      "qid": "L-923b93519f",
+      "cited": [
+        2
+      ],
+      "swapped": false
+    },
+    "V-47": {
+      "qid": "M-2c6e9e0188",
+      "cited": [
+        3
+      ],
+      "swapped": false
+    },
+    "V-48": {
+      "qid": "G-44fef5ccc2",
+      "cited": [
+        3
+      ],
+      "swapped": false
+    },
+    "V-49": {
+      "qid": "B-bf5d25e90c",
+      "cited": [
+        5
+      ],
+      "swapped": false
+    },
+    "V-50": {
+      "qid": "G-0500f0c604",
+      "cited": [
+        2
+      ],
+      "swapped": false
+    },
+    "V-51": {
+      "qid": "M-3a9e7ec6a9",
+      "cited": [
+        5
+      ],
+      "swapped": false
+    },
+    "V-52": {
+      "qid": "G-06cfa36669",
+      "cited": [
+        3
+      ],
+      "swapped": false
+    },
+    "V-53": {
+      "qid": "G-951630b502",
+      "cited": [
+        1
+      ],
+      "swapped": true
+    },
+    "V-54": {
+      "qid": "L-e4a0e66f7b",
+      "cited": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "swapped": false
+    },
+    "V-55": {
+      "qid": "L-8ab362f0e3",
+      "cited": [
+        3
+      ],
+      "swapped": false
+    },
+    "V-56": {
+      "qid": "L-60504fa849",
+      "cited": [
+        1
+      ],
+      "swapped": false
+    },
+    "V-57": {
+      "qid": "G-7ba948b373",
+      "cited": [
+        5
+      ],
+      "swapped": false
+    },
+    "V-58": {
+      "qid": "G-0be1c04db8",
+      "cited": [
+        3
+      ],
+      "swapped": false
+    },
+    "V-59": {
+      "qid": "L-60504fa849",
+      "cited": [
+        1
+      ],
+      "swapped": true
+    },
+    "V-60": {
+      "qid": "L-bbfc5e240c",
+      "cited": [
+        1
+      ],
+      "swapped": false
+    }
+  }
+}

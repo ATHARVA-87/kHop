@@ -8,6 +8,7 @@ data/raw/
 data/processed/
 data/cache/
 data/index/
+data/models/
 !data/golden/
 
 # python

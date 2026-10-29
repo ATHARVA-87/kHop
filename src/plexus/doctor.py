@@ -253,7 +253,7 @@ CHECKS: list[Check] = [
         1,
         check_imports(
             ["torch", "sentence_transformers", "qdrant_client"],
-            "pip install -c constraints.txt -e '.[ml]' (in the torch env; keeps torch 2.5.1)",
+            "pip install -c constraints.txt -e '.[ml]' (in the torch env; keeps torch 2.6.0)",
         ),
     ),
     Check("torch / GPU", 1, check_torch_cuda),
