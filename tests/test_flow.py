@@ -70,9 +70,32 @@ def test_verify_marks_sentences_without_changing_the_answer(tmp_path, monkeypatc
         def score(self, doc, claim):
             return 0.9
 
-    monkeypatch.setattr(v, "load_minicheck", lambda name="roberta": Fake())
+    monkeypatch.setattr(v, "load_minicheck", lambda *a, **k: Fake())
     rag = _rag(tmp_path, lambda r: "TSMC makes the chips for us [1].")
     rag.cfg.guard.verify = True
     ans, trace = ask(build_flow(rag), "Who makes the chips?")
     assert ans.text == "TSMC makes the chips for us [1]."
     assert ans.checks[0]["supported"] and trace[-1]["step"] == "verify"
+
+
+def test_ask_events_streams_steps_tokens_and_done(tmp_path):
+    from plexus.agents.flow import ask_events
+
+    rag = _rag(tmp_path, lambda r: "TSMC makes the chips for us [1].")
+    events = list(ask_events(build_flow(rag), "Who makes the chips?"))
+    kinds = [k for k, _ in events]
+    assert kinds[-1] == "done" and kinds.count("token") > 1
+    assert [e["step"] for k, e in events if k == "step"] == ["route", "retrieve", "answer"]
+    text = "".join(t for k, t in events if k == "token")
+    assert text == events[-1][1]["answer"].text == "TSMC makes the chips for us [1]."
+
+
+def test_verify_skips_refusals(tmp_path, monkeypatch):
+    import plexus.agents.verifier as v
+    from plexus.baseline.naive import NOT_ENOUGH
+
+    monkeypatch.setattr(v, "load_minicheck", lambda *a, **k: None)
+    rag = _rag(tmp_path, lambda r: NOT_ENOUGH)
+    rag.cfg.guard.verify = True
+    ans, trace = ask(build_flow(rag), "Who makes the chips?")
+    assert ans.checks == [] and trace[-1]["sentences"] == 0

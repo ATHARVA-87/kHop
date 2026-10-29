@@ -31,3 +31,6 @@ Mistakes in AI-generated code or data that tests, evals or human review caught. 
 
 ## 2026-10-29: LangGraph equivalence check compared routes with themselves
 I reported "routes 134/134 identical" for the LangGraph flow, but saved results store no route, so the check fell back to comparing the flow's route with itself. Caught by the reviewer agent (no script backed the claim). Fix: `make flow-check` (committed, writes `results/flow_check.json`) compares every route with the golden question type: 134/134. Also from the same review: the reported human test-retest 43/49 counted 3 answers that were never re-labelled (true: 40/46).
+
+## 2026-10-29: committed a failing test; the test had caught a real cache bug
+`pytest | tail` hid pytest's exit status, so commit 3bc37b3 went in with a failing test. The failure was a real bug: the semantic cache cut period words to 3 characters, which also cut years ("2024" and "2025" both became "202"), so a 2025 question could have reused a 2024 answer. Fixed (years kept whole) before any cache result was produced. From now on the exit status is checked directly before committing.

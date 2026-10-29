@@ -39,3 +39,6 @@ logs/
 *.log
 data/graph/
 .cache/
+web/.next/
+web/out/
+data/logs/

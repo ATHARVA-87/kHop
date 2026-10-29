@@ -123,16 +123,26 @@ class NaiveRAG:
         ans.retrieval_ms = (time.perf_counter() - t0) * 1000 - ans.generation_ms
         return ans
 
-    def generate(self, question: str, hits: list[Hit]) -> Answer:
+    def generate(self, question: str, hits: list[Hit], on_text=None) -> Answer:
         """Write the cited answer from the top `context_chunks` hits (the LangGraph "answer"
-        node calls this too, so both paths give the same answer)."""
+        node calls this too, so both paths give the same answer). With `on_text`, the text is
+        streamed piece by piece to that callback (the live app); the result is the same."""
         if self.llm is None:
             raise RuntimeError("NaiveRAG.generate needs an LLMClient")
         t1 = time.perf_counter()
         context = hits[: self.cfg.generation.context_chunks]
-        resp = self.llm.complete(self.build_request(question, context))
+        request = self.build_request(question, context)
+        if on_text is None:
+            resp = self.llm.complete(request)
+            raw, cached = resp.text, resp.cached
+        else:
+            pieces = []
+            for piece in self.llm.stream(request):
+                pieces.append(piece)
+                on_text(piece)
+            raw, cached = "".join(pieces), self.llm.last_cached
         t2 = time.perf_counter()
-        text = strip_thinking(resp.text)
+        text = strip_thinking(raw)
         cited = sorted({int(n) for n in _CITE.findall(text)})
         return Answer(
             question=question,
@@ -140,5 +150,5 @@ class NaiveRAG:
             hits=context,
             cited_chunk_ids=[context[n - 1].chunk_id for n in cited if 1 <= n <= len(context)],
             generation_ms=(t2 - t1) * 1000,
-            cached=resp.cached,
+            cached=cached,
         )

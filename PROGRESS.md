@@ -230,6 +230,23 @@ Research first (2026-10-29): well-tuned single pipelines with a reranker match m
 
 Not built (research + measurements): LLM planner / sub-question split, LLM researcher, retry loop, grade-and-rewrite.
 
+## Phase 6 (branch `phase6-app`): the app
+Research first (2026-10-29). Built: FastAPI service with live answers (SSE; `make serve`, 127.0.0.1:8000), static Next.js 16.4.1 page (ADR 0008; design plan approved by the owner: white / filing red / highlighter yellow, light by default, dark only by switch, remembered), one-company filter for single-company questions (found by using the app; dev recall@10 +0.015, kept; `configs/app.yaml`), A8 semantic cache, per-question trace log, load test.
+
+**Gate evidence, final setup after the review fixes** (writer loaded first, 100% on the GPU; fact-checker on CPU; worker thread per question; cold caches; `results/phase6_load.json`, `phase6_stages.json`, `a8_cache.json`). Small samples: "p95" is the slowest answer when n < 20.
+| people asking at once | answered (n) | told "busy" (503) | first words p50 / max | full answer p50 / max |
+| --- | --- | --- | --- | --- |
+| 1 | 2 | 0 | 4.2 s | 8.9 s |
+| 2 | 4 | 0 | 4.8 / 15.6 s | 14.5 / 23.4 s |
+| 4 | 8 | 0 | 19.1 / 31.1 s | 27.1 / 34.5 s |
+| 8 | 10 of 16 | 6 (queue limit 4, by design) | 16.4 / 27.9 s | 22.1 / 33.4 s |
+| mix: 6 rewordings + 4 new | 7 of 10 | 3 | 8.2 / 34.6 s | 13.9 / 37.3 s (2 cache hits) |
+- Per step (fresh answers): retrieve p50 0.55 s, writer p50 3.5 s / p95 9.4 s, fact-check (CPU) p50 2.1 s; queue wait p50 7.5 s; cached answers p50 59 ms. Cache (pre-set test half): 10/20 rewordings reused, 0/20 wrong (upper bound 15%); follow-up over all 40 pairs, labelled post-hoc: 23/40 reusable with the company/period key vs 3/40 without it. (Commit 44fa023's message quoted the post-hoc 23/40 without that label; this line is the correction.) Cache hits in the mix round vary by run (2 here, 4 before the review fixes): only fully fact-checked originals are stored.
+- Cost per question: $0; 1 LLM call per fresh question, 0 per cache hit.
+- GPU (recorded by the load test, 219 samples): median 5,513 MiB, peak 5,547 MiB of 6,141 (owner's 10% margin limit 5,526: typical use inside, brief peaks 21 MiB over). Stopping the app frees the GPU (12 MiB).
+- First run (writer 35% on CPU, before the load-order fix) is in docs/failures.md.
+- Found by the load test: cache hits were being turned away as "busy" because the queue was checked before the cache; fixed (cache first, then queue), test added.
+
 ## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
 `results/test/*.json`. No design decision was made on these numbers.
 

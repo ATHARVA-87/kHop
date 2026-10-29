@@ -1,9 +1,9 @@
 # Plexus — one command per step. Run inside the `torch` conda env:
 #   conda activate torch
-PY ?= python
+PY ?= $(shell test -x $(HOME)/miniconda3/envs/torch/bin/python && echo $(HOME)/miniconda3/envs/torch/bin/python || echo python)
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask flow-check security extract serve ui
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask flow-check security ui-dev stop extract serve ui
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -68,6 +68,7 @@ security: ## Secrets/home-path hooks on all files + known-vulnerability audit of
 	uv export --frozen --all-extras --no-hashes --no-emit-project -q -o .cache/requirements-audit.txt
 	-uvx --from pip-audit==2.9.0 pip-audit -r .cache/requirements-audit.txt --no-deps --disable-pip --progress-spinner off -f json -o .cache/pip-audit.json
 	$(PY) -m plexus.audit .cache/pip-audit.json
+	cd web && NODE_OPTIONS=--dns-result-order=ipv4first npm audit --omit=dev --audit-level=low
 
 flow-check: ## Cache-only: the LangGraph flow must reproduce every answer of results/a6_router.json
 	$(PY) -m plexus.agents.flow --config configs/a6_router.yaml --check --results results/a6_router.json
@@ -103,8 +104,14 @@ gate-ci: ## CI gate, no torch: BM25, and graph + A5 on BM25 (needs data/processe
 compare: ## paired bootstrap of B vs A on the same queries: make compare A=a0_naive B=a0_bm25
 	$(PY) -m plexus.eval.compare results/$(A).json results/$(B).json
 
-serve: ## FastAPI server (Phase 6)
-	@echo "serve: not implemented yet (Phase 6)"; exit 1
+serve: ## Plexus app on http://127.0.0.1:8000 (API + UI; needs Ollama running). CONFIG=configs/app.yaml
+	PLEXUS_CONFIG=$${CONFIG:-configs/app.yaml} $(PY) -m uvicorn plexus.serve.app:app --host 127.0.0.1 --port 8000
 
-ui: ## Next.js UI (Phase 6)
-	@echo "ui: not implemented yet (Phase 6)"; exit 1
+stop: ## Free the GPU after a hard kill of make serve (unloads the local model)
+	-ollama stop $$($(PY) -c "from plexus.config import ExperimentConfig as E; print(E.load('configs/app.yaml').generation.model)")
+
+ui: ## Build the web page (static export into web/out; make serve then serves it). Telemetry off
+	cd web && NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS=--dns-result-order=ipv4first npm run build
+
+ui-dev: ## Live-reload UI on 127.0.0.1:3000 against make serve (dev only)
+	cd web && NEXT_TELEMETRY_DISABLED=1 NEXT_PUBLIC_API_BASE=http://127.0.0.1:8000 npm run dev

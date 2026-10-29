@@ -63,6 +63,8 @@ class RetrievalConfig(_Strict):
     router: Literal["rules", "local", "multi_hop", "global"] = "rules"
     # A5: questions naming no company get one passage per company first
     company_diverse: bool = False
+    # A6 local route: search only the named company's filings when exactly one is named
+    local_company_filter: bool = False
 
 
 class GenerationConfig(_Strict):
@@ -95,6 +97,10 @@ class GuardConfig(_Strict):
     datamark: bool = False  # ^ between words of retrieved text (prompt-injection defence)
     verify: bool = False  # mark each cited sentence as supported or not (MiniCheck); no LLM call
     verifier_model: Literal["roberta", "flan-t5"] = "roberta"  # roberta fits the 6 GB GPU
+    # cpu (default): frees ~0.7 GB so the writer fits fully on the 6 GB GPU (owner's choice
+    # 2026-10-29); ~3 s per answer on 4 threads. "cuda" on a bigger card: ~0.07 s.
+    verifier_device: Literal["cpu", "cuda"] = "cpu"
+    verifier_threads: int = 4
 
 
 class ExperimentConfig(_Strict):

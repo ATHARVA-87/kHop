@@ -41,6 +41,16 @@ class FlowState(TypedDict, total=False):
     trace: Annotated[list[dict[str, Any]], operator.add]  # each node appends one step
 
 
+def _writer():
+    """LangGraph's custom-event writer while the flow is streamed (the app), else None."""
+    try:
+        from langgraph.config import get_stream_writer
+
+        return get_stream_writer()
+    except Exception:  # not inside a streamed run
+        return None
+
+
 def _step(name: str, t0: float, **detail) -> dict:
     return {"trace": [{"step": name, "ms": round((time.perf_counter() - t0) * 1000, 1), **detail}]}
 
@@ -78,9 +88,11 @@ def build_flow(rag: NaiveRAG):
 
     def answer(s: FlowState) -> dict:
         t0 = time.perf_counter()
-        ans = rag.generate(s["question"], s["hits"])
+        writer = _writer()
+        on_text = (lambda t: writer({"type": "token", "text": t})) if writer else None
+        ans = rag.generate(s["question"], s["hits"], on_text)
         ans.retrieval_ms = next(t["ms"] for t in s["trace"] if t["step"] == "retrieve")
-        return {"answer": ans, **_step("answer", t0, cited=ans.cited_chunk_ids)}
+        return {"answer": ans, **_step("answer", t0, cited=ans.cited_chunk_ids, cached=ans.cached)}
 
     scorer = None
 
@@ -95,9 +107,17 @@ def build_flow(rag: NaiveRAG):
         t0 = time.perf_counter()
         ans = s["answer"]
         if scorer is None:
-            scorer = load_minicheck(rag.cfg.guard.verifier_model)
+            g = rag.cfg.guard
+            scorer = load_minicheck(g.verifier_model, g.verifier_device, g.verifier_threads)
+        from plexus.baseline.naive import is_refusal
+
         passages = [index_text(h.header, h.text) for h in ans.hits]
-        checks = check_answer(ans.text, passages, scorer) if ans.hits else []
+        # a refusal ("not enough evidence") makes no claim, so there is nothing to check
+        checks = (
+            check_answer(ans.text, passages, scorer)
+            if ans.hits and not is_refusal(ans.text)
+            else []
+        )
         ans.checks = [{"sentence": c.sentence, "cited": c.cited, "supported": c.supported,
                        "support": None if c.support is None else round(c.support, 3)}
                       for c in checks]  # fmt: skip
@@ -125,6 +145,25 @@ def build_flow(rag: NaiveRAG):
     else:
         g.add_edge("answer", END)
     return g.compile()  # no checkpointer: state lives only for one question
+
+
+def ask_events(flow, question: str):
+    """Yield the events the app shows live: ("step", trace entry) when a step finishes,
+    ("token", text) while the answer is written, then ("done", final state)."""
+    final: dict = {"question": question, "trace": []}
+    for mode, data in flow.stream(
+        {"question": question, "trace": []}, stream_mode=["updates", "custom"]
+    ):
+        if mode == "custom" and data.get("type") == "token":
+            yield "token", data["text"]
+        elif mode == "updates":
+            for update in data.values():
+                for entry in (update or {}).get("trace", []):
+                    final["trace"].append(entry)
+                    yield "step", entry
+                if update and "answer" in update:
+                    final["answer"] = update["answer"]
+    yield "done", final
 
 
 def ask(flow, question: str) -> tuple[Answer, list[dict]]:

@@ -1,0 +1,41 @@
+# Display names for the 39 filers in the semis-2025 snapshot (shown in the app).
+# Keys are tickers from data/snapshots/semis-2025.manifest.jsonl.
+"ADI": Analog Devices
+"ALGM": Allegro MicroSystems
+"AMAT": Applied Materials
+"AMBA": Ambarella
+"AMD": AMD
+"AMKR": Amkor Technology
+"AVGO": Broadcom
+"CRDO": Credo Technology
+"CRUS": Cirrus Logic
+"DIOD": Diodes
+"ENTG": Entegris
+"FORM": FormFactor
+"INTC": Intel
+"KLAC": KLA
+"LRCX": Lam Research
+"LSCC": Lattice Semiconductor
+"MCHP": Microchip Technology
+"MPWR": Monolithic Power Systems
+"MRVL": Marvell Technology
+"MTSI": MACOM
+"MU": Micron Technology
+"MXL": MaxLinear
+"NVDA": NVIDIA
+"NXPI": NXP Semiconductors
+"ON": onsemi
+"ONTO": Onto Innovation
+"PI": Impinj
+"POWI": Power Integrations
+"QCOM": Qualcomm
+"RMBS": Rambus
+"SITM": SiTime
+"SLAB": Silicon Labs
+"SMTC": Semtech
+"SWKS": Skyworks Solutions
+"SYNA": Synaptics
+"TER": Teradyne
+"TXN": Texas Instruments
+"VSH": Vishay Intertechnology
+"WOLF": Wolfspeed
