@@ -39,7 +39,8 @@ def normalize(q: str) -> str:
 def key_of(question: str, linker) -> str:
     """The exact part of the key: who and when the question is about."""
     ents = sorted(set(linker.link(question))) if linker is not None else []
-    periods = sorted({p.lower()[:3] for p in PERIOD.findall(question)})
+    # years stay whole; words are cut to 3 letters so "jan" and "january" match
+    periods = sorted({p if p.isdigit() else p.lower()[:3] for p in PERIOD.findall(question)})
     return json.dumps({"e": ents, "p": periods})
 
 
