@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import queue
 import threading
 import time
 from collections import defaultdict, deque
@@ -42,6 +43,10 @@ MAX_WAITING = 4  # questions allowed to wait for the GPU
 RATE_PER_MIN = int(os.getenv("PLEXUS_RATE_PER_MIN", "10"))  # per client; the load test raises it
 DEADLINE_S = 120  # one question, start to finish
 UI_DIR = REPO_ROOT / "web" / "out"  # the static Next.js export
+ANSWER_ERROR = os.getenv(
+    "PLEXUS_ANSWER_ERROR",
+    "Plexus could not answer. Check that the answer model is running (for the local app: ollama serve), then ask again.",
+)
 CACHE_THRESHOLD = 0.935  # chosen on cache pairs C-01..C-20, results/a8_cache.json
 TRACE_LOG = Path(os.getenv("PLEXUS_TRACE_LOG", REPO_ROOT / "data" / "logs" / "traces.jsonl"))
 
@@ -63,6 +68,8 @@ class RateLimiter:
             if len(q) >= self.per_min:
                 return False
             q.append(now)
+            for k in [k for k, v in self.hits.items() if not v]:  # forget idle clients
+                del self.hits[k]
             return True
 
 
@@ -89,6 +96,11 @@ class GpuQueue:
         finally:
             with self.lock:
                 self.waiting -= 1
+
+    def leave(self) -> None:
+        """Give back a queue place that never reached acquire() (reader left first)."""
+        with self.lock:
+            self.waiting -= 1
 
     def release(self) -> None:
         self.slot.release()
@@ -121,7 +133,7 @@ def source_of(n: int, hit, docs: dict) -> dict:
         "company": d.get("company", hit.doc_id),
         "form": d.get("form", ""),
         "filed": d.get("filed", ""),
-        "url": d.get("url", ""),
+        "url": d.get("url", "") if d.get("url", "").startswith("https://www.sec.gov/") else "",
         "section": SECTION_NAMES.get(hit.section, hit.section.replace("_", " ").capitalize()),
         "text": hit.text,  # plain text; the UI renders it as text, never as HTML
     }
@@ -322,23 +334,27 @@ def create_app(state_factory=build_state) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        writer = ollama_writer()
-        if writer and state_factory is build_state:
-            # the writer goes on the GPU FIRST, while it is empty: qwen3.5:4b also reserves
-            # ~0.9 GB for an image encoder we never use, so loaded after the search models it
-            # spilled 35% onto the CPU and the laptop lagged (2026-10-29). It stays loaded while
-            # the app runs and is unloaded when the app stops.
-            os.environ.setdefault("PLEXUS_OLLAMA_KEEP_ALIVE", "-1")
-            ollama_load(*writer, keep_alive=-1)
-        state.update(state_factory())
-        yield
-        r = state.get("retriever")
-        if r is not None and hasattr(r, "close"):
-            r.close()
-        if writer and state_factory is build_state:
-            ollama_load(*writer, keep_alive=0)  # free the GPU
+        writer = ollama_writer() if state_factory is build_state else None
+        try:
+            if writer:
+                # the writer goes on the GPU FIRST, while it is empty: qwen3.5:4b also reserves
+                # ~0.9 GB for an image encoder we never use, so loaded after the search models
+                # it spilled 35% onto the CPU and the laptop lagged (2026-10-29). It stays
+                # loaded while the app runs and is unloaded when the app stops (also when
+                # startup fails). After a hard kill: `make stop`.
+                os.environ.setdefault("PLEXUS_OLLAMA_KEEP_ALIVE", "-1")
+                ollama_load(*writer, keep_alive=-1)
+            state.update(state_factory())
+            yield
+        finally:
+            r = state.get("retriever")
+            if r is not None and hasattr(r, "close"):
+                r.close()
+            if writer:
+                ollama_load(*writer, keep_alive=0)  # free the GPU
 
     app = FastAPI(title="Plexus", lifespan=lifespan, docs_url=None, redoc_url=None)
+    app.state.gpu = gpu  # visible to tests
 
     if os.getenv("PLEXUS_DEV_CORS"):  # only for `next dev` on another port
         from fastapi.middleware.cors import CORSMiddleware
@@ -401,31 +417,70 @@ def create_app(state_factory=build_state) -> FastAPI:
 
     @app.get("/api/ask", response_class=EventSourceResponse)
     def ask(admitted: tuple = Depends(admit)):
+        """Streams one question. The question runs in its own worker thread and this response
+        only reads its events from a queue, so a reader who closes the page never blocks the
+        server: the generator just stops reading and signals the worker (review 2026-10-29:
+        closing LangGraph's stream from here could wait for the running writer)."""
         question, position, cached = admitted
         t_start = time.perf_counter()
-        cache = state.get("cache")
         if cached is not None:  # answered from the cache: no queue, no GPU
-            (payload, sim, original), lookup_ms = cached
-            yield ServerSentEvent(event="step", data={
-                "step": "cache", "ms": lookup_ms, "similar_to": original, "similarity": round(sim, 3)})  # fmt: skip
+            (payload, sim, _original), lookup_ms = cached
+            # the earlier question is not shown: it may be another person's (review)
+            yield ServerSentEvent(
+                event="step", data={"step": "cache", "ms": lookup_ms, "similarity": round(sim, 3)}
+            )
             yield ServerSentEvent(event="done", data={**payload, "from_cache": True})
             log_trace(question, {"cache_hit": True, "queue_ms": 0, "total_ms": lookup_ms})
             return
-        yield ServerSentEvent(event="queued", data={"position": position})
-        t_wait = time.perf_counter()
-        if not gpu.acquire(timeout=DEADLINE_S):
-            yield ServerSentEvent(
-                event="error", data={"message": "Plexus is busy. Try again shortly."}
-            )
-            return
-        queue_ms = round((time.perf_counter() - t_wait) * 1000, 1)
-        start = time.monotonic()
+        events: queue.Queue = queue.Queue()
+        cancel = threading.Event()
+        worker = threading.Thread(target=answer_worker, daemon=True, name="plexus-question",
+                                  args=(question, events, cancel, t_start))  # fmt: skip
+        started = False
         try:
-            for ev in run_question(state["flow"], question, state["docs"]):
-                if time.monotonic() - start > DEADLINE_S:
-                    yield ServerSentEvent(event="error", data={
-                        "message": "This answer took too long. Try a shorter or more specific question."})  # fmt: skip
+            yield ServerSentEvent(event="queued", data={"position": position})
+            worker.start()
+            started = True
+            while True:
+                try:
+                    kind, item = events.get(timeout=1.0)
+                except queue.Empty:
+                    if time.perf_counter() - t_start > DEADLINE_S:
+                        cancel.set()
+                        yield ServerSentEvent(event="error", data={
+                            "message": "This answer took too long. Try a shorter or more specific question."})  # fmt: skip
+                        return
+                    continue
+                if kind == "end":
                     return
+                yield item
+        finally:
+            cancel.set()  # the worker stops at its next step and frees the GPU itself
+            if not started:
+                gpu.leave()  # the reader left before the question reached the queue
+
+    def answer_worker(question: str, events: queue.Queue, cancel: threading.Event, t_start: float):
+        cache = state.get("cache")
+        acquired = False
+        try:
+            t_wait = time.perf_counter()
+            acquired = gpu.acquire(timeout=DEADLINE_S)
+            if not acquired:
+                events.put(
+                    (
+                        "event",
+                        ServerSentEvent(
+                            event="error", data={"message": "Plexus is busy. Try again shortly."}
+                        ),
+                    )
+                )
+                return
+            if cancel.is_set():
+                return
+            queue_ms = round((time.perf_counter() - t_wait) * 1000, 1)
+            for ev in run_question(state["flow"], question, state["docs"]):
+                if cancel.is_set():
+                    return  # reader gone or deadline passed; the writer's text stays in the LLM cache
                 if ev.event == "done":
                     trace = ev.data.get("trace", [])
                     log_trace(question, {
@@ -434,18 +489,19 @@ def create_app(state_factory=build_state) -> FastAPI:
                         "steps": {t.get("step"): t.get("ms") for t in trace},
                         "route": next((t.get("route") for t in trace if t.get("step") == "route"), None),
                     })  # fmt: skip
-                if ev.event == "done" and cache is not None and cacheable(ev.data):
-                    try:
-                        cache.store(question, ev.data)
-                    except Exception:
-                        log.exception("cache store failed")
-                yield ev
+                    if cache is not None and cacheable(ev.data):
+                        try:
+                            cache.store(question, ev.data)
+                        except Exception:
+                            log.exception("cache store failed")
+                events.put(("event", ev))
         except Exception:  # details stay in the local log; the reader gets a clear next step
             log.exception("question failed")
-            yield ServerSentEvent(event="error", data={
-                "message": "Plexus could not answer. Check that Ollama is running (ollama serve), then ask again."})  # fmt: skip
+            events.put(("event", ServerSentEvent(event="error", data={"message": ANSWER_ERROR})))
         finally:
-            gpu.release()  # also runs when the reader closes the page
+            if acquired:
+                gpu.release()
+            events.put(("end", None))
 
     @app.exception_handler(HTTPException)
     async def http_error(request: Request, exc: HTTPException):

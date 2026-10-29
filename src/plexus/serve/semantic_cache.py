@@ -19,6 +19,7 @@ import hashlib
 import json
 import re
 import sqlite3
+import threading
 import time
 from pathlib import Path
 
@@ -53,6 +54,7 @@ class SemanticCache:
         self.threshold, self.ttl_s = threshold, ttl_s
         path.parent.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(path, check_same_thread=False)
+        self.lock = threading.Lock()  # one connection shared by the server's threads
         self.db.execute(
             "CREATE TABLE IF NOT EXISTS entries (scope TEXT, k TEXT, question TEXT, vec BLOB, "
             "payload TEXT, created REAL)"
@@ -60,12 +62,13 @@ class SemanticCache:
         self.db.execute("CREATE INDEX IF NOT EXISTS by_key ON entries (scope, k)")
 
     def lookup(self, question: str, now: float | None = None) -> tuple[dict, float, str] | None:
-        """(payload, similarity, original question) of the best match, or None."""
+        """(payload, similarity, stored question hash) of the best match, or None."""
         now = time.time() if now is None else now
-        rows = self.db.execute(
-            "SELECT question, vec, payload, created FROM entries WHERE scope=? AND k=?",
-            (self.scope, key_of(question, self.linker)),
-        ).fetchall()
+        with self.lock:
+            rows = self.db.execute(
+                "SELECT question, vec, payload, created FROM entries WHERE scope=? AND k=?",
+                (self.scope, key_of(question, self.linker)),
+            ).fetchall()
         rows = [r for r in rows if now - r[3] <= self.ttl_s]
         if not rows:
             return None
@@ -77,18 +80,27 @@ class SemanticCache:
         return json.loads(rows[best][2]), sims[best], rows[best][0]
 
     def store(self, question: str, payload: dict, now: float | None = None) -> None:
+        """Stores the answer, the question's vector and only a HASH of its text (privacy:
+        on a shared demo, one person's question is never stored or shown in plain text)."""
+        now = time.time() if now is None else now
         vec = self.encode([normalize(question)])[0].astype(np.float32).tobytes()
-        self.db.execute(
-            "INSERT INTO entries VALUES (?, ?, ?, ?, ?, ?)",
-            (self.scope, key_of(question, self.linker), question, vec, json.dumps(payload),
-             time.time() if now is None else now),
-        )  # fmt: skip
-        self.db.commit()
+        qhash = hashlib.sha256(normalize(question).encode()).hexdigest()[:16]
+        with self.lock:
+            self.db.execute("DELETE FROM entries WHERE created < ?", (now - self.ttl_s,))
+            self.db.execute(
+                "INSERT INTO entries VALUES (?, ?, ?, ?, ?, ?)",
+                (self.scope, key_of(question, self.linker), qhash, vec, json.dumps(payload), now),
+            )
+            self.db.commit()
 
 
 def scope_of(snapshot: str, config_path: Path) -> str:
-    """Snapshot name + hash of the app config: a new corpus or setup never reuses old answers."""
-    return f"{snapshot}:{hashlib.sha256(config_path.read_bytes()).hexdigest()[:12]}"
+    """Snapshot + app config + the writer's instructions: a new corpus, setup or prompt never
+    reuses old answers (review 2026-10-29)."""
+    from plexus.baseline.naive import DATAMARK_RULE, SYSTEM_PROMPT
+
+    h = hashlib.sha256(config_path.read_bytes() + (SYSTEM_PROMPT + DATAMARK_RULE).encode())
+    return f"{snapshot}:{h.hexdigest()[:12]}"
 
 
 def bge_encoder(embedder):

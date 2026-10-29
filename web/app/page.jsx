@@ -61,7 +61,7 @@ async function streamQuestion(question, signal, on) {
   for (;;) {
     const { value, done } = await reader.read();
     if (done) break;
-    buffer += decoder.decode(value, { stream: true });
+    buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
     let cut;
     while ((cut = buffer.indexOf("\n\n")) >= 0) {
       const block = buffer.slice(0, cut);
@@ -72,7 +72,11 @@ async function streamQuestion(question, signal, on) {
         if (line.startsWith("event:")) event = line.slice(6).trim();
         else if (line.startsWith("data:")) data += line.slice(5).trim();
       }
-      if (data) on(event, JSON.parse(data));
+      if (data) {
+        let parsed;
+        try { parsed = JSON.parse(data); } catch { throw new Error("Plexus sent a reply it could not read. Ask again."); }
+        on(event, parsed);
+      }
     }
   }
 }
@@ -182,7 +186,7 @@ function stepView(name, step, running, result) {
     case "cache":
       return {
         title: "Reused a recent answer",
-        detail: `Asked before in other words: "${step.similar_to}". Same companies and dates, checked sentence by sentence then.`,
+        detail: "A very similar question about the same companies and dates was answered recently and fully fact-checked, so its answer is shown at once.",
         state: "is-done",
       };
     case "guard":

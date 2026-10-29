@@ -3,7 +3,7 @@
 PY ?= $(shell test -x $(HOME)/miniconda3/envs/torch/bin/python && echo $(HOME)/miniconda3/envs/torch/bin/python || echo python)
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask flow-check security ui-dev extract serve ui
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask flow-check security ui-dev stop extract serve ui
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -106,6 +106,9 @@ compare: ## paired bootstrap of B vs A on the same queries: make compare A=a0_na
 
 serve: ## Plexus app on http://127.0.0.1:8000 (API + UI; needs Ollama running). CONFIG=configs/app.yaml
 	PLEXUS_CONFIG=$${CONFIG:-configs/app.yaml} $(PY) -m uvicorn plexus.serve.app:app --host 127.0.0.1 --port 8000
+
+stop: ## Free the GPU after a hard kill of make serve (unloads the local model)
+	-ollama stop $$($(PY) -c "from plexus.config import ExperimentConfig as E; print(E.load('configs/app.yaml').generation.model)")
 
 ui: ## Build the web page (static export into web/out; make serve then serves it). Telemetry off
 	cd web && NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS=--dns-result-order=ipv4first npm run build

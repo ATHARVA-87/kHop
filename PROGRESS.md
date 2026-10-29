@@ -241,7 +241,7 @@ Research first (2026-10-29). Built: FastAPI service with live answers (SSE; `mak
 | 4 | 8/8 | 0 | 13.3 / 31.2 s | 27.2 / 34.6 s |
 | 8 | 10/16 | 6 (queue limit 4, by design) | 10.7 / 27.5 s | 16.5 / 33.2 s |
 | mix: 6 rewordings + 4 new | 9/10 | 1 | 0.7 / 13.6 s | 2.4 / 16.0 s (4 cache hits) |
-- Per step (fresh answers): retrieve p50 0.53 s, writer p50 3.1 s / p95 9.8 s, fact-check (CPU) p50 2.2 s; queue wait p50 5.2 s; cached answers p50 6 ms. Cache: 23/40 owner-checked rewordings reused, 0/40 wrong.
+- Per step (fresh answers): retrieve p50 0.53 s, writer p50 3.1 s / p95 9.8 s, fact-check (CPU) p50 2.2 s; queue wait p50 5.2 s; cached answers p50 6 ms. Cache (pre-set test half): 10/20 rewordings reused, 0/20 wrong (upper bound 15%); follow-up over all 40 pairs, labelled post-hoc: 23/40 reusable with the company/period key vs 3/40 without it. (Commit 44fa023's message quoted the post-hoc 23/40 without that label; this line is the correction.)
 - Cost per question: $0; 1 LLM call per fresh question, 0 per cache hit.
 - GPU: 5,513 / 6,141 MB in normal use (inside the owner's 10% margin); peak 5,565 MB under 8 concurrent questions (40 MB over the margin, brief). Stopping the app frees the GPU.
 - First run (writer 35% on CPU, before the load-order fix) is in docs/failures.md.

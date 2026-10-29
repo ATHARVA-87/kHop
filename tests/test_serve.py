@@ -152,3 +152,41 @@ def test_cache_hit_needs_no_queue_place(monkeypatch):
         assert c.get("/api/ask", params={"q": "brand new question"}).status_code == 503
         ev = _events(c.get("/api/ask", params={"q": "old question"}).text)
         assert ev[-1][1]["from_cache"] is True
+
+
+def slow_events(flow, question):
+    import time as _t
+
+    yield "step", {"step": "route", "ms": 0.1}
+    yield "token", "Partial "
+    _t.sleep(3)  # a slow writer
+    yield "token", "answer [1]."
+    yield "done", {"answer": FakeAnswer(), "trace": []}
+
+
+def test_leaving_mid_answer_does_not_block_others_or_leak(monkeypatch):
+    import time as _t
+
+    import plexus.agents.flow as flow_mod
+
+    monkeypatch.setattr(flow_mod, "ask_events", slow_events)
+    monkeypatch.setattr(
+        srv, "TRACE_LOG", __import__("pathlib").Path(__import__("tempfile").mkdtemp()) / "t.jsonl"
+    )
+    state = {"flow": FakeFlow(), "config": "test", **srv.load_meta()}
+    app = srv.create_app(lambda: state)
+    with TestClient(app) as c:
+        with c.stream("GET", "/api/ask", params={"q": "Who makes NVIDIA chips?"}) as r:
+            for line in r.iter_lines():
+                if "Partial" in line:
+                    break  # the reader leaves while the writer is still working
+        t0 = _t.perf_counter()
+        assert c.get("/api/health").status_code == 200
+        assert _t.perf_counter() - t0 < 1.0  # other requests are not blocked
+        for _ in range(50):  # the worker finishes on its own and frees the GPU slot
+            if app.state.gpu.waiting == 0 and app.state.gpu.slot.acquire(blocking=False):
+                app.state.gpu.slot.release()
+                break
+            _t.sleep(0.1)
+        else:
+            raise AssertionError("GPU slot or queue place leaked")

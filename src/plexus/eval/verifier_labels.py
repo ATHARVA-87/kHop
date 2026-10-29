@@ -69,7 +69,7 @@ def export(results: Path, seed: int = 0, per_type: int = 20, swapped: int = 10) 
     return len(sheet)
 
 
-def score(model: str = "roberta") -> dict:
+def score(model: str = "roberta", device: str | None = None) -> dict:
     from plexus.agents.verifier import THRESHOLD, MiniCheck, numbers
     from plexus.eval.checklist_judge import binary_stats
     from plexus.eval.ragas_eval import auroc
@@ -80,7 +80,11 @@ def score(model: str = "roberta") -> dict:
     bad = [r["pid"] for r in sheet if r["supported"].strip().lower() not in ("yes", "no")]
     if bad:
         raise ValueError(f"`supported` must be yes/no; missing or invalid: {bad}")
-    m = MiniCheck(REPO_ROOT / "data" / "models" / f"minicheck-{model}-large")
+    if device == "cpu":
+        import torch
+
+        torch.set_num_threads(4)  # keep the laptop responsive
+    m = MiniCheck(REPO_ROOT / "data" / "models" / f"minicheck-{model}-large", device=device)
     per = []
     for r in sheet:
         doc = "\n\n".join(p.split("] ", 1)[1] if p.startswith("[") else p
@@ -117,13 +121,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("cmd", choices=("export", "score"))
     ap.add_argument("--results", type=Path, default=REPO_ROOT / "results/a6_router.json")
     ap.add_argument("--model", choices=("flan-t5", "roberta"), default="roberta")
+    ap.add_argument("--device", choices=("cpu", "cuda"), default=None)
     a = ap.parse_args(argv)
     if a.cmd == "export":
         print(f"{SHEET}: {export(a.results.resolve())} pairs to label")
         return 0
-    out = score(a.model)
+    out = score(a.model, a.device)
     out["summary"]["model"] = a.model
-    suffix = "_flan_t5" if a.model == "flan-t5" else ""
+    out["summary"]["device"] = a.device or "default"
+    suffix = ("_flan_t5" if a.model == "flan-t5" else "") + ("_cpu" if a.device == "cpu" else "")
     (REPO_ROOT / "results" / f"verifier_validation{suffix}.json").write_text(
         json.dumps(out, indent=2) + "\n"
     )

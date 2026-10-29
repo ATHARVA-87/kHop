@@ -67,7 +67,10 @@ def pct(xs: list[float], q: float) -> float | None:
 
 def summarize(rows: list[dict]) -> dict:
     ok = [r for r in rows if r["status"] == 200 and not r["error"]]
+    # with fewer than 20 answers, "p95" is simply the slowest one: say so (review 2026-10-29)
     return {
+        "n_answered": len(ok),
+        "p95_is_max_of_small_sample": len(ok) < 20,
         "requests": len(rows),
         "answered": len(ok),
         "busy_503": sum(r["status"] == 503 for r in rows),
@@ -78,6 +81,40 @@ def summarize(rows: list[dict]) -> dict:
         "total_p95_s": pct([r["total_s"] for r in ok], 0.95),
         "cache_hits": sum(r["from_cache"] for r in ok),
     }
+
+
+class GpuPeak:
+    """Polls nvidia-smi once a second during the test: peak GPU memory in MiB (results file
+    backs the GPU numbers quoted in PROGRESS; review 2026-10-29)."""
+
+    def __init__(self):
+        import threading
+
+        self.peak, self.samples, self.stop = 0, [], threading.Event()
+        self.t = threading.Thread(target=self._run, daemon=True)
+
+    def _run(self):
+        import subprocess
+
+        while not self.stop.is_set():
+            try:
+                mib = int(subprocess.run(["nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader,nounits"],
+                                         capture_output=True, text=True, timeout=5).stdout.split()[0])  # fmt: skip
+                self.samples.append(mib)
+                self.peak = max(self.peak, mib)
+            except Exception:
+                pass
+            self.stop.wait(1.0)
+
+
+def gpu_total() -> int | None:
+    import subprocess
+
+    try:
+        return int(subprocess.run(["nvidia-smi", "--query-gpu=memory.total", "--format=csv,noheader,nounits"],
+                                  capture_output=True, text=True, timeout=5).stdout.split()[0])  # fmt: skip
+    except Exception:
+        return None
 
 
 async def run(base: str, levels: list[int], rounds: int) -> dict:
@@ -105,7 +142,7 @@ async def run(base: str, levels: list[int], rounds: int) -> dict:
             mix.append(await one(client, base, p["original"]))
         mixed = [p["variant"] for p in pairs] + qs[:4]
         mix_round = await asyncio.gather(*(one(client, base, q) for q in mixed))
-        out["mix_30pct_rewordings"] = summarize(list(mix_round))
+        out["mix_60pct_rewordings"] = summarize(list(mix_round))
         out["mix_note"] = (
             "6 rewordings of questions answered just before + 4 new questions, sent together"
         )
@@ -119,7 +156,17 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--rounds", type=int, default=2)
     a = ap.parse_args(argv)
     levels = [] if a.levels == "none" else [int(x) for x in a.levels.split(",")]
-    out = asyncio.run(run(a.base, levels, a.rounds))
+    gpu = GpuPeak()
+    gpu.t.start()
+    try:
+        out = asyncio.run(run(a.base, levels, a.rounds))
+    finally:
+        gpu.stop.set()
+    total = gpu_total()
+    s = sorted(gpu.samples)
+    out["gpu_mib"] = {"total": total, "peak": gpu.peak, "median": s[len(s) // 2] if s else None,
+                      "margin_limit_90pct": int(total * 0.9) if total else None,
+                      "samples": len(s)}  # fmt: skip
     out["cost_usd"] = 0.0
     name = "phase6_load_mix.json" if not levels else "phase6_load.json"
     (REPO_ROOT / "results" / name).write_text(json.dumps(out, indent=2) + "\n")
