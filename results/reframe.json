@@ -1,0 +1,70 @@
+{
+  "version": "v2",
+  "spelling_fresh_set": {
+    "golden_questions": 225,
+    "golden_spelling_changes": [],
+    "golden_any_change_shown_to_user": 0,
+    "trap_changes": [],
+    "company_restored": "113/113",
+    "word_restored": "114/125",
+    "wrong_replacements": [],
+    "p95_ms": 0.37,
+    "bars": {
+      "golden_spelling_changes": true,
+      "trap_changes": true,
+      "company_restored_90pct": true,
+      "word_restored_70pct": true,
+      "wrong_replacements_max_3pct": true,
+      "p95_under_20ms": true
+    },
+    "passed": true
+  },
+  "spelling_original_set_seen_by_v2": {
+    "golden_questions": 225,
+    "golden_spelling_changes": [],
+    "golden_any_change_shown_to_user": 0,
+    "trap_changes": [],
+    "company_restored": "57/57",
+    "word_restored": "77/87",
+    "wrong_replacements": [
+      {
+        "typo": "reate",
+        "to": "rate",
+        "expected": "relate"
+      }
+    ],
+    "p95_ms": 0.38,
+    "bars": {
+      "golden_spelling_changes": true,
+      "trap_changes": true,
+      "company_restored_90pct": true,
+      "word_restored_70pct": true,
+      "wrong_replacements_max_3pct": true,
+      "p95_under_20ms": true
+    },
+    "passed": true
+  },
+  "routes": {
+    "without": {
+      "same_route": "95/121",
+      "rate": 0.785,
+      "by_variant": {
+        "lowercase": "39/40",
+        "rewording_owner_checked": "40/40",
+        "company_typo": "4/29",
+        "company_plural_swap": "12/12"
+      }
+    },
+    "with_reframe": {
+      "same_route": "121/121",
+      "rate": 1.0,
+      "by_variant": {
+        "lowercase": "40/40",
+        "rewording_owner_checked": "40/40",
+        "company_typo": "29/29",
+        "company_plural_swap": "12/12"
+      }
+    },
+    "passed_95pct": true
+  }
+}
