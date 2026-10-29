@@ -15,7 +15,9 @@ from __future__ import annotations
 
 import os
 
-os.environ.setdefault("LANGSMITH_TRACING", "false")  # nothing leaves the machine
+# nothing leaves the machine: forced off even if the shell exports tracing on (review 2026-10-29)
+os.environ["LANGSMITH_TRACING"] = "false"
+os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
 import argparse
 import json
@@ -44,25 +46,28 @@ def _step(name: str, t0: float, **detail) -> dict:
 
 
 def build_flow(rag: NaiveRAG):
-    """rag.retriever is a RoutedRetriever (A6) or any single retriever (route = "fixed")."""
+    """Nodes call the same public methods as NaiveRAG.answer, so the two paths cannot drift:
+    route = the A6 rule router (or "fixed" for a single retriever), retrieve = the
+    retriever's own retrieve(), answer = NaiveRAG.generate()."""
     retriever = rag.retriever
-    routes = getattr(retriever, "retrievers", None)
+    router = getattr(retriever, "router", None)  # RoutedRetriever (A6) has one
     k = rag.cfg.retrieval.top_k
 
     def route(s: FlowState) -> dict:
         t0 = time.perf_counter()
-        r = retriever.router.route(s["question"]) if routes else "fixed"
+        r = router.route(s["question"]) if router else "fixed"
         return {"route": r, **_step("route", t0, route=r)}
 
     def retrieve(s: FlowState) -> dict:
         t0 = time.perf_counter()
-        hits = (routes[s["route"]] if routes else retriever).retrieve(s["question"], k)
+        hits = retriever.retrieve(s["question"], k)  # RoutedRetriever routes again: same rule
         top = [{"doc_id": h.doc_id, "section": h.section} for h in hits[:3]]
         return {"hits": hits, **_step("retrieve", t0, n_hits=len(hits), top=top)}
 
     def answer(s: FlowState) -> dict:
         t0 = time.perf_counter()
         ans = rag.generate(s["question"], s["hits"])
+        ans.retrieval_ms = next(t["ms"] for t in s["trace"] if t["step"] == "retrieve")
         return {"answer": ans, **_step("answer", t0, cited=ans.cited_chunk_ids)}
 
     g = StateGraph(FlowState)
@@ -81,6 +86,29 @@ def ask(flow, question: str) -> tuple[Answer, list[dict]]:
     return out["answer"], out["trace"]
 
 
+def check(flow, results: Path) -> int:
+    """Same answers as a saved eval run, and route = golden question type? Writes results/flow_check.json."""
+    from plexus.settings import REPO_ROOT
+
+    saved = json.loads(results.read_text())["per_query"]
+    rows = []
+    for r in saved:
+        ans, trace = ask(flow, r["question"])
+        rows.append({"qid": r["qid"], "same_answer": ans.text == r["answer"],
+                     # saved runs store no route; on dev the A6 router should equal the type
+                     "route_is_qtype": trace[0]["route"] == r["qtype"]})  # fmt: skip
+    out = {
+        "results": str(results),
+        "n": len(rows),
+        "same_answer": sum(x["same_answer"] for x in rows),
+        "route_is_qtype": sum(x["route_is_qtype"] for x in rows),
+        "different": [x["qid"] for x in rows if not (x["same_answer"] and x["route_is_qtype"])],
+    }
+    (REPO_ROOT / "results" / "flow_check.json").write_text(json.dumps(out, indent=2) + "\n")
+    print(json.dumps(out))
+    return 0 if not out["different"] else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     from plexus.config import ExperimentConfig
     from plexus.llm import LLMClient
@@ -89,14 +117,27 @@ def main(argv: list[str] | None = None) -> int:
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", type=Path, default=Path("configs/a6_router.yaml"))
-    ap.add_argument("question")
+    ap.add_argument("question", nargs="?")
+    ap.add_argument(
+        "--check",
+        action="store_true",
+        help="run every question of --results through the flow (cache-only) and compare answers",
+    )
+    ap.add_argument("--results", type=Path, default=Path("results/a6_router.json"))
     a = ap.parse_args(argv)
+    if a.check:
+        os.environ["PLEXUS_LLM_OFFLINE"] = "1"  # cache-only: must reproduce, never re-generate
+    elif not a.question:
+        ap.error("give a question, or --check")
     settings = Settings.load()
     cfg = ExperimentConfig.load(a.config)
     retriever = make_retriever(cfg, settings.data_dir)
     try:
         rag = NaiveRAG(cfg, retriever, LLMClient.from_settings(settings))
-        ans, trace = ask(build_flow(rag), a.question)
+        flow = build_flow(rag)
+        if a.check:
+            return check(flow, a.results)
+        ans, trace = ask(flow, a.question)
     finally:
         if hasattr(retriever, "close"):
             retriever.close()

@@ -1,6 +1,6 @@
 {
-  "a": "/home/atharva/Desktop/RAG /results/a6_router.json",
-  "b": "/home/atharva/Desktop/RAG /results/a6_router_ctx10.json",
+  "a": "results/a6_router.json",
+  "b": "results/a6_router_ctx10.json",
   "swapped": {
     "B-0192416a5a": false,
     "B-611217c7b6": false,

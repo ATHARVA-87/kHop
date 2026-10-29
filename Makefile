@@ -3,7 +3,7 @@
 PY ?= python
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask extract serve ui
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask flow-check extract serve ui
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -61,6 +61,9 @@ ragas: ## RAGAS Faithfulness + FactualCorrectness in the separate `ragas` env (R
 
 ask: ## One question through the LangGraph flow with its step trace (Q="...", CONFIG=configs/a6_router.yaml)
 	$(PY) -m plexus.agents.flow --config $${CONFIG:-configs/a6_router.yaml} "$(Q)"
+
+flow-check: ## Cache-only: the LangGraph flow must reproduce every answer of results/a6_router.json
+	$(PY) -m plexus.agents.flow --config configs/a6_router.yaml --check --results results/a6_router.json
 
 golden-test: ## Build data/golden/golden_test.jsonl from your reviewed review_test.csv
 	$(PY) -m plexus.eval.golden build --split test

@@ -20,6 +20,20 @@ def test_flow_gives_the_same_answer_as_naive_rag(tmp_path):
     assert ans.cached  # the same request hit the LLM cache: identical prompt
     assert [t["step"] for t in trace] == ["route", "retrieve", "answer"]
     assert trace[0]["route"] == "fixed" and trace[2]["cited"] == ["D#c0", "D#c1"]
+    assert ans.retrieval_ms == trace[1]["ms"]
+
+
+def test_tracing_is_forced_off(monkeypatch):
+    import importlib
+    import os
+
+    import plexus.agents.flow as flow
+
+    monkeypatch.setenv("LANGSMITH_TRACING", "true")
+    monkeypatch.setenv("LANGCHAIN_TRACING_V2", "true")
+    importlib.reload(flow)
+    assert os.environ["LANGSMITH_TRACING"] == "false"
+    assert os.environ["LANGCHAIN_TRACING_V2"] == "false"
 
 
 def test_flow_uses_the_routed_retriever(tmp_path):

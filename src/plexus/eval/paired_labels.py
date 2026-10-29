@@ -40,10 +40,18 @@ def _labels(path: Path) -> dict[str, str]:
                 for r in csv.DictReader(fh) if r["human_verdict"].strip()}  # fmt: skip
 
 
+def _rel(path: Path) -> str:
+    """Repo-relative path in saved files: no username, works on any machine."""
+    try:
+        return str(Path(path).resolve().relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
+
+
 def export(a_path: Path, b_path: Path, labels: Path, seed: int = 0) -> tuple[int, int]:
     a, b, human = _answers(a_path), _answers(b_path), _labels(labels)
     rng = random.Random(seed)
-    rows, key, same = [], {"a": str(a_path), "b": str(b_path), "swapped": {}, "identical": []}, 0
+    rows, key, same = [], {"a": _rel(a_path), "b": _rel(b_path), "swapped": {}, "identical": []}, 0
     for qid in sorted(human):
         ra, rb = a[qid], b[qid]
         if ra["answer"].strip() == rb["answer"].strip():
@@ -90,6 +98,10 @@ def score(labels: Path, flips: list[str] = ()) -> dict:
     human = _labels(labels)
     with open(SHEET, newline="", encoding="utf-8-sig") as fh:
         sheet = list(csv.DictReader(fh))
+    sheet_qids = {r["qid"] for r in sheet}
+    bad = [f for f in flip if len(f) != 2 or f[0] not in sheet_qids or f[1] not in ("1", "2")]
+    if bad:  # a typo must not silently do nothing (review 2026-10-29)
+        raise ValueError(f"flips must be qid:1 or qid:2 for a qid on the sheet, got {bad}")
     va, vb = {}, {}
     for r in sheet:
         v1, v2 = r["verdict_1"].strip().lower(), r["verdict_2"].strip().lower()
@@ -122,8 +134,8 @@ def score(labels: Path, flips: list[str] = ()) -> dict:
         "only_a_correct": a_only,
         "mcnemar_exact_p": round(mcnemar_exact(b_only, a_only), 4),
         "flips": sorted(flips),
-        "stray_not_enough_lines": {"a": stray_refusal_lines(Path(key["a"]), qids),
-                                   "b": stray_refusal_lines(Path(key["b"]), qids)},
+        "stray_not_enough_lines": {"a": stray_refusal_lines(REPO_ROOT / key["a"], qids),
+                                   "b": stray_refusal_lines(REPO_ROOT / key["b"], qids)},
         "per_query": [{"qid": q, "a": va[q], "b": vb[q]} for q in qids],
     }  # fmt: skip
 

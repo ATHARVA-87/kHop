@@ -3,7 +3,7 @@
   "relabelled": 46,
   "identical_answers": 3,
   "a": {
-    "config": "/home/atharva/Desktop/RAG /results/a6_router.json",
+    "config": "results/a6_router.json",
     "correct": 40,
     "rate": 0.816,
     "wilson_95": [
@@ -12,7 +12,7 @@
     ]
   },
   "b": {
-    "config": "/home/atharva/Desktop/RAG /results/a6_router_ctx10.json",
+    "config": "results/a6_router_ctx10.json",
     "correct": 45,
     "rate": 0.918,
     "wilson_95": [
