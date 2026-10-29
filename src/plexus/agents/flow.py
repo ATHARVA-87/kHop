@@ -53,6 +53,18 @@ def build_flow(rag: NaiveRAG):
     router = getattr(retriever, "router", None)  # RoutedRetriever (A6) has one
     k = rag.cfg.retrieval.top_k
 
+    use_gate = rag.cfg.guard.input_gate
+
+    def guard(s: FlowState) -> dict:
+        from plexus.guardrails.input_gate import gate
+
+        t0 = time.perf_counter()
+        hit = gate(s["question"], getattr(router, "linker", None))
+        if hit is None:
+            return _step("guard", t0, refused=False)
+        ans = Answer(question=s["question"], text=hit[1], hits=[])
+        return {"answer": ans, **_step("guard", t0, refused=True, reason=hit[0])}
+
     def route(s: FlowState) -> dict:
         t0 = time.perf_counter()
         r = router.route(s["question"]) if router else "fixed"
@@ -74,7 +86,14 @@ def build_flow(rag: NaiveRAG):
     g.add_node("route", route)
     g.add_node("retrieve", retrieve)
     g.add_node("answer", answer)
-    g.add_edge(START, "route")
+    if use_gate:  # refused questions end here, before any search or LLM call
+        g.add_node("guard", guard)
+        g.add_edge(START, "guard")
+        g.add_conditional_edges(
+            "guard", lambda s: END if "answer" in s else "route", ["route", END]
+        )
+    else:
+        g.add_edge(START, "route")
     g.add_edge("route", "retrieve")
     g.add_edge("retrieve", "answer")
     g.add_edge("answer", END)

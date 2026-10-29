@@ -85,6 +85,12 @@ class JudgeConfig(_Strict):
     fallback_models: list[str] = ["gemini-3.5-flash-lite"]  # tried when the main one fails
 
 
+class GuardConfig(_Strict):
+    """Phase 5 guardrails; all off by default so earlier configs are unchanged."""
+
+    input_gate: bool = False  # refuse advice / off-scope / rule-breaking before search
+
+
 class ExperimentConfig(_Strict):
     name: str
     description: str = ""
@@ -95,6 +101,7 @@ class ExperimentConfig(_Strict):
     retrieval: RetrievalConfig = RetrievalConfig()
     generation: GenerationConfig = GenerationConfig()
     judge: JudgeConfig = JudgeConfig()
+    guard: GuardConfig = GuardConfig()
 
     @classmethod
     def load(cls, path: Path | str) -> ExperimentConfig:
