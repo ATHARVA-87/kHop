@@ -37,7 +37,7 @@ from plexus.settings import REPO_ROOT, Settings
 
 log = logging.getLogger("plexus.serve")
 
-CONFIG = Path(os.getenv("PLEXUS_CONFIG", REPO_ROOT / "configs" / "a9_agents.yaml"))
+CONFIG = Path(os.getenv("PLEXUS_CONFIG", REPO_ROOT / "configs" / "app.yaml"))
 MAX_WAITING = 4  # questions allowed to wait for the GPU
 RATE_PER_MIN = 10  # questions per client per minute
 DEADLINE_S = 120  # one question, start to finish

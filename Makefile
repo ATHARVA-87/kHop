@@ -103,8 +103,8 @@ gate-ci: ## CI gate, no torch: BM25, and graph + A5 on BM25 (needs data/processe
 compare: ## paired bootstrap of B vs A on the same queries: make compare A=a0_naive B=a0_bm25
 	$(PY) -m plexus.eval.compare results/$(A).json results/$(B).json
 
-serve: ## Plexus app on http://127.0.0.1:8000 (API + UI; needs Ollama running). CONFIG=configs/a9_agents.yaml
-	PLEXUS_CONFIG=$${CONFIG:-configs/a9_agents.yaml} $(PY) -m uvicorn plexus.serve.app:app --host 127.0.0.1 --port 8000
+serve: ## Plexus app on http://127.0.0.1:8000 (API + UI; needs Ollama running). CONFIG=configs/app.yaml
+	PLEXUS_CONFIG=$${CONFIG:-configs/app.yaml} $(PY) -m uvicorn plexus.serve.app:app --host 127.0.0.1 --port 8000
 
 ui: ## Next.js UI (Phase 6)
 	@echo "ui: not implemented yet (Phase 6)"; exit 1
