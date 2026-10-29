@@ -74,6 +74,8 @@ def test_ollama_requests_turn_thinking_off(tmp_path):
     rag = _rag(tmp_path, lambda r: "ok [1]")
     req = rag.build_request("q", HITS[:2])
     assert req.params == {"think": False}  # qwen3.5 otherwise returns empty answers
+    rag.cfg.generation.num_ctx = 8192  # only sent when set (old cache keys unchanged)
+    assert rag.build_request("q", HITS[:2]).params == {"think": False, "num_ctx": 8192}
 
 
 def test_refusal_means_declining_not_a_caveat():

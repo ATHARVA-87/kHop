@@ -86,8 +86,15 @@ class NaiveRAG:
             temperature=g.temperature,
             max_tokens=g.max_tokens,
             seed=self.cfg.seed,
-            params={"think": g.think} if g.provider == "ollama" else {},
+            params=self._params(),
         )
+
+    def _params(self) -> dict:
+        g = self.cfg.generation
+        if g.provider != "ollama":
+            return {}
+        # num_ctx only when set, so cache keys of earlier runs stay the same
+        return {"think": g.think} | ({"num_ctx": g.num_ctx} if g.num_ctx else {})
 
     def answer(self, question: str) -> Answer:
         if self.llm is None:

@@ -74,6 +74,9 @@ class GenerationConfig(_Strict):
     # qwen3.5 "thinking" spends the whole token budget on hidden reasoning and returns an
     # empty answer (found 2026-10-28 in the first generation run); off unless asked for
     think: bool = False
+    # Ollama context window in tokens; None keeps Ollama's default (~4K), which would silently
+    # cut a 10-passage prompt (~3.5K tokens + answer)
+    num_ctx: int | None = None
 
 
 class JudgeConfig(_Strict):

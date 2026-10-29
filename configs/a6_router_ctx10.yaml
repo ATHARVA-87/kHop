@@ -1,0 +1,30 @@
+name: a6_router_ctx10
+description: >
+  A6 + writer sees 10 passages instead of 5 (complete@10 0.789 vs complete@5 0.649). A6: rule router (0 companies -> global, 2+ filers -> multi-hop, else local) choosing
+  hybrid+reranker (local), graph traversal (multi-hop) or company-diverse ranking (global).
+snapshot: semis-2025
+seed: 0
+chunker:
+  type: structured
+  child_words: 200
+  child_chars: 1400
+  parent_words: 800
+  headers: true
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: routed
+  router: rules
+  graph_max_edges: 12
+  rerank:
+    model: BAAI/bge-reranker-base
+    candidates: 50
+  top_k: 20
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 10
+  num_ctx: 8192
+judge:
+  provider: gemini
+  model: gemini-3.6-flash
