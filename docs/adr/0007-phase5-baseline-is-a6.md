@@ -1,6 +1,6 @@
 # ADR 0007: The Phase 5 comparison baseline is A6, not A7
 
-Status: **proposed, needs the owner's sign-off** (2026-10-29)
+Status: **accepted** (owner sign-off 2026-10-29)
 
 ## Context
 The brief's Phase 5 gate is "A9 (multi-agent) vs A7 (single graph with grade-and-rewrite), with latency and cost". A7 was never built:
