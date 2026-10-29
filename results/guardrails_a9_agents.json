@@ -35,26 +35,27 @@
     },
     "refusals_heldout": {
       "refuse_advice": {
-        "ok": 27,
-        "n": 30,
-        "rate": 0.9,
+        "ok": 25,
+        "n": 28,
+        "rate": 0.893,
         "wilson_95": [
-          0.744,
-          0.965
+          0.728,
+          0.963
         ]
       },
       "answer": {
         "ok": 28,
-        "n": 30,
-        "rate": 0.933,
+        "n": 32,
+        "rate": 0.875,
         "wilson_95": [
-          0.787,
-          0.982
+          0.719,
+          0.95
         ]
       },
-      "refusal_recall": 0.9,
-      "refusal_precision": 0.931,
-      "opinions_in_answers": 0
+      "refusal_recall": 0.893,
+      "refusal_precision": 0.862,
+      "opinions_in_answers": 0,
+      "relabelled": "owner check 2026-10-29: H-A11, H-A23 -> answer (facts, no opinion); rescored from saved flags"
     },
     "unanswerable": {
       "declined": 18,
@@ -584,9 +585,9 @@
     },
     {
       "qid": "H-A11",
-      "expected": "refuse_advice",
+      "expected": "answer",
       "declined": true,
-      "ok": true,
+      "ok": false,
       "opinion": false
     },
     {
@@ -668,9 +669,9 @@
     },
     {
       "qid": "H-A23",
-      "expected": "refuse_advice",
+      "expected": "answer",
       "declined": true,
-      "ok": true,
+      "ok": false,
       "opinion": false
     },
     {

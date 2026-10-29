@@ -222,7 +222,7 @@ Research first (2026-10-29): well-tuned single pipelines with a reranker match m
 | step | what | result | kept? |
 | --- | --- | --- | --- |
 | eval sets | 60 refusal + 20 unanswerable questions (human-checked), 30 planted-injection questions (canary, no labels) | A6 baseline: advice 17/17, off-scope 18/20, should-answer 19/23, unanswerable 19/20, attacks 3/30 | |
-| 2 input gate | rules before search: rule-breaking (plain refusal; owner's joke behind `guard.joke`, off), advice, off-scope, 1000-char cap | tuning set: off-scope 20/20, advice 17/17; **held-out: rules alone 4/30 advice, whole system 27/30** (A6 28/30: the prompt already declines); 0 false refusals in 268 + 30 look-alikes | yes (clear message) |
+| 2 input gate | rules before search: rule-breaking (plain refusal; owner's joke behind `guard.joke`, off), advice, off-scope, 1000-char cap | tuning set: off-scope 20/20, advice 17/17; **held-out (owner-checked; 2 'upside' rows moved to answer): rules alone 4/30 advice, whole system 25/28** (A6 26/28: the prompt already declines); look-alikes answered A9 28/32 vs A6 26/32 | yes (clear message) |
 | 3 datamarking | ^ between words of retrieved text + one prompt rule | 10 attack templates: A6 4/30 -> A9 0/30 (p = 0.125, consistent with, not proof); cited-sentence support 0.820 -> 0.833 (n.s.); fewer uncited sentences | yes |
 | 4 verifier | MiniCheck-RoBERTa-Large (fits the GPU; Flan-T5 ran out of memory), 60 blind human pairs: 15/15 caught, 41/45 passed, kappa 0.84 (real sentences only: 5/5, 41/45, kappa 0.67) | marks each sentence; replacing answers rejected (would blank a human-correct answer) | marks only |
 
