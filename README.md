@@ -104,18 +104,22 @@ Held-out test set, 91 questions (60 name companies; the rest are sector-wide and
 | LLM judge (one verdict per answer) vs me: Cohen's kappa / catches answers I marked not correct | 0.63 / 3 of 5 |
 | LLM judge (pre-registered checklist) vs me: Cohen's kappa / catches answers I marked not correct | 0.49 / 3 of 5 |
 | LLM judge accepted as a stand-in for me (bar: catch 70%, pass 85%) | no (below its pre-set bar) |
-| RAGAS pilot (gemini-3.5-flash-lite judge; 14 of 49 answers before the free quota ran out): faithfulness | 0.99 |
-| RAGAS factual correctness (F1) agrees with my labels | 2 of 14 answers (mean score 0.43) |
-| RAGAS factual correctness (recall) agrees with my labels | 8 of 14 answers (mean score 0.57) |
+| RAGAS (gemini-3.5-flash-lite judge; in progress on the free tier: 44 of 49 answers fully scored) | answers scored per metric below |
+| RAGAS faithfulness: claims backed by the retrieved passages | 0.96 (45 of 49) |
+| RAGAS answer relevancy: the answer addresses the question | 0.82 (44 of 49) |
+| RAGAS context precision: relevant passages ranked first | 0.47 (44 of 49) |
+| RAGAS context recall: passages contain what the reference needs | 0.88 (44 of 49) |
+| RAGAS factual correctness (F1) agrees with my labels | 3 of 44 answers (mean score 0.32; separates my correct from not-correct answers: AUROC 0.23, 0.50 = chance) |
+| RAGAS factual correctness (recall) agrees with my labels | 15 of 44 answers (mean score 0.45; separates my correct from not-correct answers: AUROC 0.30, 0.50 = chance) |
 <!-- /table -->
 
 **How to read this table:**
 - **Cohen's kappa** measures how far two graders agree beyond what chance would give: 1 is perfect agreement, 0 is chance level.
 - **LLM judges:** both agreed with my labels only moderately, and missed answers I had marked not correct, so they failed the bar set in advance. Answer quality is therefore reported from my own blind labels.
-- **RAGAS** (Retrieval-Augmented Generation Assessment, a popular RAG metric library) was run as a pilot on the answers the free Gemini quota allowed (`make ragas`, reproducible offline from the published LLM cache).
-  - **Faithfulness** (are the answer's claims backed by the retrieved passages?) confirms the fact-checker's picture.
-  - **Factual correctness** disagreed with my labels on answers I marked fully correct: it penalises correct detail that the reference answer leaves out.
-  - So, like the LLM judges, it is reported for comparison and not used as the quality measure.
+- **RAGAS** (Retrieval-Augmented Generation Assessment, the standard RAG metric library) scored the same labelled answers with one judge model on Gemini's free tier. It runs in daily batches; `make ragas` resumes where the quota stopped it and reproduces offline from the LLM cache.
+  - **Faithfulness and context recall are high.** This agrees with the fact-checker and with the search scores.
+  - **Context precision is lower.** The writer's 5 passages include some that are on topic but not needed.
+  - **Factual correctness does not track my labels.** It penalises correct detail missing from the short reference answer, and its score separates my correct from not-correct answers no better than chance. Like the LLM judges, it is reported for comparison; my blind labels remain the quality measure.
 
 ### Guardrails
 
