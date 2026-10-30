@@ -27,18 +27,17 @@
 - **P7-6:** `docs/demo_script.md` (3 minutes).
 - A reviewer agent checked these commits; see the Log below for findings and fixes.
 
+**Update 2026-10-30:**
+- PR #10 is merged.
+- The project is renamed kHop.
+- **Demo option A is built** (ADR 0013 accepted): 7 questions recorded live from the app (`make record-demo`), replayed by a static page (`make demo-site`), deployed by GitHub Pages from `main`.
+- The 4 untracked files were deleted. The `_old` CSVs were blank templates; the real labels are in git history.
+
 **Blocked on you, in order:**
-1. Review and merge PR #10.
-2. **Demo hosting (ADR 0013).** Free Hugging Face Docker Spaces need the paid PRO plan since July 2026, which breaks the free-only rule. Options:
-   - **A (recommended):** a static page replaying real recorded runs, plus a video;
-   - **B:** a Gradio ZeroGPU Space;
-   - **C:** PRO, which is paid;
-   - **D:** local only.
-3. Run `make refresh` (downloads about 160 filings from SEC, then parses and embeds them on the GPU), then `make drift` and `python -m plexus.readme`.
-4. Sign off ADRs 0003, 0004 and 0009–0013 (0003 and 0004 are still "Proposed" from Phase 1).
-5. Untracked files: decide keep or delete:
-   - `data/golden/*_old.csv`: earlier label copies;
-   - `results/ragas_a6_router.json`: partial RAGAS run, 14 of 49; can finish with `make ragas` once Gemini's quota allows.
+1. Review and merge the Phase 7 PR. GitHub Pages must be switched on once: Settings → Pages → Source: GitHub Actions.
+2. Run `make refresh` (about 160 SEC downloads, then parse and embed on the GPU), then `make drift` and `python -m plexus.readme`.
+3. Sign off the ADRs that are still "Proposed": 0003, 0004 and 0009–0012.
+4. Record a short video of the live app, following `docs/demo_script.md`.
 
 **Then (Claude):** build the chosen demo option; draft resume bullets (local file, measured numbers only); tick the definition of done; run the final reviewer; write the context-mode savings report.
 
