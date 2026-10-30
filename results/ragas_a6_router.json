@@ -8,65 +8,67 @@
     "judge": "gemini-3.5-flash-lite",
     "embeddings": "all-minilm",
     "models_used": {
-      "gemini-3.5-flash-lite": 844
+      "gemini-3.5-flash-lite": 931
     },
-    "answers_fully_scored": 44,
-    "complete": false,
-    "stopped_reason": "gemini/gemini-3.5-flash-lite: litellm.RateLimitError: litellm.RateLimitError: geminiException - {\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 500, model: gemini-3.5-flash-lite, description: Generate content requests per day limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\\nPlease retry in 19h45m22.987356812s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"description\": \"Generate content requests per day limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits.\",\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\"",
+    "answers_fully_scored": 49,
+    "complete": true,
+    "stopped_reason": null,
     "faithfulness": {
-      "mean": 0.9562,
-      "n": 45,
-      "failed": 4
+      "mean": 0.9505,
+      "n": 49,
+      "failed": 0
     },
     "factual_correctness": {
-      "mean": 0.3164,
-      "n": 44,
-      "failed": 5
+      "mean": 0.2841,
+      "n": 49,
+      "failed": 0
     },
     "factual_recall": {
-      "mean": 0.4548,
-      "n": 44,
-      "failed": 5
+      "mean": 0.4084,
+      "n": 49,
+      "failed": 0
     },
     "answer_relevancy": {
-      "mean": 0.8174,
-      "n": 44,
-      "failed": 5
+      "mean": 0.7659,
+      "n": 49,
+      "failed": 0
     },
     "context_precision": {
-      "mean": 0.4714,
-      "n": 44,
-      "failed": 5
+      "mean": 0.4723,
+      "n": 49,
+      "failed": 0
     },
     "context_recall": {
-      "mean": 0.8847,
-      "n": 44,
-      "failed": 5
+      "mean": 0.8965,
+      "n": 49,
+      "failed": 0
     },
     "vs_human_factual_correctness": {
-      "n": 44,
-      "kappa_at_fixed_thresholds": -0.044,
-      "raw_agreement": 0.0682,
-      "auroc_correct_vs_not": 0.2262,
+      "n": 49,
+      "kappa_at_fixed_thresholds": -0.0617,
+      "raw_agreement": 0.0612,
+      "auroc_correct_vs_not": 0.55,
       "confusion": {
-        "human=correct ragas=incorrect": 21,
+        "human=correct ragas=incorrect": 23,
         "human=correct ragas=partially_correct": 18,
         "human=correct ragas=correct": 3,
         "human=incorrect ragas=partially_correct": 1,
-        "human=partially_correct ragas=correct": 1
+        "human=partially_correct ragas=correct": 1,
+        "human=partially_correct ragas=incorrect": 3
       }
     },
     "vs_human_factual_recall": {
-      "n": 44,
-      "kappa_at_fixed_thresholds": -0.0324,
-      "raw_agreement": 0.3409,
-      "auroc_correct_vs_not": 0.3036,
+      "n": 49,
+      "kappa_at_fixed_thresholds": -0.0159,
+      "raw_agreement": 0.3061,
+      "auroc_correct_vs_not": 0.5795,
       "confusion": {
-        "human=correct ragas=incorrect": 20,
+        "human=correct ragas=incorrect": 22,
         "human=correct ragas=correct": 15,
         "human=correct ragas=partially_correct": 7,
         "human=incorrect ragas=partially_correct": 1,
-        "human=partially_correct ragas=correct": 1
+        "human=partially_correct ragas=correct": 1,
+        "human=partially_correct ragas=incorrect": 3
       }
     }
   },
@@ -515,80 +517,51 @@
       "qid": "B-bf5d25e90c",
       "qtype": "multi_hop",
       "faithfulness": 1.0,
-      "factual_correctness": null,
-      "factual_correctness_error": "not scored yet: daily quota used up",
-      "factual_recall": null,
-      "factual_recall_error": "not scored yet: daily quota used up",
-      "answer_relevancy": null,
-      "answer_relevancy_error": "not scored yet: daily quota used up",
-      "context_precision": null,
-      "context_precision_error": "not scored yet: daily quota used up",
-      "context_recall": null,
-      "context_recall_error": "not scored yet: daily quota used up"
+      "factual_correctness": 0.0,
+      "factual_recall": 0.0,
+      "answer_relevancy": 0.9373783271426559,
+      "context_precision": 0.0,
+      "context_recall": 1.0
     },
     {
       "qid": "B-8a448465a7",
       "qtype": "multi_hop",
-      "faithfulness": null,
-      "faithfulness_error": "not scored yet: daily quota used up",
-      "factual_correctness": null,
-      "factual_correctness_error": "not scored yet: daily quota used up",
-      "factual_recall": null,
-      "factual_recall_error": "not scored yet: daily quota used up",
-      "answer_relevancy": null,
-      "answer_relevancy_error": "not scored yet: daily quota used up",
-      "context_precision": null,
-      "context_precision_error": "not scored yet: daily quota used up",
-      "context_recall": null,
-      "context_recall_error": "not scored yet: daily quota used up"
+      "faithfulness": 0.8333333333333334,
+      "factual_correctness": 0.0,
+      "factual_recall": 0.0,
+      "answer_relevancy": 0.6276830981475333,
+      "context_precision": 0.36666666664833336,
+      "context_recall": 1.0
     },
     {
       "qid": "B-d9746d69e7",
       "qtype": "multi_hop",
-      "faithfulness": null,
-      "faithfulness_error": "not scored yet: daily quota used up",
-      "factual_correctness": null,
-      "factual_correctness_error": "not scored yet: daily quota used up",
-      "factual_recall": null,
-      "factual_recall_error": "not scored yet: daily quota used up",
-      "answer_relevancy": null,
-      "answer_relevancy_error": "not scored yet: daily quota used up",
-      "context_precision": null,
-      "context_precision_error": "not scored yet: daily quota used up",
-      "context_recall": null,
-      "context_recall_error": "not scored yet: daily quota used up"
+      "faithfulness": 1.0,
+      "factual_correctness": 0.0,
+      "factual_recall": 0.0,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.3333333333,
+      "context_recall": 1.0
     },
     {
       "qid": "B-611217c7b6",
       "qtype": "multi_hop",
-      "faithfulness": null,
-      "faithfulness_error": "not scored yet: daily quota used up",
-      "factual_correctness": null,
-      "factual_correctness_error": "not scored yet: daily quota used up",
-      "factual_recall": null,
-      "factual_recall_error": "not scored yet: daily quota used up",
-      "answer_relevancy": null,
-      "answer_relevancy_error": "not scored yet: daily quota used up",
-      "context_precision": null,
-      "context_precision_error": "not scored yet: daily quota used up",
-      "context_recall": null,
-      "context_recall_error": "not scored yet: daily quota used up"
+      "faithfulness": 0.8333333333333334,
+      "factual_correctness": 0.0,
+      "factual_recall": 0.0,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.9999999999,
+      "context_recall": 1.0
     },
     {
       "qid": "B-0192416a5a",
       "qtype": "multi_hop",
-      "faithfulness": null,
-      "faithfulness_error": "not scored yet: daily quota used up",
-      "factual_correctness": null,
-      "factual_correctness_error": "not scored yet: daily quota used up",
-      "factual_recall": null,
-      "factual_recall_error": "not scored yet: daily quota used up",
-      "answer_relevancy": null,
-      "answer_relevancy_error": "not scored yet: daily quota used up",
-      "context_precision": null,
-      "context_precision_error": "not scored yet: daily quota used up",
-      "context_recall": null,
-      "context_recall_error": "not scored yet: daily quota used up"
+      "faithfulness": 0.875,
+      "factual_correctness": 0.0,
+      "factual_recall": 0.0,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.699999999965,
+      "context_recall": 1.0
     }
   ]
 }

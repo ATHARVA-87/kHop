@@ -104,13 +104,13 @@ Held-out test set, 91 questions (60 name companies; the rest are sector-wide and
 | LLM judge (one verdict per answer) vs me: Cohen's kappa / catches answers I marked not correct | 0.63 / 3 of 5 |
 | LLM judge (pre-registered checklist) vs me: Cohen's kappa / catches answers I marked not correct | 0.49 / 3 of 5 |
 | LLM judge accepted as a stand-in for me (bar: catch 70%, pass 85%) | no (below its pre-set bar) |
-| RAGAS (gemini-3.5-flash-lite judge; in progress on the free tier: 44 of 49 answers fully scored) | answers scored per metric below |
-| RAGAS faithfulness: claims backed by the retrieved passages | 0.96 (45 of 49) |
-| RAGAS answer relevancy: the answer addresses the question | 0.82 (44 of 49) |
-| RAGAS context precision: relevant passages ranked first | 0.47 (44 of 49) |
-| RAGAS context recall: passages contain what the reference needs | 0.88 (44 of 49) |
-| RAGAS factual correctness (F1) agrees with my labels | 3 of 44 answers (mean score 0.32; separates my correct from not-correct answers: AUROC 0.23, 0.50 = chance) |
-| RAGAS factual correctness (recall) agrees with my labels | 15 of 44 answers (mean score 0.45; separates my correct from not-correct answers: AUROC 0.30, 0.50 = chance) |
+| RAGAS (gemini-3.5-flash-lite judge; complete) | answers scored per metric below |
+| RAGAS faithfulness: claims backed by the retrieved passages | 0.95 (49 of 49) |
+| RAGAS answer relevancy: the answer addresses the question | 0.77 (49 of 49) |
+| RAGAS context precision: relevant passages ranked first | 0.47 (49 of 49) |
+| RAGAS context recall: passages contain what the reference needs | 0.90 (49 of 49) |
+| RAGAS factual correctness (F1) agrees with my labels | 3 of 49 answers (mean score 0.28; separates my correct from not-correct answers: AUROC 0.55, 0.50 = chance) |
+| RAGAS factual correctness (recall) agrees with my labels | 15 of 49 answers (mean score 0.41; separates my correct from not-correct answers: AUROC 0.58, 0.50 = chance) |
 <!-- /table -->
 
 **How to read this table:**
