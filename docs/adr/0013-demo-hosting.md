@@ -1,6 +1,6 @@
 # ADR 0013: Where the public demo runs
 
-Status: **Open: needs the owner's choice** (free-only rule)
+Status: **Accepted: option A** (owner, 2026-10-30)
 Date: 2026-10-29
 
 ## Context
@@ -27,4 +27,12 @@ Sources:
 **A.** It is free, it shows the real interface and real outputs, and nothing can run up a bill or be abused. The full app stays one `make serve` away for anyone who clones the repo.
 
 ## Decision
-Pending the owner.
+**Option A**, chosen by the owner on 2026-10-30.
+
+**How it is built:**
+- `make record-demo` starts the app with fresh, empty caches, so every answer is generated live.
+- It asks each demo question the way the page does. For the typo question it records both "Use this version" and "Ask as I typed".
+- It saves every event with the time it arrived (`web/public/replay/`).
+- `make demo-site` builds the same page in replay mode: its calls read the recordings, and answers stream back at their recorded speed. A note on the page says the answers are recorded, and a question that was not recorded gets a plain message.
+
+**Hosting:** GitHub Pages, from the public repo (`.github/workflows/demo-site.yml`). It deploys only from `main`, so the page changes only when the owner merges. It needs no Hugging Face account, no server, no model and no keys.

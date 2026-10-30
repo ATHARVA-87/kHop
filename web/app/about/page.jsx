@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const API = process.env.NEXT_PUBLIC_API_BASE || "";
+import { apiFetch } from "../api";
 
 export default function About() {
   const [figures, setFigures] = useState(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    fetch(`${API}/api/about`)
+    apiFetch("/api/about")
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => setFigures(d.figures))
       .catch(() => setFailed(true));

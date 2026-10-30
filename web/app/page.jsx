@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-const API = process.env.NEXT_PUBLIC_API_BASE || "";
+import { apiFetch, NOT_RECORDED, recordedExamples, REPLAY } from "./api";
 
 const EXAMPLES = [
   { kind: "Two companies", q: "What do Impinj and Allegro MicroSystems each rely on TSMC for?" },
@@ -70,7 +69,7 @@ function ExternalIcon() {
 
 // ---- reading the event stream (fetch, so error messages from the server can be shown) ----
 async function streamQuestion(question, signal, on) {
-  const res = await fetch(`${API}/api/ask?q=${encodeURIComponent(question)}`, { signal });
+  const res = await apiFetch(`/api/ask?q=${encodeURIComponent(question)}`, { signal });
   if (!res.ok) {
     let message = "kHop could not take this question. Try again.";
     try {
@@ -298,15 +297,20 @@ export default function AskPage() {
   const [suggestion, setSuggestion] = useState(null); // {typed, question, changes}
   const useBtn = useRef(null);
   const [metaError, setMetaError] = useState(false);
+  const [examples, setExamples] = useState(EXAMPLES);
+  const [recorded, setRecorded] = useState(null); // recorded demo only: when the runs were recorded
   const abort = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
     setHistory(loadHistory());
-    fetch(`${API}/api/meta`)
+    apiFetch("/api/meta")
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then(setMeta)
       .catch(() => setMetaError(true));
+    recordedExamples()
+      .then((r) => { if (r) { setExamples(r.examples); setRecorded(r.recorded); } })
+      .catch(() => {});
     return () => abort.current?.abort();
   }, []);
 
@@ -322,7 +326,7 @@ export default function AskPage() {
     setFieldError("");
     let r = null;
     try {
-      const res = await fetch(`${API}/api/reframe?q=${encodeURIComponent(clean)}`);
+      const res = await apiFetch(`/api/reframe?q=${encodeURIComponent(clean)}`);
       if (res.ok) r = await res.json();
     } catch {
       // reframing is a help, not a requirement: ask as typed
@@ -447,6 +451,13 @@ export default function AskPage() {
         </section>
       )}
 
+      {REPLAY && (
+        <p className="notice replay-note">
+          This is a recorded demo: real answers kHop gave{recorded ? ` on ${recorded}` : ""}, replayed at the speed they
+          ran. Pick a question below. To ask your own, run kHop on your computer (see the README).
+        </p>
+      )}
+
       <form className="ask" onSubmit={(e) => { e.preventDefault(); submit(question); }} noValidate>
         <label htmlFor="question">Your question</label>
         <div className="ask-row">
@@ -510,7 +521,7 @@ export default function AskPage() {
           <section aria-labelledby="examples-title">
             <h2 id="examples-title">Try one of these</h2>
             <ul className="examples">
-              {EXAMPLES.map((e) => (
+              {examples.map((e) => (
                 <li key={e.q}>
                   <button type="button" className="example" onClick={() => { setQuestion(e.q); submit(e.q); }}>
                     <span className="example-kind">{e.kind}</span>
@@ -547,14 +558,22 @@ export default function AskPage() {
             {phase === "error" ? (
               <div className="notice" role="alert">
                 <p>{error}</p>
-                <button type="button" className="retry" onClick={() => ask(asked)}>Ask again</button>
+                {REPLAY && error === NOT_RECORDED ? (
+                  <ul className="examples">
+                    {examples.map((e) => (
+                      <li key={e.q}><button type="button" className="example" onClick={() => { setQuestion(e.q); submit(e.q); }}>{e.q}</button></li>
+                    ))}
+                  </ul>
+                ) : (
+                  <button type="button" className="retry" onClick={() => ask(asked)}>Ask again</button>
+                )}
               </div>
             ) : refused ? (
               <div className="notice">
                 <p>{text}</p>
                 <p>Try one of these instead:</p>
                 <ul className="examples">
-                  {EXAMPLES.slice(0, 2).map((e) => (
+                  {examples.slice(0, 2).map((e) => (
                     <li key={e.q}><button type="button" className="example" onClick={() => { setQuestion(e.q); submit(e.q); }}>{e.q}</button></li>
                   ))}
                 </ul>

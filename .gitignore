@@ -41,4 +41,5 @@ data/graph/
 .cache/
 web/.next/
 web/out/
+web/out-demo/
 data/logs/

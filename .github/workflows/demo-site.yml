@@ -1,0 +1,53 @@
+# Recorded demo on GitHub Pages (ADR 0013, option A): a static page that replays real runs
+# recorded from the app (make record-demo). No server, no model, no keys: nothing can be abused
+# or cost money. Deploys only from main, so it changes only when the owner merges.
+name: demo-site
+
+on:
+  push:
+    branches: [main]
+    paths: ["web/**", ".github/workflows/demo-site.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Build the recorded demo
+        working-directory: web
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          NEXT_PUBLIC_REPLAY: "1"
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+        run: |
+          npm ci --ignore-scripts
+          npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/out-demo
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

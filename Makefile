@@ -3,7 +3,7 @@
 PY ?= $(shell test -x $(HOME)/miniconda3/envs/torch/bin/python && echo $(HOME)/miniconda3/envs/torch/bin/python || echo python)
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask flow-check security ui-dev stop extract serve ui refresh drift
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask flow-check security ui-dev stop extract serve ui refresh drift record-demo demo-site
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -120,6 +120,17 @@ stop: ## Free the GPU after a hard kill of make serve (unloads the local model)
 
 ui: ## Build the web page (static export into web/out; make serve then serves it). Telemetry off
 	cd web && NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS=--dns-result-order=ipv4first npm run build
+
+record-demo: ## Record real runs for the static demo into web/public/replay (fresh caches: every answer generated live; needs Ollama)
+	@mkdir -p data/cache/record-demo && rm -f data/cache/record-demo/llm.sqlite data/cache/record-demo/semantic.sqlite data/cache/record-demo/traces.jsonl
+	@PLEXUS_LLM_CACHE=data/cache/record-demo/llm.sqlite PLEXUS_SEMANTIC_CACHE=data/cache/record-demo/semantic.sqlite \
+	PLEXUS_TRACE_LOG=data/cache/record-demo/traces.jsonl PLEXUS_RATE_PER_MIN=60 \
+	$(PY) -m uvicorn plexus.serve.app:app --host 127.0.0.1 --port 8000 > data/cache/record-demo/server.log 2>&1 & pid=$$!; \
+	for i in $$(seq 150); do curl -sf http://127.0.0.1:8000/api/health > /dev/null && break; sleep 2; done; \
+	$(PY) -m plexus.serve.record_demo; status=$$?; kill $$pid; wait $$pid 2> /dev/null; exit $$status
+
+demo-site: ## Build the recorded demo (static, no server) into web/out-demo; BASE_PATH=/kHop for GitHub Pages
+	cd web && NEXT_TELEMETRY_DISABLED=1 NEXT_PUBLIC_REPLAY=1 NEXT_PUBLIC_BASE_PATH=$${BASE_PATH-/kHop} NODE_OPTIONS=--dns-result-order=ipv4first npm run build
 
 ui-dev: ## Live-reload UI on 127.0.0.1:3000 against make serve (dev only)
 	cd web && NEXT_TELEMETRY_DISABLED=1 NEXT_PUBLIC_API_BASE=http://127.0.0.1:8000 npm run dev

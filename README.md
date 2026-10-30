@@ -9,6 +9,8 @@ It is also a measurement project:
 
 Answers are research output over public filings, **not investment advice**.
 
+**Try the recorded demo:** https://atharva-87.github.io/kHop/ (real answers recorded from the app, replayed at their real speed; to ask your own questions, run it locally, see [Run it](#run-it)).
+
 ## What it does
 
 - **Hybrid search** (BM25 keywords + bge-small embeddings, fused with reciprocal rank fusion) over section-aware chunks, each with a short header (company, form, period, section).
