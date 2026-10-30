@@ -144,29 +144,16 @@ def ragas_rows() -> list[str]:
         else f"in progress on the free tier: {r.get('answers_fully_scored', 0)} of {total} answers fully scored"
     )
     rows = [f"| RAGAS ({judge} judge; {status}) | answers scored per metric below |"]
+    # The README shows three RAGAS metrics (owner's choice); the results file keeps all six.
     labels = {
         "faithfulness": "faithfulness: claims backed by the retrieved passages",
-        "answer_relevancy": "answer relevancy: the answer addresses the question",
-        "context_precision": "context precision: relevant passages ranked first",
         "context_recall": "context recall: passages contain what the reference needs",
+        "answer_relevancy": "answer relevancy: the answer addresses the question",
     }
     for key, label in labels.items():
         m = r.get(key)
         if m and m.get("n"):
             rows.append(f"| RAGAS {label} | {m['mean']:.2f} ({m['n']} of {total}) |")
-    for key, label in (("factual_correctness", "F1"), ("factual_recall", "recall")):
-        h = r.get(f"vs_human_{key}")
-        if h:
-            agree = round(h["raw_agreement"] * h["n"])
-            au = h.get("auroc_correct_vs_not")
-            sep = (
-                ""
-                if au is None
-                else f"; separates my correct from not-correct answers: AUROC {au:.2f}, 0.50 = chance"
-            )
-            rows.append(
-                f"| RAGAS factual correctness ({label}) agrees with my labels | {agree} of {h['n']} answers (mean score {r[key]['mean']:.2f}{sep}) |"
-            )
     return rows
 
 
