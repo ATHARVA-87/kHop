@@ -1,0 +1,498 @@
+{
+  "summary": {
+    "n": 49,
+    "thresholds": [
+      0.75,
+      0.25
+    ],
+    "models_used": {
+      "gemini-3.5-flash-lite": 140
+    },
+    "faithfulness": {
+      "mean": 0.9881,
+      "n": 14,
+      "failed": 35
+    },
+    "factual_correctness": {
+      "mean": 0.43,
+      "n": 14,
+      "failed": 35
+    },
+    "factual_recall": {
+      "mean": 0.5714,
+      "n": 14,
+      "failed": 35
+    },
+    "vs_human_factual_correctness": {
+      "n": 14,
+      "kappa_at_fixed_thresholds": 0.0,
+      "raw_agreement": 0.1429,
+      "auroc_correct_vs_not": null,
+      "confusion": {
+        "human=correct ragas=incorrect": 6,
+        "human=correct ragas=partially_correct": 6,
+        "human=correct ragas=correct": 2
+      }
+    },
+    "vs_human_factual_recall": {
+      "n": 14,
+      "kappa_at_fixed_thresholds": 0.0,
+      "raw_agreement": 0.5714,
+      "auroc_correct_vs_not": null,
+      "confusion": {
+        "human=correct ragas=incorrect": 6,
+        "human=correct ragas=correct": 8
+      }
+    }
+  },
+  "per_query": [
+    {
+      "qid": "L-07ebaffcc3",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 0.0,
+      "factual_recall": 0.0
+    },
+    {
+      "qid": "L-77ed32c36f",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 0.67,
+      "factual_recall": 1.0
+    },
+    {
+      "qid": "L-47aef70f5a",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 0.0,
+      "factual_recall": 0.0
+    },
+    {
+      "qid": "L-e5b33be7e2",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 1.0,
+      "factual_recall": 1.0
+    },
+    {
+      "qid": "L-eab9a6091b",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 0.67,
+      "factual_recall": 1.0
+    },
+    {
+      "qid": "L-13ae2a142d",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 0.67,
+      "factual_recall": 1.0
+    },
+    {
+      "qid": "L-e7cba04788",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 0.67,
+      "factual_recall": 1.0
+    },
+    {
+      "qid": "L-a2c00a9f8b",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 0.67,
+      "factual_recall": 1.0
+    },
+    {
+      "qid": "L-a8da0ea627",
+      "qtype": "local",
+      "faithfulness": 0.8333333333333334,
+      "factual_correctness": 0.0,
+      "factual_recall": 0.0
+    },
+    {
+      "qid": "L-22723db9ff",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 1.0,
+      "factual_recall": 1.0
+    },
+    {
+      "qid": "L-8ab362f0e3",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 0.67,
+      "factual_recall": 1.0
+    },
+    {
+      "qid": "L-99426bab62",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 0.0,
+      "factual_recall": 0.0
+    },
+    {
+      "qid": "L-5c2f0c36e5",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 0.0,
+      "factual_recall": 0.0
+    },
+    {
+      "qid": "L-950416d079",
+      "qtype": "local",
+      "faithfulness": 1.0,
+      "factual_correctness": 0.0,
+      "factual_recall": 0.0
+    },
+    {
+      "qid": "L-83be086895",
+      "qtype": "local",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key e2df6ce76a4a)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 7ef5b3ddbdfc)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 7ef5b3ddbdfc)"
+    },
+    {
+      "qid": "L-6ac3514931",
+      "qtype": "local",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key af232b1d9e3e)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 555a8680c0ae)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 555a8680c0ae)"
+    },
+    {
+      "qid": "L-4e51f48592",
+      "qtype": "local",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 6838a05040bd)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 44d91c33528e)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 44d91c33528e)"
+    },
+    {
+      "qid": "L-a4b3d7b618",
+      "qtype": "local",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 9f9f719ee317)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key e41f42b919ad)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key e41f42b919ad)"
+    },
+    {
+      "qid": "L-fa04780483",
+      "qtype": "local",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key e4bfa09d45d5)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 98c84f8e2ee7)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 98c84f8e2ee7)"
+    },
+    {
+      "qid": "L-1cafa4e734",
+      "qtype": "local",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key f212c5b530ef)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key ed7a296a1899)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key ed7a296a1899)"
+    },
+    {
+      "qid": "L-d445f5ab12",
+      "qtype": "local",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 3541456642fe)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 91d17cb21cb1)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 91d17cb21cb1)"
+    },
+    {
+      "qid": "L-a18a1e01b3",
+      "qtype": "local",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key e585222cf85b)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 2333294d1318)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 2333294d1318)"
+    },
+    {
+      "qid": "L-a96c0fbfdf",
+      "qtype": "local",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key fe1bb8ac449e)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 04e82489ffcd)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 04e82489ffcd)"
+    },
+    {
+      "qid": "L-17cd146474",
+      "qtype": "local",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 44f5fd4ae969)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 17911adab646)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 17911adab646)"
+    },
+    {
+      "qid": "M-f8199de8b1",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 8ba7868e34bf)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 5d301fb04f54)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 5d301fb04f54)"
+    },
+    {
+      "qid": "M-029431a3df",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key b3518333e845)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key e1656f948ae4)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key e1656f948ae4)"
+    },
+    {
+      "qid": "M-74be6129e9",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 965d4df12022)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 8874d4cab067)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 8874d4cab067)"
+    },
+    {
+      "qid": "M-3a9e7ec6a9",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key c4dba890e518)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 0f6f97aef7f8)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 0f6f97aef7f8)"
+    },
+    {
+      "qid": "M-725f6d6c79",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key a5c34749762a)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 80c8e25f6758)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 80c8e25f6758)"
+    },
+    {
+      "qid": "M-9d162a27d2",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 2ad8c635e3c4)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 39bfb33f5d11)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 39bfb33f5d11)"
+    },
+    {
+      "qid": "M-81480ee57d",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 28f8f8125d16)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key e3ae2272abe6)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key e3ae2272abe6)"
+    },
+    {
+      "qid": "M-4ef2df83e8",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 7d89fe8ffa97)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key f2594a369d11)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key f2594a369d11)"
+    },
+    {
+      "qid": "M-283acbdb08",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key b6f36d1f95f7)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 7dc45ce93ee7)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 7dc45ce93ee7)"
+    },
+    {
+      "qid": "M-83e2e426cf",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 05397f4f6454)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 344fea6c2e4b)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 344fea6c2e4b)"
+    },
+    {
+      "qid": "M-03274ff886",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 80d6fe47f55a)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 44e351b670af)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 44e351b670af)"
+    },
+    {
+      "qid": "M-25b9262768",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key edd79adcccb9)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 0c9e643032f0)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 0c9e643032f0)"
+    },
+    {
+      "qid": "M-73181cfc09",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 77711b14bc2c)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 17e4098c2479)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 17e4098c2479)"
+    },
+    {
+      "qid": "M-7531785032",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 01533b63a93d)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 22a55d7a6bc0)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 22a55d7a6bc0)"
+    },
+    {
+      "qid": "M-2c6e9e0188",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key e6f811090604)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 267a9d352cd0)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 267a9d352cd0)"
+    },
+    {
+      "qid": "M-785fbe2558",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 9081dff2c5ff)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 3f1ad83789e0)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 3f1ad83789e0)"
+    },
+    {
+      "qid": "G-354b628368",
+      "qtype": "global",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 26be789a140a)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key cfbcebac9903)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key cfbcebac9903)"
+    },
+    {
+      "qid": "G-9a28615079",
+      "qtype": "global",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key a8bc69087998)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 73354b1be3ca)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 73354b1be3ca)"
+    },
+    {
+      "qid": "G-06cfa36669",
+      "qtype": "global",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 6edd540fb756)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key d3a748c6639e)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key d3a748c6639e)"
+    },
+    {
+      "qid": "G-44fef5ccc2",
+      "qtype": "global",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key a0e920a78c80)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key e1f2792751f9)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key e1f2792751f9)"
+    },
+    {
+      "qid": "B-bf5d25e90c",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 7201424ab166)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 7edd55e6ee8a)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 7edd55e6ee8a)"
+    },
+    {
+      "qid": "B-8a448465a7",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 66443e802e78)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 6217f74f59d0)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 6217f74f59d0)"
+    },
+    {
+      "qid": "B-d9746d69e7",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key b39bea5eaa97)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 90d4db0c21c2)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 90d4db0c21c2)"
+    },
+    {
+      "qid": "B-611217c7b6",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 5fcf459b9a30)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 85fff68a3134)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 85fff68a3134)"
+    },
+    {
+      "qid": "B-0192416a5a",
+      "qtype": "multi_hop",
+      "faithfulness": null,
+      "faithfulness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 81a4a445dac5)",
+      "factual_correctness": null,
+      "factual_correctness_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 241cf1d7c4ba)",
+      "factual_recall": null,
+      "factual_recall_error": "CacheMissError: offline mode: no cached response for gemini/gemini-3.5-flash-lite (key 241cf1d7c4ba)"
+    }
+  ]
+}

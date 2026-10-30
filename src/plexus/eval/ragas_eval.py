@@ -33,6 +33,7 @@ from collections import Counter
 from pathlib import Path
 
 from plexus.llm import (
+    CacheMissError,
     LLMClient,
     LLMRequest,
     Message,
@@ -72,7 +73,9 @@ def make_llm(client: LLMClient, provider: str, models: list[str]):
                     self.failures[m] = 0
                     self.used[m] += 1
                     return out
-                except (ProviderError, StructuredOutputError) as exc:
+                # a cache miss in offline mode falls through to the next model, like a provider
+                # error: the cached run used the fallback model (3.6-flash was overloaded)
+                except (ProviderError, StructuredOutputError, CacheMissError) as exc:
                     self.failures[m] += 1
                     last = exc
             raise last  # type: ignore[misc]

@@ -104,12 +104,18 @@ Held-out test set, 91 questions (60 name companies; the rest are sector-wide and
 | LLM judge (one verdict per answer) vs me: Cohen's kappa / catches answers I marked not correct | 0.63 / 3 of 5 |
 | LLM judge (pre-registered checklist) vs me: Cohen's kappa / catches answers I marked not correct | 0.49 / 3 of 5 |
 | LLM judge accepted as a stand-in for me (bar: catch 70%, pass 85%) | no (below its pre-set bar) |
+| RAGAS pilot (gemini-3.5-flash-lite judge; 14 of 49 answers before the free quota ran out): faithfulness | 0.99 |
+| RAGAS factual correctness (F1) agrees with my labels | 2 of 14 answers (mean score 0.43) |
+| RAGAS factual correctness (recall) agrees with my labels | 8 of 14 answers (mean score 0.57) |
 <!-- /table -->
 
 **How to read this table:**
 - **Cohen's kappa** measures how far two graders agree beyond what chance would give: 1 is perfect agreement, 0 is chance level.
 - **LLM judges:** both agreed with my labels only moderately, and missed answers I had marked not correct, so they failed the bar set in advance. Answer quality is therefore reported from my own blind labels.
-- **RAGAS** (Retrieval-Augmented Generation Assessment, a popular RAG metric library) was also tried. The free Gemini quota ran out partway through. On the answers it did score, its correctness score penalised extra correct detail, so it is not reported as a result.
+- **RAGAS** (Retrieval-Augmented Generation Assessment, a popular RAG metric library) was run as a pilot on the answers the free Gemini quota allowed (`make ragas`, reproducible offline from the published LLM cache).
+  - **Faithfulness** (are the answer's claims backed by the retrieved passages?) confirms the fact-checker's picture.
+  - **Factual correctness** disagreed with my labels on answers I marked fully correct: it penalises correct detail that the reference answer leaves out.
+  - So, like the LLM judges, it is reported for comparison and not used as the quality measure.
 
 ### Guardrails
 
@@ -294,7 +300,7 @@ Other useful commands:
 | SSE / API / CSP | Server-Sent Events / Application Programming Interface / Content Security Policy |
 | CI | Continuous Integration (GitHub Actions); in result tables, CI also means Confidence Interval |
 | Cohen's kappa | Agreement between two graders beyond chance (1 = perfect, 0 = chance) |
-| RAGAS | Retrieval-Augmented Generation Assessment (a RAG metric library; tried, not used as a result) |
+| RAGAS | Retrieval-Augmented Generation Assessment (a RAG metric library; run as a pilot, compared with human labels) |
 | recall@10 / nDCG / MRR | share of needed evidence in the top 10 / normalized Discounted Cumulative Gain / Mean Reciprocal Rank |
 | p50 / p95 | typical (median) / 95th-percentile time |
 | A0–A9 | The ablation ladder: each step adds one idea to the step before (A0–A6 search, A8 cache, A9 guardrails; A7 not built) |

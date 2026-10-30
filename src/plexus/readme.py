@@ -125,8 +125,30 @@ def answers() -> str:
             f"| LLM judge (one verdict per answer) vs me: Cohen's kappa / catches answers I marked not correct | {sj['binary_kappa']:.2f} / {round(sj['tpr_catches_not_correct'] * sj['human_not_correct'])} of {sj['human_not_correct']} |",
             f"| LLM judge (pre-registered checklist) vs me: Cohen's kappa / catches answers I marked not correct | {cj['binary_kappa']:.2f} / {round(cj['tpr_catches_not_correct'] * cj['human_not_correct'])} of {cj['human_not_correct']} |",
             f"| LLM judge accepted as a stand-in for me (bar: catch {_pct(bar['tpr'])}, pass {_pct(bar['tnr'])}) | {'yes' if s['accepted'] else 'no (below its pre-set bar)'} |",
+            *ragas_rows(),
         ]
     )
+
+
+def ragas_rows() -> list[str]:
+    """RAGAS pilot rows, if results/ragas_a6_router.json exists (`make ragas`)."""
+    path = RESULTS / "ragas_a6_router.json"
+    if not path.exists():
+        return []
+    r = json.loads(path.read_text())["summary"]
+    f, n = r["faithfulness"], r["faithfulness"]["n"]
+    judge = ", ".join(r.get("models_used", {})) or "Gemini"
+    rows = [
+        f"| RAGAS pilot ({judge} judge; {n} of {r['n']} answers before the free quota ran out): faithfulness | {f['mean']:.2f} |"
+    ]
+    for key, label in (("factual_correctness", "F1"), ("factual_recall", "recall")):
+        h = r.get(f"vs_human_{key}")
+        if h:
+            agree = round(h["raw_agreement"] * h["n"])
+            rows.append(
+                f"| RAGAS factual correctness ({label}) agrees with my labels | {agree} of {h['n']} answers (mean score {r[key]['mean']:.2f}) |"
+            )
+    return rows
 
 
 def guardrails() -> str:
