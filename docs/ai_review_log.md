@@ -68,3 +68,9 @@ Caught by the reviewer agent before push.
   - ADR 0004 now says the sensitivity check was dropped;
   - ADR 0009 now describes the router rule exactly;
   - the deploy workflow publishes only from `main`.
+
+## 2026-10-30: RAGAS runner and README mistakes caught during the run
+- **"429" matched inside a cache-key hash.** The quota check looked for "429" anywhere in an error, so an offline cache miss whose key contained "1429…" was read as a rate limit. Caught when an offline rerun reported "quota used up". Fix: whole-word match.
+- **A per-minute limit was treated as the daily limit,** so the rest of the run was skipped. Caught from the run log (the next call a minute later worked). Fix: 4.5 s pacing, wait and retry on a per-minute 429, and stop for the day only after repeated refusals.
+- **Wrong explanation of context precision in the README** ("some of the 5 passages are on topic but not needed"). An analysis agent recomputed the score from all 245 cached per-passage verdicts: the low score comes from the judge rating each passage alone against a two-company reference (0.86 one-company vs 0.11 two-company), and showing 3 passages instead of 5 leaves it at 0.47. Fix: README explanation corrected.
+- **"Reproduces offline from the published cache" was not true yet:** the release was uploaded before the RAGAS run, so it lacked the judge calls and the embeddings cache. Caught by a final docs check. Fix: refreshed cache and an embeddings file prepared for the release.

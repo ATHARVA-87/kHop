@@ -71,7 +71,7 @@ graph: ## Re-validate stored extractions (no LLM), resolve entities, build the L
 	$(PY) -m plexus.index.graph build
 
 RAGAS_PY ?= $(HOME)/miniconda3/envs/ragas/bin/python
-ragas: ## RAGAS Faithfulness + FactualCorrectness in the separate `ragas` env (RESULTS=results/a6_router.json)
+ragas: ## RAGAS, six metrics on the 49 labelled answers, in the separate `ragas` env; resumable daily (RESULTS=results/a6_router.json)
 	RAGAS_DO_NOT_TRACK=true $(RAGAS_PY) -m plexus.eval.ragas_eval --results $${RESULTS:-results/a6_router.json}
 
 ask: ## One question through the LangGraph flow with its step trace (Q="...", CONFIG=configs/a6_router.yaml)
