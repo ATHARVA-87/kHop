@@ -273,7 +273,14 @@ def build_state(config: Path = CONFIG) -> dict:
         )
         cache = SemanticCache(cache_path, bge_encoder(shared_embedder(retriever) or Embedder(cfg.embedder)),
                               router.linker, scope_of(cfg.snapshot, config), CACHE_THRESHOLD)  # fmt: skip
-    return {"flow": flow, "retriever": retriever, "config": cfg.name, "cache": cache, **load_meta()}
+    from plexus.index.build import index_dir
+    from plexus.serve.reframe import Reframer
+
+    reframer = Reframer.from_index(
+        index_dir(s.data_dir, cfg) / "chunks.jsonl", s.data_dir / "cache"
+    )
+    return {"flow": flow, "retriever": retriever, "config": cfg.name, "cache": cache,
+            "reframer": reframer, **load_meta()}  # fmt: skip
 
 
 def log_trace(question: str, record: dict) -> None:
@@ -299,7 +306,9 @@ def cacheable(payload: dict) -> bool:
     from plexus.baseline.naive import is_refusal
 
     refused = any(t.get("refused") for t in payload.get("trace", []))
-    checks = payload.get("checks") or []
+    checks = [
+        c for c in payload.get("checks") or [] if c.get("cited")
+    ]  # uncited lines are not claims
     return (
         not refused
         and not is_refusal(payload["answer"])
@@ -378,6 +387,16 @@ def create_app(state_factory=build_state) -> FastAPI:
     @app.get("/api/health")
     def health():
         return {"ok": bool(state), "config": state.get("config")}
+
+    @app.get("/api/reframe")
+    def reframe(q: str = Query(min_length=3, max_length=1000)):
+        """The question in canonical form (spelling + official company names). No GPU, ~1 ms.
+        The page shows it and lets the reader choose; /api/ask answers exactly what it is sent."""
+        rf = state.get("reframer")
+        if rf is None:
+            return {"question": q, "changed": False, "changes": []}
+        r = rf(q.strip())
+        return {"question": r.question, "changed": r.changed, "changes": r.changes}
 
     @app.get("/api/meta")
     def meta():

@@ -121,8 +121,11 @@ def build_flow(rag: NaiveRAG):
         ans.checks = [{"sentence": c.sentence, "cited": c.cited, "supported": c.supported,
                        "support": None if c.support is None else round(c.support, 3)}
                       for c in checks]  # fmt: skip
-        n_sup = sum(c["supported"] for c in ans.checks)
-        return {"answer": ans, **_step("verify", t0, sentences=len(checks), supported=n_sup)}
+        # only sentences that cite a passage can be checked against it; a summary line with no
+        # citation ("Based on the excerpts, ...") is neither counted nor flagged (owner, 2026-10-29)
+        cited = [c for c in ans.checks if c["cited"]]
+        n_sup = sum(c["supported"] for c in cited)
+        return {"answer": ans, **_step("verify", t0, sentences=len(cited), supported=n_sup)}
 
     g = StateGraph(FlowState)
     g.add_node("route", route)

@@ -14,7 +14,7 @@ class FakeHit:
 class FakeAnswer:
     text, checks = (
         "TSMC makes our chips [1].",
-        [{"sentence": "TSMC makes our chips.", "supported": True}],
+        [{"sentence": "TSMC makes our chips.", "supported": True, "cited": [1]}],
     )
     hits: ClassVar[list] = [FakeHit()]
 
@@ -133,8 +133,20 @@ def test_refusals_are_not_cached():
             "trace": [{"step": "guard", "refused": True}],
         }
     )
-    assert not srv.cacheable({"answer": "x [1].", "checks": [{"supported": False}], "trace": []})
-    assert srv.cacheable({"answer": "x [1].", "checks": [{"supported": True}], "trace": []})
+    assert not srv.cacheable(
+        {"answer": "x [1].", "checks": [{"supported": False, "cited": [1]}], "trace": []}
+    )
+    assert srv.cacheable(
+        {"answer": "x [1].", "checks": [{"supported": True, "cited": [1]}], "trace": []}
+    )
+    # an uncited summary line does not block caching (it is not a claim to check)
+    assert srv.cacheable(
+        {
+            "answer": "Summary. x [1].",
+            "trace": [],
+            "checks": [{"supported": False, "cited": []}, {"supported": True, "cited": [1]}],
+        }
+    )
 
 
 def test_cache_hit_needs_no_queue_place(monkeypatch):
@@ -190,3 +202,25 @@ def test_leaving_mid_answer_does_not_block_others_or_leak(monkeypatch):
             _t.sleep(0.1)
         else:
             raise AssertionError("GPU slot or queue place leaked")
+
+
+def test_reframe_endpoint(monkeypatch):
+    from collections import Counter
+
+    from plexus.serve.reframe import Reframer
+
+    rf = Reframer(
+        Counter({"what": 9, "does": 9, "say": 9, "about": 9, "revenue": 90}),
+        {"NVIDIA": "NVIDIA"},
+        english=frozenset({"zzz"}),  # same on machines without a system word list (CI)
+    )
+    state = {"flow": FakeFlow(), "config": "test", "reframer": rf, **srv.load_meta()}
+    with TestClient(srv.create_app(lambda: state)) as c:
+        r = c.get("/api/reframe", params={"q": "What does nvdia say about revenue?"}).json()
+        assert r["changed"] and r["question"] == "What does NVIDIA say about revenue?"
+        assert (
+            c.get("/api/reframe", params={"q": "What does NVIDIA say about revenue?"}).json()[
+                "changed"
+            ]
+            is False
+        )

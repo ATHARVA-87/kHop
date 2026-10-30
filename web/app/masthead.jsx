@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Intro from "./intro";
 
 function MoonIcon() {
   return (
@@ -25,9 +26,22 @@ export default function Masthead() {
   const path = usePathname();
   const [dark, setDark] = useState(false);
 
+  const intro = useRef(null);
+
   useEffect(() => {
     setDark(document.documentElement.dataset.theme === "dark");
+    let seen = true;
+    try {
+      seen = localStorage.getItem("plexus-intro-seen") === "1";
+    } catch {}
+    if (!seen) intro.current?.showModal(); // first visit only
   }, []);
+
+  function introClosed() {
+    try {
+      localStorage.setItem("plexus-intro-seen", "1");
+    } catch {}
+  }
 
   function toggle() {
     const next = !dark;
@@ -55,12 +69,16 @@ export default function Masthead() {
         <Link href="/about/" aria-current={here("/about")}>
           About
         </Link>
+        <button type="button" className="nav-button" onClick={() => intro.current?.showModal()}>
+          How to ask
+        </button>
         <button type="button" className="theme-toggle" onClick={toggle} aria-pressed={dark}>
           {dark ? <SunIcon /> : <MoonIcon />}
           <span className="theme-label">Dark mode</span>
           <span className="visually-hidden">{dark ? "(on)" : "(off)"}</span>
         </button>
       </nav>
+      <Intro ref={intro} onClose={introClosed} />
     </header>
   );
 }

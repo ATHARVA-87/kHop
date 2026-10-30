@@ -1,0 +1,170 @@
+{
+  "version": "v2",
+  "spelling_fresh_set": {
+    "golden_questions": 225,
+    "golden_spelling_changes": [],
+    "golden_any_change_shown_to_user": 0,
+    "trap_changes": [],
+    "company_restored": "113/113",
+    "word_restored": "114/125",
+    "wrong_replacements": [],
+    "p95_ms": 0.4,
+    "bars": {
+      "golden_spelling_changes": true,
+      "trap_changes": true,
+      "company_restored_90pct": true,
+      "word_restored_70pct": true,
+      "wrong_replacements_max_3pct": true,
+      "p95_under_20ms": true
+    },
+    "passed": true
+  },
+  "spelling_original_set_seen_by_v2": {
+    "golden_questions": 225,
+    "golden_spelling_changes": [],
+    "golden_any_change_shown_to_user": 0,
+    "trap_changes": [],
+    "company_restored": "57/57",
+    "word_restored": "77/87",
+    "wrong_replacements": [
+      {
+        "typo": "reate",
+        "to": "rate",
+        "expected": "relate"
+      }
+    ],
+    "p95_ms": 0.4,
+    "bars": {
+      "golden_spelling_changes": true,
+      "trap_changes": true,
+      "company_restored_90pct": true,
+      "word_restored_70pct": true,
+      "wrong_replacements_max_3pct": true,
+      "p95_under_20ms": true
+    },
+    "passed": true
+  },
+  "routes": {
+    "without": {
+      "same_route": "95/121",
+      "rate": 0.785,
+      "by_variant": {
+        "lowercase": "39/40",
+        "rewording_owner_checked": "40/40",
+        "company_typo": "4/29",
+        "company_plural_swap": "12/12"
+      }
+    },
+    "with_reframe": {
+      "same_route": "121/121",
+      "rate": 1.0,
+      "by_variant": {
+        "lowercase": "40/40",
+        "rewording_owner_checked": "40/40",
+        "company_typo": "29/29",
+        "company_plural_swap": "12/12"
+      }
+    },
+    "passed_95pct": true
+  },
+  "top5_overlap": {
+    "without": {
+      "median_jaccard": 0.667,
+      "mean_jaccard": 0.543,
+      "identical_top5": "40/121",
+      "by_variant_mean": {
+        "lowercase": 0.741,
+        "rewording_owner_checked": 0.483,
+        "company_typo": 0.175,
+        "company_plural_swap": 0.972
+      }
+    },
+    "with_reframe": {
+      "median_jaccard": 1.0,
+      "mean_jaccard": 0.76,
+      "identical_top5": "71/121",
+      "by_variant_mean": {
+        "lowercase": 0.799,
+        "rewording_owner_checked": 0.483,
+        "company_typo": 1.0,
+        "company_plural_swap": 0.972
+      }
+    },
+    "median_rises": true
+  },
+  "typos_anywhere_fresh": {
+    "sentences": 338,
+    "sentence_restored_exactly": "228/338",
+    "words_by_length": {
+      "1-3": {
+        "restored": 52,
+        "wrong": 0,
+        "untouched": 57,
+        "total": 109
+      },
+      "4-7": {
+        "restored": 165,
+        "wrong": 6,
+        "untouched": 74,
+        "total": 245
+      },
+      "8+": {
+        "restored": 99,
+        "wrong": 1,
+        "untouched": 45,
+        "total": 145
+      }
+    },
+    "wrong_replacement_rate": 0.014,
+    "same_route_without": 0.82,
+    "same_route_with": 0.979,
+    "top5_median_jaccard_without": 0.667,
+    "top5_median_jaccard_with": 1.0,
+    "top5_identical_without": "74/338",
+    "top5_identical_with": "270/338",
+    "bars": {
+      "wrong_max_3pct": true,
+      "route_95pct": true,
+      "overlap_not_worse": true
+    },
+    "passed": true
+  },
+  "typos_anywhere_seen": {
+    "sentences": 329,
+    "sentence_restored_exactly": "204/329",
+    "words_by_length": {
+      "1-3": {
+        "restored": 57,
+        "wrong": 1,
+        "untouched": 70,
+        "total": 128
+      },
+      "4-7": {
+        "restored": 146,
+        "wrong": 7,
+        "untouched": 71,
+        "total": 224
+      },
+      "8+": {
+        "restored": 85,
+        "wrong": 0,
+        "untouched": 39,
+        "total": 124
+      }
+    },
+    "wrong_replacement_rate": 0.0168,
+    "same_route_without": 0.812,
+    "same_route_with": 0.954,
+    "top5_median_jaccard_without": 0.667,
+    "top5_median_jaccard_with": 1.0,
+    "top5_identical_without": "78/329",
+    "top5_identical_with": "254/329",
+    "bars": {
+      "wrong_max_3pct": true,
+      "route_95pct": true,
+      "overlap_not_worse": true
+    },
+    "passed": true
+  },
+  "golden_text_changed": "0/225 (recall@10 on dev and test therefore unchanged)"
+}

@@ -217,7 +217,7 @@ Plan agreed 2026-10-28 (research scout: Adaptive-RAG, CRAG, IRCoT/Self-Ask, RAGA
 - Also fixed at Phase 4 start: generation returned empty answers (qwen3.5 thinking), now `generation.think: false`.
 
 ## Phase 5 (branch `phase5-agents`): agents + guardrails
-Research first (2026-10-29): well-tuned single pipelines with a reranker match multi-agent RAG at a fraction of the cost (Ferrazzi et al. 2026), so the four roles stay but only the Writer is an LLM call. Planner = A6 rule router; Researcher = the A6 retrievers; Writer = qwen3.5:4b; Verifier = MiniCheck-Flan-T5-Large (no LLM call). Every piece had a keep rule fixed before its run.
+Research first (2026-10-29): well-tuned single pipelines with a reranker match multi-agent RAG at a fraction of the cost (Ferrazzi et al. 2026, "Is Agentic RAG worth it?", arXiv:2601.07711), so the four roles stay but only the Writer is an LLM call. Planner = A6 rule router; Researcher = the A6 retrievers; Writer = qwen3.5:4b; Verifier = MiniCheck-Flan-T5-Large (no LLM call). Every piece had a keep rule fixed before its run.
 
 | step | what | result | kept? |
 | --- | --- | --- | --- |
@@ -246,6 +246,9 @@ Research first (2026-10-29). Built: FastAPI service with live answers (SSE; `mak
 - GPU (recorded by the load test, 219 samples): median 5,513 MiB, peak 5,547 MiB of 6,141 (owner's 10% margin limit 5,526: typical use inside, brief peaks 21 MiB over). Stopping the app frees the GPU (12 MiB).
 - First run (writer 35% on CPU, before the load-order fix) is in docs/failures.md.
 - Found by the load test: cache hits were being turned away as "busy" because the queue was checked before the cache; fixed (cache first, then queue), test added.
+
+## Phase 7 to-do noted during Phase 6
+- Demo container: install the Debian word list `wamerican` (the reframe layer switches itself off without one: measured 10/225 correct questions changed without it), start uvicorn with `--proxy-headers --forwarded-allow-ips` behind the Space proxy, Groq writer config.
 
 ## Held-out TEST results (2026-10-28, scored once, 91 questions: 37 local, 23 multi-hop [9 bridge, 14 comparison], 31 global)
 `results/test/*.json`. No design decision was made on these numbers.

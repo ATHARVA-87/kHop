@@ -12,6 +12,31 @@ const EXAMPLES = [
 ];
 
 const STEP_ORDER = ["guard", "route", "retrieve", "answer", "verify"];
+const HISTORY_KEY = "plexus-history"; // this browser tab only (sessionStorage), never sent anywhere
+const HISTORY_MAX = 20;
+
+function loadHistory() {
+  try {
+    const h = JSON.parse(sessionStorage.getItem(HISTORY_KEY) || "[]");
+    return Array.isArray(h) ? h : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(h) {
+  try {
+    sessionStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(0, HISTORY_MAX)));
+  } catch {
+    // storage full or blocked: history just is not kept
+  }
+}
+
+function stepsOf(data) {
+  const steps = Object.fromEntries((data.trace || []).map((t) => [t.step, t]));
+  if (data.from_cache) steps.cache = { step: "cache" };
+  return steps;
+}
 const NOT_ENOUGH = "Not enough evidence in the filings to answer this.";
 const REASONS = {
   advice: "It asks for investment advice.",
@@ -112,7 +137,8 @@ function Inline({ text, nSources, current, onCite }) {
 
 function Answer({ text, busy, result, current, onCite }) {
   const blocks = blocksOf(text);
-  const unsupported = (result?.checks || []).filter((c) => !c.supported);
+  // only sentences that cite a passage and failed the check (an uncited summary line is not flagged)
+  const unsupported = (result?.checks || []).filter((c) => !c.supported && c.cited && c.cited.length);
   const nSources = result?.sources?.length || 0;
   const items = [];
   let list = [];
@@ -121,16 +147,19 @@ function Answer({ text, busy, result, current, onCite }) {
     list = [];
   };
   blocks.forEach((b, i) => {
-    const flagged = unsupported.some((c) => norm(b.text).includes(norm(c.sentence).slice(0, 60)));
+    const flaggedChecks = unsupported.filter((c) => norm(b.text).includes(norm(c.sentence)));
     const body = (
       <>
         <Inline text={b.text} nSources={nSources} current={current} onCite={onCite} />
-        {flagged && (
-          <span className="flag">
+        {flaggedChecks.map((c) => (
+          <span className="flag" key={c.sentence}>
             <WarnIcon />
-            Not backed by its source. Check the cited passage before relying on this.
+            <span>
+              Not backed by its cited passage: "{c.sentence.length > 90 ? c.sentence.slice(0, 90) + "…" : c.sentence}"
+              Check that passage before relying on this sentence.
+            </span>
           </span>
-        )}
+        ))}
       </>
     );
     if (b.bullet) list.push(<li key={i} className="line">{body}</li>);
@@ -145,6 +174,15 @@ function Answer({ text, busy, result, current, onCite }) {
       {items.length ? items : <p className="status">Searching the filings…</p>}
     </div>
   );
+}
+
+// the reframed question with its changed words marked (text, never HTML)
+function Marked({ text, words }) {
+  const uniq = [...new Set(words)].filter(Boolean).sort((a, b) => b.length - a.length);
+  if (!uniq.length) return text;
+  const esc = uniq.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  return text.split(new RegExp(`(${esc.join("|")})`, "g")).map((part, i) =>
+    uniq.includes(part) ? <mark key={i} className="changed">{part}<span className="visually-hidden"> (changed)</span></mark> : <span key={i}>{part}</span>);
 }
 
 function formatDate(iso) {
@@ -256,17 +294,55 @@ export default function AskPage() {
   const [error, setError] = useState("");
   const [current, setCurrent] = useState(null);
   const [meta, setMeta] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [suggestion, setSuggestion] = useState(null); // {typed, question, changes}
+  const useBtn = useRef(null);
   const [metaError, setMetaError] = useState(false);
   const abort = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
+    setHistory(loadHistory());
     fetch(`${API}/api/meta`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then(setMeta)
       .catch(() => setMetaError(true));
     return () => abort.current?.abort();
   }, []);
+
+  // Reframe first: fix spelling and company names so the same question always searches the
+  // same way. If a word would change, the reader chooses; nothing is searched until then.
+  async function submit(q) {
+    const clean = q.trim();
+    if (clean.length < 3) {
+      setFieldError("Type at least 3 characters.");
+      inputRef.current?.focus();
+      return;
+    }
+    setFieldError("");
+    let r = null;
+    try {
+      const res = await fetch(`${API}/api/reframe?q=${encodeURIComponent(clean)}`);
+      if (res.ok) r = await res.json();
+    } catch {
+      // reframing is a help, not a requirement: ask as typed
+    }
+    if (r && r.changed) {
+      setSuggestion({ typed: clean, question: r.question, changes: r.changes });
+      return;
+    }
+    ask(r ? r.question : clean);
+  }
+
+  function choose(q) {
+    setSuggestion(null);
+    setQuestion(q);
+    ask(q);
+  }
+
+  useEffect(() => {
+    if (suggestion) useBtn.current?.focus();
+  }, [suggestion]);
 
   async function ask(q) {
     const clean = q.trim();
@@ -298,6 +374,11 @@ export default function AskPage() {
           setText(data.answer);
           setResult(data);
           setPhase("done");
+          setHistory((h) => {
+            const next = [{ q: clean, at: Date.now(), data }, ...h.filter((e) => e.q !== clean)].slice(0, HISTORY_MAX);
+            saveHistory(next);
+            return next;
+          });
         } else if (event === "error") {
           finished = true;
           setError(data.message);
@@ -315,6 +396,24 @@ export default function AskPage() {
         : e.message);
       setPhase("error");
     }
+  }
+
+  function reopen(entry) {
+    abort.current?.abort();
+    setQuestion(entry.q);
+    setAsked(entry.q);
+    setText(entry.data.answer);
+    setResult(entry.data);
+    setSteps(stepsOf(entry.data));
+    setQueued(0);
+    setError("");
+    setCurrent(null);
+    setPhase("done");
+  }
+
+  function clearHistory() {
+    setHistory([]);
+    saveHistory([]);
   }
 
   function onCite(n) {
@@ -348,7 +447,7 @@ export default function AskPage() {
         </section>
       )}
 
-      <form className="ask" onSubmit={(e) => { e.preventDefault(); ask(question); }} noValidate>
+      <form className="ask" onSubmit={(e) => { e.preventDefault(); submit(question); }} noValidate>
         <label htmlFor="question">Your question</label>
         <div className="ask-row">
           <input id="question" ref={inputRef} className="ask-input" type="text" enterKeyHint="search"
@@ -369,6 +468,41 @@ export default function AskPage() {
         </p>
       </form>
 
+      {suggestion && (
+        <section className="reframe" aria-labelledby="reframe-title">
+          <h2 id="reframe-title">Did you mean this?</h2>
+          <p className="reframe-question"><Marked text={suggestion.question} words={suggestion.changes.map((c) => c.to)} /></p>
+          <p className="reframe-note">
+            You typed: "{suggestion.typed}". Plexus fixed the spelling and used the official company
+            name, so the same question always searches the same filings.
+          </p>
+          <div className="reframe-actions">
+            <button ref={useBtn} type="button" className="ask-button" onClick={() => choose(suggestion.question)}>Use this version</button>
+            <button type="button" className="retry" onClick={() => choose(suggestion.typed)}>Ask as I typed</button>
+          </div>
+        </section>
+      )}
+
+      {history.length > 0 && (
+        <details className="history" open={phase === "start"}>
+          <summary>Your questions this session ({history.length})</summary>
+          <ul className="history-list">
+            {history.map((e) => (
+              <li key={e.at}>
+                <button type="button" className="history-item" onClick={() => reopen(e)}
+                  aria-current={phase !== "start" && e.q === asked ? "true" : undefined}>
+                  {e.q}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="history-note">
+            Kept only in this browser tab; closing the tab clears it.{" "}
+            <button type="button" className="text-button" onClick={clearHistory}>Clear these questions</button>
+          </p>
+        </details>
+      )}
+
       <p className="visually-hidden" aria-live="polite">{phase !== "start" ? statusText : ""}</p>
 
       {phase === "start" && (
@@ -378,7 +512,7 @@ export default function AskPage() {
             <ul className="examples">
               {EXAMPLES.map((e) => (
                 <li key={e.q}>
-                  <button type="button" className="example" onClick={() => { setQuestion(e.q); ask(e.q); }}>
+                  <button type="button" className="example" onClick={() => { setQuestion(e.q); submit(e.q); }}>
                     <span className="example-kind">{e.kind}</span>
                     {e.q}
                   </button>
@@ -421,7 +555,7 @@ export default function AskPage() {
                 <p>Try one of these instead:</p>
                 <ul className="examples">
                   {EXAMPLES.slice(0, 2).map((e) => (
-                    <li key={e.q}><button type="button" className="example" onClick={() => { setQuestion(e.q); ask(e.q); }}>{e.q}</button></li>
+                    <li key={e.q}><button type="button" className="example" onClick={() => { setQuestion(e.q); submit(e.q); }}>{e.q}</button></li>
                   ))}
                 </ul>
               </div>
