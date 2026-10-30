@@ -40,8 +40,8 @@ function stepsOf(data) {
 const NOT_ENOUGH = "Not enough evidence in the filings to answer this.";
 const REASONS = {
   advice: "It asks for investment advice.",
-  scope: "It is not about the filings Plexus covers.",
-  jailbreak: "It asks Plexus to ignore its rules.",
+  scope: "It is not about the filings kHop covers.",
+  jailbreak: "It asks kHop to ignore its rules.",
   too_long: "It is longer than 1000 characters.",
 };
 const ROUTES = {
@@ -72,7 +72,7 @@ function ExternalIcon() {
 async function streamQuestion(question, signal, on) {
   const res = await fetch(`${API}/api/ask?q=${encodeURIComponent(question)}`, { signal });
   if (!res.ok) {
-    let message = "Plexus could not take this question. Try again.";
+    let message = "kHop could not take this question. Try again.";
     try {
       const body = await res.json();
       if (typeof body.message === "string") message = body.message;
@@ -99,7 +99,7 @@ async function streamQuestion(question, signal, on) {
       }
       if (data) {
         let parsed;
-        try { parsed = JSON.parse(data); } catch { throw new Error("Plexus sent a reply it could not read. Ask again."); }
+        try { parsed = JSON.parse(data); } catch { throw new Error("kHop sent a reply it could not read. Ask again."); }
         on(event, parsed);
       }
     }
@@ -229,8 +229,8 @@ function stepView(name, step, running, result) {
       };
     case "guard":
       return step.refused
-        ? { title: "Declined the question", detail: REASONS[step.reason] || "Outside what Plexus answers.", state: "is-flagged" }
-        : { title: "Checked the question", detail: "It is about the filings Plexus covers.", state: "is-done" };
+        ? { title: "Declined the question", detail: REASONS[step.reason] || "Outside what kHop answers.", state: "is-flagged" }
+        : { title: "Checked the question", detail: "It is about the filings kHop covers.", state: "is-done" };
     case "route":
       return { title: "Chose how to search", detail: ROUTES[step.route] || step.route, state: "is-done" };
     case "retrieve":
@@ -386,13 +386,13 @@ export default function AskPage() {
         }
       });
       if (!finished && !ctrl.signal.aborted) {
-        setError("The connection to Plexus closed before the answer finished. Ask again.");
+        setError("The connection to kHop closed before the answer finished. Ask again.");
         setPhase("error");
       }
     } catch (e) {
       if (ctrl.signal.aborted) return;
       setError(e.message === "Failed to fetch" || e.name === "TypeError"
-        ? "Plexus is not reachable. Start it with make serve, then ask again."
+        ? "kHop is not reachable. Start it with make serve, then ask again."
         : e.message);
       setPhase("error");
     }
@@ -464,7 +464,7 @@ export default function AskPage() {
           <p id="question-error" className="field-error" role="alert"><WarnIcon />{fieldError}</p>
         ) : null}
         <p id="question-help" className="helper">
-          Name one or more companies, or ask about the whole sector. Plexus does not give investment advice.
+          Name one or more companies, or ask about the whole sector. kHop does not give investment advice.
         </p>
       </form>
 
@@ -473,7 +473,7 @@ export default function AskPage() {
           <h2 id="reframe-title">Did you mean this?</h2>
           <p className="reframe-question"><Marked text={suggestion.question} words={suggestion.changes.map((c) => c.to)} /></p>
           <p className="reframe-note">
-            You typed: "{suggestion.typed}". Plexus fixed the spelling and used the official company
+            You typed: "{suggestion.typed}". kHop fixed the spelling and used the official company
             name, so the same question always searches the same filings.
           </p>
           <div className="reframe-actions">
@@ -521,14 +521,14 @@ export default function AskPage() {
             </ul>
           </section>
           <section className="coverage" aria-labelledby="coverage-title">
-            <h2 id="coverage-title">What Plexus covers</h2>
+            <h2 id="coverage-title">What kHop covers</h2>
             {meta ? (
               <p>
                 <strong>{meta.filings} filings</strong> (annual 10-K and quarterly 10-Q reports filed in {meta.years}) from{" "}
                 <strong>{meta.companies.length} companies</strong>: {meta.companies.join(", ")}.
               </p>
             ) : metaError ? (
-              <p className="notice">Plexus is not running, so the list of companies cannot load. Start it with <code>make serve</code>, then reload this page.</p>
+              <p className="notice">kHop is not running, so the list of companies cannot load. Start it with <code>make serve</code>, then reload this page.</p>
             ) : (
               <p>Loading the list of companies…</p>
             )}
@@ -561,7 +561,7 @@ export default function AskPage() {
               </div>
             ) : noEvidence ? (
               <div className="notice">
-                <p>The filings Plexus found do not answer this question.</p>
+                <p>The filings kHop found do not answer this question.</p>
                 <p>Name the company, or ask about something filings cover, such as risks, suppliers, customers or results. The passages it searched are listed below.</p>
               </div>
             ) : (

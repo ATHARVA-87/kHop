@@ -1,4 +1,4 @@
-# Plexus — one command per step. Run inside the `torch` conda env:
+# kHop — one command per step. Run inside the `torch` conda env:
 #   conda activate torch
 PY ?= $(shell test -x $(HOME)/miniconda3/envs/torch/bin/python && echo $(HOME)/miniconda3/envs/torch/bin/python || echo python)
 CONFIG ?= configs/a0_naive.yaml
@@ -112,7 +112,7 @@ gate-ci: ## CI gate, no torch: BM25, and graph + A5 on BM25 (needs data/processe
 compare: ## paired bootstrap of B vs A on the same queries: make compare A=a0_naive B=a0_bm25
 	$(PY) -m plexus.eval.compare results/$(A).json results/$(B).json
 
-serve: ## Plexus app on http://127.0.0.1:8000 (API + UI; needs Ollama running). CONFIG=configs/app.yaml
+serve: ## kHop app on http://127.0.0.1:8000 (API + UI; needs Ollama running). CONFIG=configs/app.yaml
 	PLEXUS_CONFIG=$${CONFIG:-configs/app.yaml} $(PY) -m uvicorn plexus.serve.app:app --host 127.0.0.1 --port 8000
 
 stop: ## Free the GPU after a hard kill of make serve (unloads the local model)

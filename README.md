@@ -1,6 +1,6 @@
-# Plexus
+# kHop
 
-Ask questions about the 2025 SEC filings (10-K and 10-Q) of 39 US semiconductor companies. Plexus answers with numbered citations to the passages it used, fact-checks each cited sentence, and shows every step it took.
+Ask questions about the 2025 SEC filings (10-K and 10-Q) of 39 US semiconductor companies. kHop answers with numbered citations to the passages it used, fact-checks each cited sentence, and shows every step it took.
 
 It is also a measurement project:
 - Each component was compared with a simpler baseline on a dev question set I checked by hand.
@@ -182,7 +182,7 @@ Each major choice is recorded in [docs/adr/](docs/adr/) with the alternatives th
 
 ## AI-assisted development
 
-Plexus was built with Claude Code as a pair programmer. Commits it co-authored carry a `Co-Authored-By` trailer.
+kHop was built with Claude Code as a pair programmer. Commits it co-authored carry a `Co-Authored-By` trailer.
 
 What I kept for myself:
 - the golden-set labels;

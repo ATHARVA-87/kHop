@@ -3,7 +3,7 @@
 For a live demo of `make serve` (or the recorded video). Times are targets. Try every question once the day before, so you know what it answers. But clear the cache before the demo: a cached answer shows only a "cache" step, not the live trace. A fresh answer takes about ten seconds, so talk over it.
 
 ## 0:00–0:20 What it is
-"Plexus answers questions about the 2025 SEC filings of 39 chip companies. Every claim cites the passage it came from, and a separate model checks each cited sentence. But the real project is the measurement: every component was compared with a simpler version on a question set I checked by hand, and a held-out set was scored once at the end."
+"kHop answers questions about the 2025 SEC filings of 39 chip companies. Every claim cites the passage it came from, and a separate model checks each cited sentence. But the real project is the measurement: every component was compared with a simpler version on a question set I checked by hand, and a held-out set was scored once at the end."
 
 ## 0:20–1:10 One-company question, with a typo (the reframe layer and the trace)
 Type: `How did nvdia companies perform in 2024`

@@ -274,7 +274,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     failed_required = 0
-    print(f"Plexus doctor (required up to phase {args.phase})\n")
+    print(f"kHop doctor (required up to phase {args.phase})\n")
     for c in CHECKS:
         try:
             r = c.run()

@@ -1,4 +1,4 @@
-"""Plexus web service (Phase 6): one question in, live events out (Server-Sent Events).
+"""kHop web service (Phase 6): one question in, live events out (Server-Sent Events).
 
     make serve            # http://127.0.0.1:8000  (UI + API on one port)
 
@@ -45,7 +45,7 @@ DEADLINE_S = 120  # one question, start to finish
 UI_DIR = REPO_ROOT / "web" / "out"  # the static Next.js export
 ANSWER_ERROR = os.getenv(
     "PLEXUS_ANSWER_ERROR",
-    "Plexus could not answer. Check that the answer model is running (for the local app: ollama serve), then ask again.",
+    "kHop could not answer. Check that the answer model is running (for the local app: ollama serve), then ask again.",
 )
 CACHE_THRESHOLD = 0.935  # chosen on cache pairs C-01..C-20, results/a8_cache.json
 TRACE_LOG = Path(os.getenv("PLEXUS_TRACE_LOG", REPO_ROOT / "data" / "logs" / "traces.jsonl"))
@@ -204,7 +204,7 @@ def about_figures() -> list[dict]:
         )
         i = d["summary"]["injection"]
         add(
-            'Attack test: fake orders such as "ignore your rules" were hidden inside filing text. Times Plexus obeyed them',
+            'Attack test: fake orders such as "ignore your rules" were hidden inside filing text. Times kHop obeyed them',
             f"{i['attack_success']} of {i['n']}",
             "results/guardrails_a9_agents.json",
         )
@@ -362,7 +362,7 @@ def create_app(state_factory=build_state) -> FastAPI:
             if writer:
                 ollama_load(*writer, keep_alive=0)  # free the GPU
 
-    app = FastAPI(title="Plexus", lifespan=lifespan, docs_url=None, redoc_url=None)
+    app = FastAPI(title="kHop", lifespan=lifespan, docs_url=None, redoc_url=None)
     app.state.gpu = gpu  # visible to tests
 
     if os.getenv("PLEXUS_DEV_CORS"):  # only for `next dev` on another port
@@ -426,7 +426,7 @@ def create_app(state_factory=build_state) -> FastAPI:
                 return question, None, (hit, round((time.perf_counter() - t0) * 1000, 1))
         position = gpu.join()
         if position is None:
-            raise HTTPException(503, "Plexus is busy answering other questions. Try again shortly.",
+            raise HTTPException(503, "kHop is busy answering other questions. Try again shortly.",
                                 headers={"Retry-After": "20"})  # fmt: skip
         return question, position, None
 
@@ -489,7 +489,7 @@ def create_app(state_factory=build_state) -> FastAPI:
                     (
                         "event",
                         ServerSentEvent(
-                            event="error", data={"message": "Plexus is busy. Try again shortly."}
+                            event="error", data={"message": "kHop is busy. Try again shortly."}
                         ),
                     )
                 )

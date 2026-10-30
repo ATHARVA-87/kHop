@@ -1,4 +1,4 @@
-"""Drift check (Phase 7): does Plexus still find the facts in newer filings, with no retuning?
+"""Drift check (Phase 7): does kHop still find the facts in newer filings, with no retuning?
 
     make refresh   # (you) download, parse and index the 2026 snapshot (configs/corpus_2026.yaml)
     make drift     # compare the golden set on semis-2025 vs semis-2026 -> results/drift.json

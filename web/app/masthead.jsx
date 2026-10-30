@@ -59,8 +59,8 @@ export default function Masthead() {
 
   return (
     <header className="masthead">
-      <Link href="/" className="wordmark" aria-label="Plexus, home">
-        Plexus<span className="wordmark-mark" aria-hidden="true">.</span>
+      <Link href="/" className="wordmark" aria-label="kHop, home">
+        kHop<span className="wordmark-mark" aria-hidden="true">.</span>
       </Link>
       <nav className="nav" aria-label="Main">
         <Link href="/" aria-current={here("/")}>
