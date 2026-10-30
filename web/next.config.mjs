@@ -5,5 +5,9 @@ const nextConfig = {
   images: { unoptimized: true },
   poweredByHeader: false,
   trailingSlash: true,
+  // the recorded demo (make demo-site) is served from a sub-path such as /kHop/ on GitHub Pages,
+  // and is written to its own folder so it never replaces the app's web/out
+  ...(process.env.NEXT_PUBLIC_BASE_PATH ? { basePath: process.env.NEXT_PUBLIC_BASE_PATH } : {}),
+  ...(process.env.NEXT_PUBLIC_REPLAY === "1" ? { distDir: "out-demo" } : {}),
 };
 export default nextConfig;

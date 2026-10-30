@@ -1,4 +1,4 @@
-"""The Plexus question flow as a LangGraph graph: route -> retrieve -> answer.
+"""The kHop question flow as a LangGraph graph: route -> retrieve -> answer.
 
     python -m plexus.agents.flow --config configs/a6_router.yaml "Which companies rely on TSMC?"
 

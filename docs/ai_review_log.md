@@ -34,3 +34,16 @@ I reported "routes 134/134 identical" for the LangGraph flow, but saved results 
 
 ## 2026-10-29: committed a failing test; the test had caught a real cache bug
 `pytest | tail` hid pytest's exit status, so commit 3bc37b3 went in with a failing test. The failure was a real bug: the semantic cache cut period words to 3 characters, which also cut years ("2024" and "2025" both became "202"), so a 2025 question could have reused a 2024 answer. Fixed (years kept whole) before any cache result was produced. From now on the exit status is checked directly before committing.
+
+## 2026-10-29: first README draft overclaimed in several places
+Caught by the reviewer agent before push.
+
+**Overclaims, now fixed:**
+- **The test set:** "no design decision used the test set" (the 'TI' linker fix came after seeing it).
+- **Baselines:** "every component had to beat a simpler baseline" (the graph's gain is not proven).
+- **Fact-checker:** the rows counted 10 deliberately swapped passages as if they were real sentences.
+- **Answer accuracy:** 44/49 was shown without saying it is the dev set after a blind re-label.
+- **Provenance:** every result file was said to record its git commit; some do not.
+- **Spelling layer:** keep bars used while building were shown under "never used for tuning".
+
+**Fixes:** every row now names its set, and the generator (`plexus.readme`) carries those labels. The demo script also pre-warmed the cache for a question whose live trace it then showed; a cache hit shows only a cache step.

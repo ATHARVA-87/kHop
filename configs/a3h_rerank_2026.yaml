@@ -1,0 +1,30 @@
+name: a3h_rerank_2026
+description: >
+  Drift check (Phase 7): a3h_rerank unchanged, on the 2026 snapshot. Hybrid search + chunk
+  headers + reranker, the app's settings without the graph (a graph needs a 4.5 h LLM
+  extraction per snapshot).
+snapshot: semis-2026
+seed: 0
+chunker:
+  type: structured
+  child_words: 200
+  child_chars: 1400
+  parent_words: 800
+  headers: true
+embedder:
+  model: BAAI/bge-small-en-v1.5
+retrieval:
+  type: hybrid
+  top_k: 20
+  candidates: 100
+  rrf_k: 60
+  rerank:
+    model: BAAI/bge-reranker-base
+    candidates: 50
+generation:
+  provider: ollama
+  model: qwen3.5:4b
+  context_chunks: 5
+judge:
+  provider: gemini
+  model: gemini-3.6-flash

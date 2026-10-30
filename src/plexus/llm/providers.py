@@ -50,7 +50,7 @@ class FakeProvider:
         )
 
 
-# LiteLLM model-string prefix per provider. Keys are Plexus provider names.
+# LiteLLM model-string prefix per provider. Keys are kHop provider names.
 _LITELLM_PREFIX = {"ollama": "ollama", "gemini": "gemini", "groq": "groq"}
 
 

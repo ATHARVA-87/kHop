@@ -16,11 +16,11 @@ JAILBREAK_REPLY = (
     "companies in the corpus."
 )
 ADVICE_REPLY = (
-    "I can't help with investment advice. Plexus answers factual questions about what "
+    "I can't help with investment advice. kHop answers factual questions about what "
     "semiconductor companies say in their SEC filings."
 )
 SCOPE_REPLY = (
-    "I can't help with that: Plexus only answers questions about the SEC filings of the "
+    "I can't help with that: kHop only answers questions about the SEC filings of the "
     "semiconductor companies in its corpus."
 )
 

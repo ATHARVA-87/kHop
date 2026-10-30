@@ -1,0 +1,56 @@
+# Second frozen snapshot for the Phase 7 drift check (owner's idea: newer data with minimal
+# changes). Same companies and forms as configs/corpus.yaml; only the name and the window
+# differ. The end date is fixed so the snapshot never moves.
+name: semis-2026
+sector: Semiconductors and semiconductor equipment (US domestic 10-K filers)
+forms: ["10-K", "10-Q"]          # amendments (10-K/A, 10-Q/A) are excluded
+filed_from: "2026-01-01"
+filed_to: "2026-10-28"
+max_requests_per_second: 5        # SEC fair-access limit is 10/s; stay well under it
+
+# 40 companies. Mix of designers, IDMs, foundry customers and equipment makers so that
+# supplier/customer relations cross company boundaries (needed for multi-hop questions).
+tickers:
+  # chip designers / fabless
+  - NVDA
+  - AMD
+  - QCOM
+  - AVGO
+  - MRVL
+  - MPWR
+  - LSCC
+  - SYNA
+  - SLAB
+  - CRUS
+  - SMTC
+  - MXL
+  - RMBS
+  - SITM
+  - AMBA
+  - CRDO
+  - PI
+  # integrated device makers / analog / power
+  - INTC
+  - TXN
+  - MU
+  - ADI
+  - NXPI
+  - "ON"              # quoted: bare ON is a YAML boolean
+  - MCHP
+  - SWKS
+  - QRVO
+  - WOLF
+  - POWI
+  - DIOD
+  - ALGM
+  - MTSI
+  - VSH
+  # equipment, materials, test, packaging
+  - AMAT
+  - LRCX
+  - KLAC
+  - TER
+  - ENTG
+  - ONTO
+  - FORM
+  - AMKR

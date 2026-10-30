@@ -204,10 +204,10 @@ def main(argv: list[str] | None = None) -> int:
     s = Settings.load()
     cfg = ExperimentConfig.load(REPO_ROOT / "configs" / "app.yaml")
     rf = Reframer.from_index(index_dir(s.data_dir, cfg) / "chunks.jsonl", s.data_dir / "cache")
-    # v1 failed on typos.jsonl; v2's fixes were made after seeing it, so v2 is judged on the fresh
-    # dev-derived set (typos_fresh.jsonl); both are reported
+    # v1 failed on typos.jsonl and v2 on typos_anywhere.jsonl; each later version is judged on a
+    # fresh set it was not tuned on (typos_fresh.jsonl, typos_anywhere_fresh.jsonl); all are reported
     out = {
-        "version": "v2",
+        "version": "v3",
         "spelling_fresh_set": spelling(rf, "reframe/typos_fresh.jsonl"),
         "spelling_original_set_seen_by_v2": spelling(rf),
         "routes": routes(rf, RuleRouter(make_linker(cfg, s.data_dir))),

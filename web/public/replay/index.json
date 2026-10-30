@@ -1,0 +1,52 @@
+{
+ "recorded": "2026-10-30",
+ "examples": [
+  {
+   "kind": "Two companies",
+   "q": "What do Impinj and Allegro MicroSystems each rely on TSMC for?"
+  },
+  {
+   "kind": "Two companies",
+   "q": "How do Lam Research and KLA describe their exposure to Huawei under export restrictions?"
+  },
+  {
+   "kind": "One company",
+   "q": "What natural disaster risks does NXP face at its factories in places like Singapore, Taiwan, Malaysia and Thailand?"
+  },
+  {
+   "kind": "Whole sector",
+   "q": "How do all semiconductor companies describe the risks that tariffs and trade policy pose to their costs and supply chains?"
+  },
+  {
+   "kind": "A typo in the name",
+   "q": "How did nvdia companies perform in 2024"
+  },
+  {
+   "kind": "Two companies",
+   "q": "Which suppliers do NVIDIA and AMD both depend on?"
+  },
+  {
+   "kind": "Declined: investment advice",
+   "q": "Should I buy NVIDIA stock?"
+  }
+ ],
+ "ask": {
+  "What do Impinj and Allegro MicroSystems each rely on TSMC for?": "a1",
+  "How do Lam Research and KLA describe their exposure to Huawei under export restrictions?": "a2",
+  "What natural disaster risks does NXP face at its factories in places like Singapore, Taiwan, Malaysia and Thailand?": "a3",
+  "How do all semiconductor companies describe the risks that tariffs and trade policy pose to their costs and supply chains?": "a4",
+  "How did NVIDIA perform in 2024": "a5",
+  "How did nvdia companies perform in 2024": "a5b",
+  "Which suppliers do NVIDIA and AMD both depend on?": "a6",
+  "Should I buy NVIDIA stock?": "a7"
+ },
+ "reframe": {
+  "What do Impinj and Allegro MicroSystems each rely on TSMC for?": "r1",
+  "How do Lam Research and KLA describe their exposure to Huawei under export restrictions?": "r2",
+  "What natural disaster risks does NXP face at its factories in places like Singapore, Taiwan, Malaysia and Thailand?": "r3",
+  "How do all semiconductor companies describe the risks that tariffs and trade policy pose to their costs and supply chains?": "r4",
+  "How did nvdia companies perform in 2024": "r5",
+  "Which suppliers do NVIDIA and AMD both depend on?": "r6",
+  "Should I buy NVIDIA stock?": "r7"
+ }
+}

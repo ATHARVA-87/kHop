@@ -1,0 +1,16 @@
+{
+ "question": "How did NVIDIA perform in 2024",
+ "changed": true,
+ "changes": [
+  {
+   "from": "nvdia",
+   "to": "NVIDIA",
+   "kind": "spelling"
+  },
+  {
+   "from": "NVIDIA companies",
+   "to": "NVIDIA",
+   "kind": "company"
+  }
+ ]
+}

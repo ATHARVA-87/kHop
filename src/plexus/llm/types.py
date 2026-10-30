@@ -1,4 +1,4 @@
-"""Typed request/response objects for every LLM call in Plexus."""
+"""Typed request/response objects for every LLM call in kHop."""
 
 from __future__ import annotations
 
