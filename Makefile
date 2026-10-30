@@ -3,7 +3,7 @@
 PY ?= $(shell test -x $(HOME)/miniconda3/envs/torch/bin/python && echo $(HOME)/miniconda3/envs/torch/bin/python || echo python)
 CONFIG ?= configs/a0_naive.yaml
 
-.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask flow-check security ui-dev stop extract serve ui refresh drift record-demo demo-site
+.PHONY: help doctor install install-ml lint fmt test test-all ingest process index candidates golden eval eval-full judge-export judge-agreement compare gate gate-ci golden-test test-candidates graph ragas ask flow-check security ui-dev stop extract serve ui refresh drift record-demo demo-site minicheck fetch
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-12s %s\n", $$1, $$2}'
@@ -15,8 +15,15 @@ install: ## Install core + dev deps (editable)
 	$(PY) -m pip install -c constraints.txt -e '.[dev]'
 	pre-commit install
 
-install-ml: ## Install heavy ML deps (torch stays pinned at 2.5.1)
-	$(PY) -m pip install -c constraints.txt -e '.[ml,dev]'
+install-ml: ## Install everything the app and experiments need (torch pinned by constraints.txt)
+	$(PY) -m pip install -c constraints.txt -e '.[ml,graph,agents,serve,dev]'
+
+fetch: ## Download the processed 2025 filings + graph extractions (release assets, checksum-verified): no SEC download or 4.5 h extraction needed
+	$(PY) -m plexus.ingest.ci_data
+	$(PY) -m plexus.ingest.ci_data --graph
+
+minicheck: ## Download the fact-checker model once and convert it to safetensors (1.4 GB)
+	$(PY) -m plexus.agents.get_minicheck
 
 lint: ## Ruff lint + format check
 	$(PY) -m ruff check src tests

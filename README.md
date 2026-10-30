@@ -1,35 +1,28 @@
 # kHop
 
-Ask questions about the 2025 SEC filings (10-K and 10-Q) of 39 US semiconductor companies. kHop answers with numbered citations to the passages it used, fact-checks each cited sentence, and shows every step it took.
+**Ask a question about what chip companies told the SEC, and get a short answer where every sentence cites the exact filing passage it came from.**
 
-It is also a measurement project:
-- Each component was compared with a simpler baseline on a dev question set I checked by hand.
-- A separate held-out test set was scored once, at the end.
-- Experiments that lost are written up in [docs/failures.md](docs/failures.md), and so are the components whose gain was not proven.
+kHop answers questions over the 2025 SEC filings (10-K annual and 10-Q quarterly reports) of 39 US semiconductor companies. It is a **multi-agent system**: five specialised agents run together in a LangGraph workflow, each with one narrow job:
+- a **guard** that declines unsafe requests;
+- a **router** that picks how to search;
+- a **retriever** that combines keyword search, embeddings, a reranker and a knowledge graph;
+- a **writer** that drafts the cited answer (the only agent that calls an LLM);
+- a **fact-checker** that marks any sentence its source does not back.
+
+The page streams every step live, so you can see how each answer was made.
+
+It is also a measurement project. Every component was compared with a simpler version on a question set checked by hand, and kept only if it helped. A held-out test set was scored once, at the end. The ideas that lost are written up in [docs/failures.md](docs/failures.md).
+
+> **[Try the recorded demo →](https://atharva-87.github.io/kHop/)** Real answers recorded from the app, replayed at the speed they ran. To ask your own questions, run kHop on your computer ([setup below](#run-it-yourself)).
+
+![kHop answering a two-company question: cited answer, sources from the filings, and the numbered steps it took](docs/images/khop-demo.png)
 
 Answers are research output over public filings, **not investment advice**.
 
-**Try the recorded demo:** https://atharva-87.github.io/kHop/ (real answers recorded from the app, replayed at their real speed; to ask your own questions, run it locally, see [Run it](#run-it)).
-
-## What it does
-
-- **Hybrid search** (BM25 keywords + bge-small embeddings, fused with reciprocal rank fusion) over section-aware chunks, each with a short header (company, form, period, section).
-- **A rule router** sends each question one of three ways:
-  - **one company:** search that company's filings, then rerank;
-  - **two or more companies:** add knowledge-graph links between them;
-  - **no company named:** spread the results across companies.
-- **A local writer** (qwen3.5:4b through Ollama) must cite a passage for every claim.
-- **A fact-checker** (MiniCheck-RoBERTa-Large, on CPU) marks any cited sentence its passage does not back.
-- **Guardrails:**
-  - refuses investment advice and off-topic requests;
-  - treats retrieved text as untrusted (datamarking);
-  - says so when the filings do not contain the answer.
-- **The app:** FastAPI with a live, numbered step trace (Server-Sent Events) and a static Next.js page. It also has:
-  - a semantic cache for reworded repeat questions;
-  - a spelling layer that asks before it changes anything;
-  - session history kept in the browser tab only.
+## How it works
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#FFF8D6", "primaryBorderColor": "#D4A800", "primaryTextColor": "#1C1E21", "lineColor": "#5B6068", "clusterBkg": "#FFFDF2", "clusterBorder": "#D4A800", "edgeLabelBackground": "#FFFFFF"}}}%%
 flowchart TB
     subgraph BUILD["Build once per data snapshot"]
         direction LR
@@ -45,19 +38,19 @@ flowchart TB
         K -- "yes" --> KEEP["Keep; CI gate guards it"]
         K -- "no" --> DROP["Delete; write up in docs/failures.md"]
     end
-    subgraph ASK["Answer a question"]
+    subgraph ASK["Answer a question: the agents"]
         direction LR
         Q["Question"] --> S["Spelling check<br/>user confirms"]
-        S --> G["Guard<br/>advice / off-topic / attack"]
+        S --> G["Guard agent<br/>advice / off-topic / attack"]
         G -- "declined" --> REF["Plain refusal"]
         G -- "ok" --> C{"Semantic cache"}
         C -- "hit" --> A["Answer + citations<br/>+ live step trace"]
-        C -- "miss" --> R{"Router"}
-        R -- "one company" --> L["Hybrid search<br/>+ reranker"]
-        R -- "2+ companies" --> M["Hybrid + graph links"]
-        R -- "none named" --> W["Company-diverse search"]
-        L & M & W --> Wr["Writer LLM cites every claim"]
-        Wr --> V["Fact-check each cited sentence"]
+        C -- "miss" --> R{"Router agent"}
+        R -- "one company" --> L["Retriever: hybrid search<br/>+ reranker"]
+        R -- "2+ companies" --> M["Retriever: hybrid<br/>+ graph links"]
+        R -- "none named" --> W["Retriever: company-diverse search"]
+        L & M & W --> Wr["Writer agent (LLM)<br/>cites every claim"]
+        Wr --> V["Fact-checker agent<br/>checks each cited sentence"]
         V --> A
     end
     BUILD --> ASK
@@ -65,9 +58,21 @@ flowchart TB
     EVAL -.->|"decides every design choice"| ASK
 ```
 
+| Part | What it does |
+| --- | --- |
+| **Data** | 156 filings (2025) from 39 chip companies, downloaded from SEC EDGAR, frozen with a SHA-256 per file |
+| **Chunks** | Section-aware pieces, each with a header naming the company, form, period and section |
+| **Retriever** | Keyword search (BM25) + meaning search (bge-small embeddings in Qdrant), merged by Reciprocal Rank Fusion; a cross-encoder reranker for one-company questions |
+| **Knowledge graph** | Supplier, customer and competitor links extracted by a local LLM, each kept only with a quote that proves it (LadybugDB) |
+| **Router** | A rule: one company named → that company's filings + reranker; two or more → graph links; none → spread results across companies |
+| **Writer** | qwen3.5:4b running locally through Ollama; must cite a passage for every sentence, or say the filings don't contain the answer |
+| **Fact-checker** | MiniCheck (a small NLI model, on CPU) marks any cited sentence its passage does not support |
+| **Guardrails** | Declines investment advice and off-topic requests; marks retrieved text so instructions hidden in a filing are ignored |
+| **App** | FastAPI streaming (Server-Sent Events) + a static Next.js page; a semantic cache for reworded repeats; a "Did you mean this?" spelling check |
+
 ## Results
 
-All numbers below are generated from `results/*.json` by `python -m plexus.readme`, and a test fails if they drift. The search result files also record the config, the corpus checksum and the git commit. A commit marked `-dirty` had uncommitted changes in the working tree.
+Every number below is generated from `results/*.json` by `python -m plexus.readme`, and a test fails if the README drifts from those files. The search result files also record the config, the corpus checksum and the git commit. A commit marked `-dirty` had uncommitted changes in the working tree.
 
 ### Search: what each step adds
 
@@ -177,39 +182,78 @@ Full write-ups with numbers are in [docs/failures.md](docs/failures.md).
 - **Ten passages to the writer instead of five** made no significant difference, so the app uses five.
 - **The spelling layer leaves ambiguous typos alone** ("fom" could be "from" or "for"). It also does not translate everyday wording into filing wording.
 
-## Run it
+## Run it yourself
 
-Needs the conda env `torch` (Python 3.11), Ollama with `qwen3.5:4b`, and Node LTS for the page.
+### What you need
+
+| | Requirement |
+| --- | --- |
+| **OS** | Linux (built and tested on Ubuntu). macOS should work for everything except GPU speed. |
+| **Python** | 3.11 (conda or venv) |
+| **GPU** | An NVIDIA GPU with 6 GB or more is recommended (built on an RTX 4050 laptop). Without one, the writer and search run on CPU, slowly. |
+| **Ollama** | [ollama.com](https://ollama.com), then `ollama pull qwen3.5:4b` (3.3 GB) |
+| **Node.js** | 22 LTS, to build the web page |
+| **Disk** | About 7 GB: models about 6 GB, data and indexes about 1 GB |
+| **Word list** | `sudo apt install wamerican` (Debian/Ubuntu). The spelling check switches itself off without it. |
+| **Cost** | $0. Everything runs locally; no API key is needed to run the app. |
+
+### Settings (`.env`)
+Copy `.env.example` to `.env`. It is git-ignored, so keys stay on your machine.
+
+| Variable | Needed for | Example / default |
+| --- | --- | --- |
+| `SEC_USER_AGENT` | Only `make ingest` (downloading filings from SEC). SEC asks for your name and email. | `"Jane Doe jane@example.com"` |
+| `OLLAMA_API_BASE` | The writer | `http://localhost:11434` |
+| `GEMINI_API_KEY` / `GROQ_API_KEY` | Only to regenerate the question set or the LLM judges (free tiers). Not needed to run the app or reproduce results. | empty |
+| `PLEXUS_LLM_OFFLINE` | `1` = answer only from the LLM cache and never call a model (CI uses this) | `0` |
+| `PLEXUS_LLM_CACHE` | Where the LLM cache lives | `data/cache/llm.sqlite` |
+| `PLEXUS_ENABLE_CLAUDE_SDK` | Personal comparison runs only; leave off | `0` |
+
+### Setup
 
 ```bash
-make install-ml      # pip install -c constraints.txt -e '.[ml,dev]'
-make doctor          # what is missing and how to fix it
-make ingest process  # download and parse the frozen snapshot (SEC_USER_AGENT in .env)
-make index CONFIG=configs/app.yaml
-make ui              # build the page into web/out
-make serve           # http://127.0.0.1:8000
-make stop            # free the GPU afterwards
+git clone https://github.com/ATHARVA-87/kHop.git && cd kHop
+conda create -n khop python=3.11 -y && conda activate khop    # or: python3.11 -m venv .venv
+make install-ml PY=python      # Python packages (torch pinned by constraints.txt)
+cp .env.example .env           # then edit if needed (see the table above)
+make doctor PY=python          # checks everything and says how to fix what's missing
+
+ollama pull qwen3.5:4b         # the writer model
+make minicheck PY=python       # fact-checker model: download + safe conversion to safetensors
+make fetch PY=python           # processed filings + graph extractions (checksum-verified)
+make graph PY=python           # build the knowledge graph from the extractions (no LLM)
+make index CONFIG=configs/app.yaml PY=python   # chunk + embed + index (GPU, a few minutes)
+(cd web && npm ci) && make ui  # build the web page
+make serve PY=python           # open http://127.0.0.1:8000
+make stop PY=python            # afterwards: free the GPU
 ```
 
-Re-run one experiment: `make eval CONFIG=configs/a5_diverse.yaml`. Run the drift check: `make refresh drift`.
+`make fetch` skips the two slow steps. If you prefer to build everything from the source:
+- `make ingest process` downloads and parses the filings from SEC; this needs `SEC_USER_AGENT`.
+- `make extract` re-runs the graph extraction with the local LLM, which takes about 4.5 hours.
 
-## Reproducibility
+### Reproduce the numbers without running any model
+Every LLM call made while building kHop is published as a release: [llm-cache-2026-10-30](https://github.com/ATHARVA-87/kHop/releases/tag/llm-cache-2026-10-30).
+1. Unzip it to `data/cache/llm.sqlite`.
+2. Set `PLEXUS_LLM_OFFLINE=1`.
+3. Run an experiment, e.g. `make eval CONFIG=configs/a6_router.yaml`. It writes `results/a6_router.json`.
 
-- **Dependencies** are locked in `uv.lock`. Local installs use `constraints.txt`, so the torch env never changes.
-- **Every LLM call** goes through one client with a disk cache keyed by provider, model, prompt and parameters. CI runs cache-only (`PLEXUS_LLM_OFFLINE=1`), so reruns cost nothing. The full cache is published as a release ([llm-cache-2026-10-30](https://github.com/ATHARVA-87/kHop/releases/tag/llm-cache-2026-10-30)): unzip it to `data/cache/llm.sqlite` to reproduce every result without calling a model.
-- **The corpus snapshot is frozen:** `data/snapshots/*.manifest.jsonl` holds a sha256 per filing and a corpus checksum.
-- **Fixed seeds and a fixed question set.** Both sets were drafted by an LLM and pre-reviewed by AI reviewer agents.
-  - The dev set (for building) was checked by me question by question.
-  - For the held-out test set (scored once), I approved the AI pre-review as a whole.
-- **A retrieval regression gate runs on every PR,** and it has blocked a planted regression.
+Other useful commands:
+- `make test`: the fast test suite (what CI runs).
+- `make refresh drift`: the 2026 snapshot and the drift check.
+- `make help`: lists everything.
 
-## LLM providers
+## Project layout
 
-| Provider | Use | Default |
-| --- | --- | --- |
-| Ollama (local) | Writer in the app, graph extraction | on |
-| Gemini / Groq free tier | Question drafting, judges (public SEC text only) | on (key in `.env`) |
-| `claude_sdk` | Personal local comparison runs only | **off**, never serves other users |
+| Folder | What is inside |
+| --- | --- |
+| `src/plexus/` | The Python package (the project's earlier name): `ingest/`, `index/`, `retrieve/`, `extract/` (graph), `agents/` (LangGraph flow, fact-checker), `guardrails/`, `serve/` (FastAPI app), `eval/` (metrics and experiments), `llm/` (cached LLM client) |
+| `web/` | The Next.js page |
+| `configs/` | One YAML file per experiment (A0–A9) and for the app |
+| `data/golden/` | The hand-checked question sets and labels |
+| `data/snapshots/` | Frozen corpus manifests with checksums |
+| `results/` | One JSON file per experiment; README numbers come from here |
+| `docs/` | Decision records (`adr/`), failures, AI review log, security notes, demo script |
 
 ## Terms used (full forms)
 
@@ -217,22 +261,29 @@ Re-run one experiment: `make eval CONFIG=configs/a5_diverse.yaml`. Run the drift
 | --- | --- |
 | RAG / GraphRAG | Retrieval-Augmented Generation / RAG that also follows a knowledge graph |
 | LLM | Large Language Model |
+| Agent | A step with one narrow job in the workflow (here: guard, router, retriever, writer, fact-checker) |
+| LangGraph | A library that runs the agents as a fixed workflow over shared state |
 | ADR | Architecture Decision Record (one page per design choice, in `docs/adr/`) |
 | SEC / EDGAR | U.S. Securities and Exchange Commission / Electronic Data Gathering, Analysis, and Retrieval |
 | 10-K / 10-Q / MD&A | annual report / quarterly report / Management's Discussion and Analysis |
+| SHA-256 | Secure Hash Algorithm (256-bit): a file fingerprint |
 | BM25 | Best Matching 25 (Okapi BM25 keyword ranking) |
 | RRF | Reciprocal Rank Fusion |
 | BGE / BAAI | BAAI General Embedding / Beijing Academy of Artificial Intelligence |
-| KG | Knowledge Graph |
-| NLI | Natural Language Inference (the fact-checker's task) |
+| Qdrant | The vector database that stores the embeddings |
+| Reranker / cross-encoder | A model that reads question and passage together to reorder results |
+| KG / LadybugDB | Knowledge Graph / the embedded graph database that stores it |
+| Ollama / qwen3.5:4b | Local LLM runner / the 4-billion-parameter writer model |
+| NLI / MiniCheck | Natural Language Inference / the small model that does it for the fact-checker |
 | RoBERTa | Robustly optimized BERT approach (BERT = Bidirectional Encoder Representations from Transformers) |
-| SSE | Server-Sent Events (live streaming to the page) |
-| API / CSP | Application Programming Interface / Content Security Policy |
-| CI | Continuous Integration (GitHub Actions); in tables, CI also means Confidence Interval |
-| nDCG / MRR | normalized Discounted Cumulative Gain / Mean Reciprocal Rank |
-| TTL | Time To Live (cache expiry) |
+| Datamarking | Joining the words of retrieved text with `^` so the writer treats it as data, not instructions |
+| Semantic cache / TTL | Reusing answers to reworded questions / Time To Live (cache expiry) |
 | OSA | Optimal String Alignment (edit distance used by the spelling check) |
-| A0–A9 | the ablation ladder: each step adds one idea to the step before |
+| SSE / API / CSP | Server-Sent Events / Application Programming Interface / Content Security Policy |
+| CI | Continuous Integration (GitHub Actions); in result tables, CI also means Confidence Interval |
+| recall@10 / nDCG / MRR | share of needed evidence in the top 10 / normalized Discounted Cumulative Gain / Mean Reciprocal Rank |
+| p50 / p95 | typical (median) / 95th-percentile time |
+| A0–A9 | The ablation ladder: each step adds one idea to the step before |
 | dev / test | development set (used for decisions) / held-out test set (scored once) |
 
 ## Design decisions
