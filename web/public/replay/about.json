@@ -11,8 +11,13 @@
    "source": "results/test/a0_naive.json, results/test/a6_router.json"
   },
   {
-   "label": "Answers fully correct, checked by hand (after I re-checked borderline ones blind; first check in brackets)",
-   "value": "44 of 49 (38 of 49)",
+   "label": "Answers judged fully correct by hand, on 49 practice questions. I checked them twice, both times without knowing which version of kHop wrote them; this is the second check",
+   "value": "44 of 49",
+   "source": "data/golden/judge_labels.csv, judge_labels_first.csv"
+  },
+  {
+   "label": "The same 49 answers on my first check (6 borderline answers I first called partly correct were fully correct on the second check)",
+   "value": "38 of 49",
    "source": "data/golden/judge_labels.csv, judge_labels_first.csv"
   },
   {
