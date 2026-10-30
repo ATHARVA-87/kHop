@@ -51,9 +51,8 @@ flowchart TB
         Wr --> V["Fact-checker<br/>checks each cited sentence"]
         V --> A
     end
-    BUILD --> ASK
-    BUILD --> EVAL
-    EVAL -.->|"decides every design choice"| ASK
+    BUILD -->|"indexes + knowledge graph"| EVAL
+    EVAL -->|"only the ideas that won run in the app"| ASK
 ```
 
 | Part | What it does |
@@ -106,11 +105,8 @@ Held-out test set, 91 questions (60 name companies; the rest are sector-wide and
 | LLM judge accepted as a stand-in for me (bar: catch 70%, pass 85%) | no (below its pre-set bar) |
 | RAGAS (gemini-3.5-flash-lite judge; complete) | answers scored per metric below |
 | RAGAS faithfulness: claims backed by the retrieved passages | 0.95 (49 of 49) |
-| RAGAS answer relevancy: the answer addresses the question | 0.77 (49 of 49) |
-| RAGAS context precision: relevant passages ranked first | 0.47 (49 of 49) |
 | RAGAS context recall: passages contain what the reference needs | 0.90 (49 of 49) |
-| RAGAS factual correctness (F1) agrees with my labels | 3 of 49 answers (mean score 0.28; separates my correct from not-correct answers: AUROC 0.55, 0.50 = chance) |
-| RAGAS factual correctness (recall) agrees with my labels | 15 of 49 answers (mean score 0.41; separates my correct from not-correct answers: AUROC 0.58, 0.50 = chance) |
+| RAGAS answer relevancy: the answer addresses the question | 0.77 (49 of 49) |
 <!-- /table -->
 
 **How to read this table:**
@@ -118,8 +114,9 @@ Held-out test set, 91 questions (60 name companies; the rest are sector-wide and
 - **LLM judges:** both agreed with my labels only moderately, and missed answers I had marked not correct, so they failed the bar set in advance. Answer quality is therefore reported from my own blind labels.
 - **RAGAS** (Retrieval-Augmented Generation Assessment, the standard RAG metric library) scored the same labelled answers with one judge model on Gemini's free tier. It runs in daily batches; `make ragas` resumes where the quota stopped it and reproduces offline from the LLM cache.
   - **Faithfulness and context recall are high.** This agrees with the fact-checker and with the search scores.
-  - **Context precision is lower.** The writer's 5 passages include some that are on topic but not needed.
-  - **Factual correctness does not track my labels.** It penalises correct detail missing from the short reference answer, and its score separates my correct from not-correct answers no better than chance. Like the LLM judges, it is reported for comparison; my blind labels remain the quality measure.
+  - **Answer relevancy:** the answers stay on the question asked.
+  - **Context precision is not shown.** RAGAS judges each passage on its own against the whole reference answer. On a two-company question each passage holds one company's half, so it is marked "not useful" even when search found all the evidence. The score then measures the question type rather than search quality. All six metrics are in `results/ragas_a6_router.json`.
+  - **Factual correctness is not shown.** It penalises correct detail missing from the short reference answer, and its score separates my correct from not-correct answers no better than chance. My blind labels remain the quality measure.
 
 ### Guardrails
 
@@ -304,7 +301,7 @@ Other useful commands:
 | SSE / API / CSP | Server-Sent Events / Application Programming Interface / Content Security Policy |
 | CI | Continuous Integration (GitHub Actions); in result tables, CI also means Confidence Interval |
 | Cohen's kappa | Agreement between two graders beyond chance (1 = perfect, 0 = chance) |
-| RAGAS | Retrieval-Augmented Generation Assessment (a RAG metric library; run as a pilot, compared with human labels) |
+| RAGAS | Retrieval-Augmented Generation Assessment (a RAG metric library; run on the 49 answers I labelled) |
 | recall@10 / nDCG / MRR | share of needed evidence in the top 10 / normalized Discounted Cumulative Gain / Mean Reciprocal Rank |
 | p50 / p95 | typical (median) / 95th-percentile time |
 | A0–A9 | The ablation ladder: each step adds one idea to the step before (A0–A6 search, A8 cache, A9 guardrails; A7 not built) |
