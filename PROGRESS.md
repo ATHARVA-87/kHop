@@ -11,7 +11,7 @@
 | 4. Single-graph agent | Router, grade-and-rewrite, A6, A7 | Router vs always-local/global | **Gate met 2026-10-28** (A6 router beats always-X on dev and test; = oracle). A7 loop in progress |
 | 5. Multi-agent | 4 agents, guardrails, A9 | A9 vs A7 with latency/cost; guardrail metrics | **Done, merged.** A9 vs A6 (ADR 0007): guardrail metrics, latency, calls per question |
 | 6. Systems + UI | Semantic cache (A8), SSE, Phoenix, Next.js, Locust | p95, cache hit rate, cost/query | **Gate met, merged** (PR #9); late commits in PR #10 |
-| 7. Ship | README, ADRs, demo Space, drift check, demo script | Definition of done | **In progress** (branch `phase7-ship`): README with generated numbers, ADR drafts, demo script, drift code done; drift run, hosting choice and sign-offs wait for you |
+| 7. Ship | README, ADRs, demo Space, drift check, demo script | Definition of done | **Done 2026-10-30.** README with generated numbers + diagram, all ADRs accepted, recorded demo on GitHub Pages (ADR 0013), drift check run, demo script, resume lines (private notes), LLM-call cache released |
 
 ## Resume here
 
@@ -33,11 +33,16 @@
 - **Demo option A is built** (ADR 0013 accepted): 7 questions recorded live from the app (`make record-demo`), replayed by a static page (`make demo-site`), deployed by GitHub Pages from `main`.
 - The 4 untracked files were deleted. The `_old` CSVs were blank templates; the real labels are in git history.
 
-**Blocked on you, in order:**
-1. Review and merge the Phase 7 PR. GitHub Pages must be switched on once: Settings → Pages → Source: GitHub Actions.
-2. Run `make refresh` (about 160 SEC downloads, then parse and embed on the GPU), then `make drift` and `python -m plexus.readme`.
-3. Sign off the ADRs that are still "Proposed": 0003, 0004 and 0009–0012.
-4. Record a short video of the live app, following `docs/demo_script.md`.
+**Update 2026-10-30 (afternoon):**
+- PR #11 is merged.
+- **The recorded demo is live** at https://atharva-87.github.io/kHop/. The first deploy failed because Pages was not yet switched on; it was re-run and browser-checked live.
+- **All ADRs accepted** (owner, 2026-10-30).
+- **Drift check run by the owner,** re-run after the verifier's fixes (`results/drift.json`):
+  - 74 of 225 golden questions carry over word for word to the 2026 filings;
+  - on the 68 of them that name companies, recall@10 is 0.80 on both indexes (2 questions up, 2 down, same linking-company groups).
+- **An independent verifier agent checked the approach after sign-off.** Verdict: sound, no bug in the drift result. Six overclaims or gaps were fixed, including the cache now checking the input gate first (docs/ai_review_log.md).
+
+**Left:** a short video of the live app (owner), resume bullets (local notes), and the final definition-of-done tick.
 
 **Then (Claude):** build the chosen demo option; draft resume bullets (local file, measured numbers only); tick the definition of done; run the final reviewer; write the context-mode savings report.
 
@@ -307,3 +312,4 @@ Honest reading:
 - User chose to keep the brief's phase order (multi-agent = Phase 5). Gemini + Groq keys added. `make candidates` done: 180 candidates (10% auto-rejected) + 21 bridge questions. **Next: you review `review.csv` (local + multi-hop first) and `review_bridge.csv`; spot-check `global_themes.csv`; then `make golden` and `make eval`.**
 - **10 vs 5 passages, scoring rule fixed BEFORE unblinding (2026-10-29):** the human noticed stray "Not enough evidence" lines in otherwise complete answers, mostly in one column of each pair. Primary = human verdicts as given (same rubric as the 49 labels: only "not enough evidence" for a part the question asks is partial). Sensitivity = the human named 5 cells; 4 changed (G-9a28615079:2, M-81480ee57d:1, M-4ef2df83e8:1, G-06cfa36669:2; B-0192416a5a was already partial) re-marked partially_correct. Stray lines are counted per config by code as a separate metric.
 - 2026-10-29 night: reviewer agent on the Phase 7 commits found 10 issues (README overclaims, fact-checker rows mixing deliberate swaps with real sentences, demo pre-warming the cache, drift selection effect unstated, Makefile fallback). All fixed in one commit; logged in docs/ai_review_log.md. Hosting research: free HF Docker Spaces need PRO since July 2026 (ADR 0013, your choice).
+- 2026-10-30: LLM-call cache published as release `llm-cache-2026-10-30` (3,698 entries, scanned clean). Private notes (walkthrough + packages log) pushed to the private repo kHop-private. README gained a full-process diagram and a table of full forms; docs/adr/README.md indexes the ADRs.

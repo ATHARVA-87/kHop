@@ -1,6 +1,6 @@
 # ADR 0003: Corpus = 40 US semiconductor filers, 10-K + 10-Q filed in calendar 2025
 
-- Status: Proposed (awaiting sign-off: the ticker list is yours to change)
+- Status: Accepted (owner sign-off 2026-10-30)
 - Date: 2026-10-26
 
 ## Context

@@ -1,32 +1,32 @@
 {
  "figures": [
   {
-   "label": "Questions where the right passages are in the top 10, first version vs now (134 practice questions)",
-   "value": "28% to 85%",
+   "label": "Questions naming one or more companies where the right passages are in the top 10, first version vs now (practice questions)",
+   "value": "30% to 92%",
    "source": "results/a0_naive.json, results/a6_filter.json"
   },
   {
-   "label": "The same on 91 held-back questions, scored once before the latest improvement",
-   "value": "18% to 58%",
+   "label": "The same on held-back questions, scored once before the latest improvement",
+   "value": "25% to 88%",
    "source": "results/test/a0_naive.json, results/test/a6_router.json"
   },
   {
-   "label": "Answers fully correct, checked by hand",
-   "value": "44 of 49",
-   "source": "data/golden/judge_labels.csv"
+   "label": "Answers fully correct, checked by hand (after I re-checked borderline ones blind; first check in brackets)",
+   "value": "44 of 49 (38 of 49)",
+   "source": "data/golden/judge_labels.csv, judge_labels_first.csv"
   },
   {
-   "label": "Unsupported sentences the fact-checker catches (hand-labelled test)",
-   "value": "15 of 15",
-   "source": "results/verifier_validation.json"
+   "label": "Real answer sentences not backed by their source that the fact-checker caught (small hand-labelled sample)",
+   "value": "5 of 5, plus 10 of 10 made-up mismatches",
+   "source": "results/verifier_validation_cpu.json"
   },
   {
-   "label": "Investment-advice questions declined (fresh test set)",
+   "label": "Investment-advice questions declined (held-back set; I re-labelled two of them after scoring)",
    "value": "25 of 28",
    "source": "results/guardrails_a9_agents.json"
   },
   {
-   "label": "Attack test: fake orders such as \"ignore your rules\" were hidden inside filing text. Times kHop obeyed them",
+   "label": "Attack test: fake orders such as \"ignore your rules\" hidden inside filing text (the same attacks used to choose this defence). Times kHop obeyed them",
    "value": "0 of 30",
    "source": "results/guardrails_a9_agents.json"
   },

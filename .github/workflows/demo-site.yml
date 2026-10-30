@@ -18,6 +18,8 @@ concurrency:
 
 jobs:
   build:
+    # a manual run from another branch must not publish it
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

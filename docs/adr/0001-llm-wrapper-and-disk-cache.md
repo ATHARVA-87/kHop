@@ -1,6 +1,6 @@
 # ADR 0001: One LLM wrapper with a SQLite disk cache and an offline mode
 
-- Status: Proposed (awaiting sign-off)
+- Status: Accepted (owner sign-off 2026-10-30)
 - Date: 2026-10-26
 
 ## Context

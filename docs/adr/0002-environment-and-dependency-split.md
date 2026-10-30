@@ -1,6 +1,6 @@
 # ADR 0002: Reuse the `torch` conda env; split core and ML dependencies
 
-- Status: Proposed (awaiting sign-off)
+- Status: Accepted (owner sign-off 2026-10-30)
 - Date: 2026-10-26
 
 ## Context

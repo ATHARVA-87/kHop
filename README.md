@@ -30,18 +30,39 @@ Answers are research output over public filings, **not investment advice**.
   - session history kept in the browser tab only.
 
 ```mermaid
-flowchart LR
-    Q[Question] --> S[Spelling check<br/>user confirms]
-    S --> C{Semantic cache}
-    C -- hit --> A[Answer + citations]
-    C -- miss --> G[Guard: advice / scope / jailbreak]
-    G --> R{Router}
-    R -- one company --> L[Hybrid search<br/>+ reranker]
-    R -- 2+ companies --> M[Hybrid + graph links]
-    R -- none named --> W[Company-diverse search]
-    L & M & W --> Wr[Writer cites every claim]
-    Wr --> V[Fact-check each cited sentence]
-    V --> A
+flowchart TB
+    subgraph BUILD["Build once per data snapshot"]
+        direction LR
+        E["SEC EDGAR filings<br/>frozen, checksummed"] --> P["Parse into sections"]
+        P --> CH["Chunks + header<br/>company, form, section"]
+        CH --> IX["BM25 index<br/>+ bge-small vectors in Qdrant"]
+        CH --> KG["Knowledge graph<br/>LLM-extracted links, each with its quote"]
+    end
+    subgraph EVAL["Measure every idea"]
+        direction LR
+        GS["Golden set<br/>hand-checked questions + exact quotes<br/>dev set / held-out test set"] --> EX["Experiments A0 to A6"]
+        EX --> K{"Beats the simpler<br/>version?"}
+        K -- "yes" --> KEEP["Keep; CI gate guards it"]
+        K -- "no" --> DROP["Delete; write up in docs/failures.md"]
+    end
+    subgraph ASK["Answer a question"]
+        direction LR
+        Q["Question"] --> S["Spelling check<br/>user confirms"]
+        S --> G["Guard<br/>advice / off-topic / attack"]
+        G -- "declined" --> REF["Plain refusal"]
+        G -- "ok" --> C{"Semantic cache"}
+        C -- "hit" --> A["Answer + citations<br/>+ live step trace"]
+        C -- "miss" --> R{"Router"}
+        R -- "one company" --> L["Hybrid search<br/>+ reranker"]
+        R -- "2+ companies" --> M["Hybrid + graph links"]
+        R -- "none named" --> W["Company-diverse search"]
+        L & M & W --> Wr["Writer LLM cites every claim"]
+        Wr --> V["Fact-check each cited sentence"]
+        V --> A
+    end
+    BUILD --> ASK
+    BUILD --> EVAL
+    EVAL -.->|"decides every design choice"| ASK
 ```
 
 ## Results
@@ -51,17 +72,17 @@ All numbers below are generated from `results/*.json` by `python -m plexus.readm
 ### Search: what each step adds
 
 <!-- table:ladder -->
-| Step | What it adds | All recall@10 [95% CI] | Local | Multi-hop | Multi-hop, both facts | Global: companies covered |
+| Step | What it adds | Named-company questions, recall@10 [95% CI] | Local | Multi-hop | Multi-hop, both facts | Global: companies covered |
 | --- | --- | --- | --- | --- | --- | --- |
-| A0 | Naive RAG: fixed 300-word windows, dense search | 0.18 [0.11, 0.26] | 0.32 | 0.13 | 0.00 | 0.44 |
-| A1–A2 | Section-aware chunks with headers, hybrid BM25 + dense (RRF) | 0.52 [0.41, 0.65] | 0.95 | 0.50 | 0.13 | 0.39 |
-| A2-RR | No-graph baseline: alternate between the companies named | 0.54 [0.42, 0.68] | 0.95 | 0.59 | 0.35 | 0.39 |
-| A3 | Cross-encoder reranker (bge-reranker-base) | 0.53 [0.42, 0.66] | 1.00 | 0.46 | 0.22 | 0.40 |
-| A4 | Knowledge-graph hits fused in | 0.56 [0.43, 0.69] | 0.95 | 0.67 | 0.43 | 0.39 |
-| A5 | Company-diverse ranking for sector-wide questions | 0.56 [0.43, 0.69] | 0.95 | 0.67 | 0.43 | 0.67 |
-| A6 | Rule router picks the route per question (the app's base) | 0.58 [0.45, 0.72] | 1.00 | 0.67 | 0.43 | 0.67 |
+| A0 | Naive RAG: fixed 300-word windows, dense search | 0.25 [0.16, 0.37] | 0.32 | 0.13 | 0.00 | 0.44 |
+| A1–A2 | Section-aware chunks with headers, hybrid BM25 + dense (RRF) | 0.78 [0.66, 0.91] | 0.95 | 0.50 | 0.13 | 0.39 |
+| A2-RR | No-graph baseline: alternate between the companies named | 0.81 [0.68, 0.94] | 0.95 | 0.59 | 0.35 | 0.39 |
+| A3 | Cross-encoder reranker (bge-reranker-base) | 0.79 [0.68, 0.93] | 1.00 | 0.46 | 0.22 | 0.40 |
+| A4 | Knowledge-graph hits fused in | 0.84 [0.76, 0.93] | 0.95 | 0.67 | 0.43 | 0.39 |
+| A5 | Company-diverse ranking for sector-wide questions | 0.84 [0.76, 0.93] | 0.95 | 0.67 | 0.43 | 0.67 |
+| A6 | Rule router picks the route per question (the app's base) | 0.88 [0.80, 0.96] | 1.00 | 0.67 | 0.43 | 0.67 |
 
-Held-out test set, 91 questions, scored once at the end. One fix was made after seeing it (the ticker 'TI' was not linked to Texas Instruments); these numbers are from before that fix. Intervals: bootstrap over questions.
+Held-out test set, 91 questions (60 name companies; the rest are sector-wide and scored by company coverage), scored once at the end. One fix was made after seeing it (the ticker 'TI' was not linked to Texas Instruments); these numbers are from before that fix. Intervals: bootstrap over groups of related questions (shared linking company or theme).
 <!-- /table -->
 
 "Multi-hop, both facts" counts a question only when the passages for both of its facts are in the top 10. Global questions span the whole sector, so they are scored by how many relevant companies the top 10 covers, not by single quotes.
@@ -71,7 +92,8 @@ Held-out test set, 91 questions, scored once at the end. One fix was made after 
 <!-- table:answers -->
 | Check | Result |
 | --- | --- |
-| Dev-set answers I judged correct (A6 writer; blind labels, after a blind re-label of borderline cases, see docs/failures.md) | 44/49 = 90% [78%, 96%] |
+| Dev-set answers I judged correct (A6 writer, blind labels) after I re-labelled borderline ones blind, see docs/failures.md | 44/49 = 90% [78%, 96%] |
+| ...the same answers, my first labels | 38/49 = 78% |
 | Fact-checker flags real sentences I marked as not backed by their passage | 5/5 caught [57%, 100%] |
 | ...the same, adding 10 test sentences paired with a wrong passage on purpose | 100% [80%, 100%] of 15 |
 | Fact-checker passes sentences I marked as backed | 91% [79%, 96%] of 45 |
@@ -108,7 +130,7 @@ Held-out test set, 91 questions, scored once at the end. One fix was made after 
 | Search p50 | 0.55 s |
 | Answer from the cache p50 | 59 ms |
 | Reworded questions reused from the cache (held-out pairs) | 10/20 |
-| Wrong answers reused from the cache | 0/20 |
+| Wrong answers reused from the cache (upper 95% bound) | 0/20 (15%) |
 | GPU memory, peak | 5,547 of 6,141 MiB |
 | Cost per question | $0.00 |
 
@@ -130,7 +152,18 @@ One RTX 4050 laptop GPU (6 GB). Small samples: the slowest time is the maximum, 
 ### Drift: the same questions on newer filings
 
 <!-- table:drift -->
-Not run yet. `make refresh` then `make drift` (writes results/drift.json).
+| Snapshot | Filings | By form | Companies |
+| --- | --- | --- | --- |
+| semis-2025 | 156 | 39 10-K, 117 10-Q | 39 |
+| semis-2026 | 121 | 33 10-K, 88 10-Q | 39 |
+
+Of 225 golden questions, 74 have every evidence quote repeated word for word in the same company's newer filings; 68 partly; 83 not at all; 0 have no newer filing. Only carried-over questions can be scored on the new index, so the comparison below measures how search copes with a new corpus, not whether changed facts are found. Search settings: `a3h_rerank` (hybrid + headers + reranker; no router, company filter or graph, because a graph needs a long LLM extraction per snapshot). Sector-wide questions are left out of the comparison: they are scored by company coverage, not by quotes.
+
+| Carried-over questions | Old index | New index | New minus old [95% CI] |
+| --- | --- | --- | --- |
+| recall@10 (68 questions) | 0.80 [0.72, 0.90] | 0.80 [0.72, 0.90] | +0.00 [+0.00, +0.00] |
+
+Per question: 2 up, 2 down, the rest unchanged. Intervals resample whole groups of questions that share a linking company, as in the main scorer; when the ups and downs fall in the same groups and cancel, the interval has zero width.
 <!-- /table -->
 
 ## What did not work
@@ -163,7 +196,7 @@ Re-run one experiment: `make eval CONFIG=configs/a5_diverse.yaml`. Run the drift
 ## Reproducibility
 
 - **Dependencies** are locked in `uv.lock`. Local installs use `constraints.txt`, so the torch env never changes.
-- **Every LLM call** goes through one client with a disk cache keyed by provider, model, prompt and parameters. CI runs cache-only (`PLEXUS_LLM_OFFLINE=1`), so reruns cost nothing.
+- **Every LLM call** goes through one client with a disk cache keyed by provider, model, prompt and parameters. CI runs cache-only (`PLEXUS_LLM_OFFLINE=1`), so reruns cost nothing. The full cache is published as a release ([llm-cache-2026-10-30](https://github.com/ATHARVA-87/kHop/releases/tag/llm-cache-2026-10-30)): unzip it to `data/cache/llm.sqlite` to reproduce every result without calling a model.
 - **The corpus snapshot is frozen:** `data/snapshots/*.manifest.jsonl` holds a sha256 per filing and a corpus checksum.
 - **Fixed seeds and a fixed question set.** Both sets were drafted by an LLM and pre-reviewed by AI reviewer agents.
   - The dev set (for building) was checked by me question by question.
@@ -178,9 +211,33 @@ Re-run one experiment: `make eval CONFIG=configs/a5_diverse.yaml`. Run the drift
 | Gemini / Groq free tier | Question drafting, judges (public SEC text only) | on (key in `.env`) |
 | `claude_sdk` | Personal local comparison runs only | **off**, never serves other users |
 
+## Terms used (full forms)
+
+| Short form | Full form |
+| --- | --- |
+| RAG / GraphRAG | Retrieval-Augmented Generation / RAG that also follows a knowledge graph |
+| LLM | Large Language Model |
+| ADR | Architecture Decision Record (one page per design choice, in `docs/adr/`) |
+| SEC / EDGAR | U.S. Securities and Exchange Commission / Electronic Data Gathering, Analysis, and Retrieval |
+| 10-K / 10-Q / MD&A | annual report / quarterly report / Management's Discussion and Analysis |
+| BM25 | Best Matching 25 (Okapi BM25 keyword ranking) |
+| RRF | Reciprocal Rank Fusion |
+| BGE / BAAI | BAAI General Embedding / Beijing Academy of Artificial Intelligence |
+| KG | Knowledge Graph |
+| NLI | Natural Language Inference (the fact-checker's task) |
+| RoBERTa | Robustly optimized BERT approach (BERT = Bidirectional Encoder Representations from Transformers) |
+| SSE | Server-Sent Events (live streaming to the page) |
+| API / CSP | Application Programming Interface / Content Security Policy |
+| CI | Continuous Integration (GitHub Actions); in tables, CI also means Confidence Interval |
+| nDCG / MRR | normalized Discounted Cumulative Gain / Mean Reciprocal Rank |
+| TTL | Time To Live (cache expiry) |
+| OSA | Optimal String Alignment (edit distance used by the spelling check) |
+| A0–A9 | the ablation ladder: each step adds one idea to the step before |
+| dev / test | development set (used for decisions) / held-out test set (scored once) |
+
 ## Design decisions
 
-Each major choice is recorded in [docs/adr/](docs/adr/) with the alternatives that were considered.
+Each major choice is recorded as an Architecture Decision Record (ADR) in [docs/adr/](docs/adr/), with the alternatives that were considered. The index is in [docs/adr/README.md](docs/adr/README.md).
 
 ## AI-assisted development
 

@@ -1,6 +1,6 @@
 # ADR 0011: Semantic cache keyed by meaning AND by the companies and periods asked about
 
-Status: Proposed (awaiting owner sign-off)
+Status: Accepted (owner sign-off 2026-10-30)
 Date: 2026-10-29
 
 ## Context
@@ -19,3 +19,9 @@ On one laptop GPU a fresh answer takes seconds, and a busy queue makes it slower
 ## Consequences
 - Hit rate on real traffic depends on how often people repeat questions. The measured rate is for owner-made rewordings.
 - A wrong reuse would show a confident wrong answer. The test half had none, but the upper bound is reported because the sample is small.
+- **Thin margins (verifier, 2026-10-30):**
+  - The threshold sits just above the closest near-miss in the tuning half.
+  - The held-out half had no near-misses on periods or metrics.
+  - On the held-out pairs, the cache made no wrong reuses with or without the company/period key, so the key's value was shown only in a post-hoc look at all pairs.
+  - Re-check the threshold if the question mix changes.
+- **The input gate runs before the cache lookup,** so a question the gate would decline (advice, rule-breaking) is never answered from the cache.

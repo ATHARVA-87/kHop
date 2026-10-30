@@ -1,6 +1,6 @@
 # ADR 0004: Gold evidence is a quote, not a chunk ID
 
-- Status: Proposed (awaiting sign-off: this defines what "retrieval hit" means)
+- Status: Accepted (owner sign-off 2026-10-30)
 - Date: 2026-10-26
 
 ## Context
@@ -21,4 +21,4 @@ The ablation ladder changes chunking (A0 fixed windows → A1 structure-aware pa
 
 ## Consequences
 - A quote that cannot be located (e.g. the LLM paraphrased it) is a labelling error. The scorer reports these, and review must fix them.
-- 50% is a judgement call. A sensitivity check at 30% and 70% belongs in the A0 report.
+- 50% is a judgement call. A sensitivity check at 30% and 70% was run and dropped: gold quotes are single sentences that always sit inside one chunk, so all three thresholds gave the same scores (docs/ai_review_log.md, 2026-10-27). In practice the rule means "the chunk contains the quote".
