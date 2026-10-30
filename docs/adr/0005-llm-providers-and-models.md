@@ -1,6 +1,6 @@
 # ADR 0005: LLM providers and models (free tiers checked 2026-10-27)
 
-- Status: Proposed (awaiting sign-off). Re-check before Phase 3, because free tiers change often.
+- Status: Accepted (owner sign-off 2026-10-30)
 - Date checked: 2026-10-27 (IST), by Claude Code using the official pages below.
 
 ## Findings

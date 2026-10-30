@@ -1,6 +1,6 @@
 # ADR 0004: Gold evidence is a quote, not a chunk ID
 
-- Status: Proposed (awaiting sign-off: this defines what "retrieval hit" means)
+- Status: Accepted (owner sign-off 2026-10-30)
 - Date: 2026-10-26
 
 ## Context

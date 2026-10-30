@@ -37,5 +37,5 @@ def test_drift_table_from_a_result(tmp_path, monkeypatch):
     monkeypatch.setattr(readme, "RESULTS", tmp_path)
     table = readme.drift()
     assert "Of 225 golden questions, 40 have every evidence quote" in table
-    assert "| a3h_rerank_2026 | 140 | 38 10-K, 102 10-Q | 38 |" in table
+    assert "| semis-2026 | 140 | 38 10-K, 102 10-Q | 38 |" in table
     assert "-0.05 [-0.10, +0.00]" in table

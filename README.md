@@ -130,7 +130,16 @@ One RTX 4050 laptop GPU (6 GB). Small samples: the slowest time is the maximum, 
 ### Drift: the same questions on newer filings
 
 <!-- table:drift -->
-Not run yet. `make refresh` then `make drift` (writes results/drift.json).
+| Snapshot | Filings | By form | Companies |
+| --- | --- | --- | --- |
+| semis-2025 | 156 | 39 10-K, 117 10-Q | 39 |
+| semis-2026 | 121 | 33 10-K, 88 10-Q | 39 |
+
+Of 225 golden questions, 74 have every evidence quote repeated word for word in the same company's newer filings; 68 partly; 83 not at all; 0 have no newer filing. Only carried-over questions can be scored on the new index, so the comparison below measures how search copes with a new corpus, not whether changed facts are found. All question types are scored by quote recall here, including global ones.
+
+| Carried-over questions | Old index | New index | New minus old [95% CI] |
+| --- | --- | --- | --- |
+| recall@10 (74 questions) | 0.74 [0.64, 0.82] | 0.74 [0.65, 0.82] | +0.00 [-0.03, +0.03] |
 <!-- /table -->
 
 ## What did not work

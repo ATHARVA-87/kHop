@@ -1,6 +1,6 @@
 # ADR 0011: Semantic cache keyed by meaning AND by the companies and periods asked about
 
-Status: Proposed (awaiting owner sign-off)
+Status: Accepted (owner sign-off 2026-10-30)
 Date: 2026-10-29
 
 ## Context

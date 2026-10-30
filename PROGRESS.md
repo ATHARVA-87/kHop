@@ -33,11 +33,16 @@
 - **Demo option A is built** (ADR 0013 accepted): 7 questions recorded live from the app (`make record-demo`), replayed by a static page (`make demo-site`), deployed by GitHub Pages from `main`.
 - The 4 untracked files were deleted. The `_old` CSVs were blank templates; the real labels are in git history.
 
-**Blocked on you, in order:**
-1. Review and merge the Phase 7 PR. GitHub Pages must be switched on once: Settings → Pages → Source: GitHub Actions.
-2. Run `make refresh` (about 160 SEC downloads, then parse and embed on the GPU), then `make drift` and `python -m plexus.readme`.
-3. Sign off the ADRs that are still "Proposed": 0003, 0004 and 0009–0012.
-4. Record a short video of the live app, following `docs/demo_script.md`.
+**Update 2026-10-30 (afternoon):**
+- PR #11 is merged.
+- **The recorded demo is live** at https://atharva-87.github.io/kHop/. The first deploy failed because Pages was not yet switched on; it was re-run and browser-checked live.
+- **All ADRs accepted** (owner, 2026-10-30).
+- **Drift check run by the owner** (`results/drift.json`):
+  - 74 of 225 golden questions carry over word for word to the 2026 filings;
+  - on those 74, recall@10 is the same on both indexes (+0.00 [-0.03, +0.03]).
+- An independent verifier agent checked the approach after sign-off (see Log).
+
+**Left:** a short video of the live app (owner), resume bullets (local notes), and the final definition-of-done tick.
 
 **Then (Claude):** build the chosen demo option; draft resume bullets (local file, measured numbers only); tick the definition of done; run the final reviewer; write the context-mode savings report.
 

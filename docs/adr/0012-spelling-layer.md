@@ -1,6 +1,6 @@
 # ADR 0012: A plain-code spelling layer that asks before it changes anything
 
-Status: Proposed (awaiting owner sign-off)
+Status: Accepted (owner sign-off 2026-10-30)
 Date: 2026-10-29
 
 ## Context

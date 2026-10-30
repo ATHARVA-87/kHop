@@ -1,6 +1,6 @@
 # ADR 0009: A rule router, not an LLM planner, picks the search route
 
-Status: Proposed (awaiting owner sign-off)
+Status: Accepted (owner sign-off 2026-10-30)
 Date: 2026-10-29
 
 ## Context

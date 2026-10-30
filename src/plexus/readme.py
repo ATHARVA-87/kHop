@@ -158,6 +158,18 @@ def reframe() -> str:
     )
 
 
+def _snapshot(config_name: str) -> str:
+    """Snapshot name of a config (configs/<name>.yaml), e.g. semis-2026."""
+    import yaml
+
+    path = REPO_ROOT / "configs" / f"{config_name}.yaml"
+    return (
+        yaml.safe_load(path.read_text()).get("snapshot", config_name)
+        if path.exists()
+        else config_name
+    )
+
+
 def drift() -> str:
     path = RESULTS / "drift.json"
     if not path.exists():
@@ -171,7 +183,9 @@ def drift() -> str:
     for k in ("old", "new"):
         x = d["corpus"][k]
         forms = ", ".join(f"{n} {f}" for f, n in sorted(x["by_form"].items()))
-        rows.append(f"| {d['configs'][k]} | {x['filings']} | {forms} | {x['companies']} |")
+        rows.append(
+            f"| {_snapshot(d['configs'][k])} | {x['filings']} | {forms} | {x['companies']} |"
+        )
     rows += [
         "",
         f"Of {d['golden_questions']} golden questions, {c.get('carried', 0)} have every evidence quote "
