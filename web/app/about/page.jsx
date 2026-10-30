@@ -55,6 +55,17 @@ export default function About() {
         <p>Loading the results…</p>
       )}
 
+      <h2>How the RAGAS scores are worked out</h2>
+      <p>
+        RAGAS is a standard set of measures for systems like this one. A separate language model
+        does the checking; each score runs from 0 to 1, higher is better.
+      </p>
+      <ul>
+        <li><strong>Faithfulness</strong> = claims in the answer backed by the passages ÷ all claims in the answer.</li>
+        <li><strong>Context recall</strong> = claims in the reference answer found in the passages ÷ all claims in the reference answer.</li>
+        <li><strong>Answer relevancy</strong> = the average similarity in meaning (cosine similarity of embeddings) between the question asked and three questions written back from the answer; 0 if the answer dodges the question.</li>
+      </ul>
+
       <h2>What it does not do</h2>
       <p>
         kHop does not give investment advice and does not know anything outside these filings,

@@ -31,6 +31,21 @@
    "source": "results/guardrails_a9_agents.json"
   },
   {
+   "label": "Share of an answer's claims backed by the passages it was given (RAGAS faithfulness, 0 to 1), on 49 hand-checked answers",
+   "value": "0.95",
+   "source": "results/ragas_a6_router.json"
+  },
+  {
+   "label": "Share of the facts a reference answer needs that search found (RAGAS context recall, 0 to 1), on 49 hand-checked answers",
+   "value": "0.90",
+   "source": "results/ragas_a6_router.json"
+  },
+  {
+   "label": "How closely the answer sticks to the question asked (RAGAS answer relevancy, 0 to 1), on 49 hand-checked answers",
+   "value": "0.77",
+   "source": "results/ragas_a6_router.json"
+  },
+  {
    "label": "Typical time to a full answer on a laptop GPU",
    "value": "9 seconds",
    "source": "results/latency_a9_agents.json"

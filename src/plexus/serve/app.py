@@ -208,6 +208,17 @@ def about_figures() -> list[dict]:
             f"{i['attack_success']} of {i['n']}",
             "results/guardrails_a9_agents.json",
         )
+    d = _json("results/ragas_a6_router.json")
+    if d:
+        r, src = d["summary"], "results/ragas_a6_router.json"
+        for key, label in (
+            ("faithfulness", "Share of an answer's claims backed by the passages it was given (RAGAS faithfulness, 0 to 1)"),
+            ("context_recall", "Share of the facts a reference answer needs that search found (RAGAS context recall, 0 to 1)"),
+            ("answer_relevancy", "How closely the answer sticks to the question asked (RAGAS answer relevancy, 0 to 1)"),
+        ):  # fmt: skip
+            m = r.get(key)
+            if m and m.get("n"):
+                add(f"{label}, on {m['n']} hand-checked answers", f"{m['mean']:.2f}", src)
     d = _json("results/latency_a9_agents.json")
     if d:
         add(

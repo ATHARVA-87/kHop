@@ -255,6 +255,7 @@ Search scores need no LLM at all, only the small embedding and reranking models.
 3. Restore the cache: `gunzip khop-llm-cache-2026-10-30.sqlite.gz`, move it to `data/cache/llm.sqlite`, and set `PLEXUS_LLM_OFFLINE=1`.
 4. Score the dev set: `make eval CONFIG=configs/a6_router.yaml PY=python` writes `results/a6_router.json`.
 5. Score the held-out test set (the README's tables): `python -m plexus.eval.run --config configs/a6_router.yaml --golden data/golden/golden_test.jsonl --results-dir results/test`.
+6. RAGAS (optional): it needs its own conda environment, built with the three lines at the top of `constraints-ragas.txt`. Download `khop-ragas-embeddings-2026-10-30.json.gz` from the same release, unzip it to `data/cache/ragas_embeddings.json`, then run `PLEXUS_LLM_OFFLINE=1 make ragas RAGAS_PY=<that environment's python>` to rebuild `results/ragas_a6_router.json`.
 
 Other useful commands:
 - `make test`: the fast test suite (what CI runs).
