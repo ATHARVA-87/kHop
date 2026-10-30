@@ -2,14 +2,14 @@
 
 **Ask a question about what chip companies told the SEC, and get a short answer where every sentence cites the exact filing passage it came from.**
 
-kHop answers questions over the 2025 SEC filings (10-K annual and 10-Q quarterly reports) of 39 US semiconductor companies. It is a **multi-agent system**: five specialised agents run in a fixed LangGraph workflow, each with one narrow job:
+kHop answers questions over the 2025 SEC filings (10-K annual and 10-Q quarterly reports) of 39 US semiconductor companies. It is a **Multi-Stage, Evidence-Grounded GraphRAG System**: five stages run in a fixed LangGraph workflow, each with one narrow job:
 - a **guard** that declines unsafe requests;
 - a **router** that picks how to search;
 - a **retriever** that combines keyword search, embeddings, a reranker and a knowledge graph;
-- a **writer** that drafts the cited answer (the only agent that calls an LLM; the others are rules or small models);
+- a **writer** that drafts the cited answer (the only stage that calls an LLM; the others are rules or small models);
 - a **fact-checker** that marks any sentence its source does not back.
 
-The page streams every step live, so you can see how each answer was made.
+The page streams every step live, so you can see how each answer was made. Agent-style loops (a planner, a rewrite loop) were tested and left out because they gave no measurable gain; making kHop agentic, then multi-agent, is on the [roadmap](#roadmap).
 
 It is also a measurement project. Every component was compared with a simpler version on a question set checked by hand, and kept only if it helped. A held-out test set was scored once, at the end. The ideas that lost are written up in [docs/failures.md](docs/failures.md).
 
@@ -36,19 +36,19 @@ flowchart TB
         K -- "yes" --> KEEP["Keep; CI gate guards it"]
         K -- "no" --> DROP["Delete; write up in docs/failures.md"]
     end
-    subgraph ASK["Answer a question: the agents"]
+    subgraph ASK["Answer a question: five stages"]
         direction LR
         Q["Question"] --> S["Spelling check<br/>user confirms"]
-        S --> G["Guard agent<br/>advice / off-topic / attack"]
+        S --> G["Guard<br/>advice / off-topic / attack"]
         G -- "declined" --> REF["Plain refusal"]
         G -- "ok" --> C{"Semantic cache"}
         C -- "hit" --> A["Answer + citations<br/>+ live step trace"]
-        C -- "miss" --> R{"Router agent"}
+        C -- "miss" --> R{"Router"}
         R -- "one company" --> L["Retriever: hybrid search<br/>+ reranker"]
         R -- "2+ companies" --> M["Retriever: hybrid<br/>+ graph links"]
         R -- "none named" --> W["Retriever: company-diverse search"]
-        L & M & W --> Wr["Writer agent (LLM)<br/>cites every claim"]
-        Wr --> V["Fact-checker agent<br/>checks each cited sentence"]
+        L & M & W --> Wr["Writer (LLM)<br/>cites every claim"]
+        Wr --> V["Fact-checker<br/>checks each cited sentence"]
         V --> A
     end
     BUILD --> ASK
@@ -272,8 +272,9 @@ Other useful commands:
 | --- | --- |
 | RAG / GraphRAG | Retrieval-Augmented Generation / RAG that also follows a knowledge graph |
 | LLM | Large Language Model |
-| Agent | A step with one narrow job in the workflow (here: guard, router, retriever, writer, fact-checker) |
-| LangGraph | A library that runs the agents as a fixed workflow over shared state |
+| Stage | One step with one narrow job in the workflow (here: guard, router, retriever, writer, fact-checker) |
+| Agentic / multi-agent | An LLM that decides its own next action (e.g. whether to search again) / several such agents working together. kHop is neither yet; see the roadmap |
+| LangGraph | A library that runs the stages as a fixed workflow over shared state |
 | ADR | Architecture Decision Record (one page per design choice, in `docs/adr/`) |
 | SEC / EDGAR | U.S. Securities and Exchange Commission / Electronic Data Gathering, Analysis, and Retrieval |
 | 10-K / 10-Q / MD&A | annual report / quarterly report / Management's Discussion and Analysis |
@@ -298,6 +299,20 @@ Other useful commands:
 | p50 / p95 | typical (median) / 95th-percentile time |
 | A0–A9 | The ablation ladder: each step adds one idea to the step before (A0–A6 search, A8 cache, A9 guardrails; A7 not built) |
 | dev / test | development set (used for decisions) / held-out test set (scored once) |
+
+## Roadmap
+
+kHop is deliberately a fixed workflow today: every extra step had to beat the simpler version, and agent loops did not. The planned next steps follow the same rule. Each is built behind a switch, its pass mark is written before it runs, and it is kept only if it helps on the dev set.
+
+1. **Self-correcting loop.** When the fact-checker finds a cited sentence its passage does not back, search once more (using that sentence) and rewrite. Keep the new answer only if fewer sentences are unbacked.
+2. **Agentic: the writer chooses to search.** Give the writer LLM a `search_filings` tool. It decides whether, and what, to search again (at most two calls) before answering. This needs tool-calling support in the LLM client, and a first check that the 4B local model calls tools reliably.
+3. **Multi-agent.** Split the work between LLM agents that hand off to each other in LangGraph:
+   - a **planner** that breaks two-company questions into sub-questions;
+   - a **researcher** per company that searches with tools;
+   - a **writer**;
+   - a **verifier** that can send the work back for another round.
+
+   Each agent is added only if it beats the version before it.
 
 ## Design decisions
 
