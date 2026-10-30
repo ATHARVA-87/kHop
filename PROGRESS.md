@@ -11,7 +11,7 @@
 | 4. Single-graph agent | Router, grade-and-rewrite, A6, A7 | Router vs always-local/global | **Gate met 2026-10-28** (A6 router beats always-X on dev and test; = oracle). A7 loop in progress |
 | 5. Multi-agent | 4 agents, guardrails, A9 | A9 vs A7 with latency/cost; guardrail metrics | **Done, merged.** A9 vs A6 (ADR 0007): guardrail metrics, latency, calls per question |
 | 6. Systems + UI | Semantic cache (A8), SSE, Phoenix, Next.js, Locust | p95, cache hit rate, cost/query | **Gate met, merged** (PR #9); late commits in PR #10 |
-| 7. Ship | README, ADRs, demo Space, drift check, demo script | Definition of done | **In progress** (branch `phase7-ship`): README with generated numbers, ADR drafts, demo script, drift code done; drift run, hosting choice and sign-offs wait for you |
+| 7. Ship | README, ADRs, demo Space, drift check, demo script | Definition of done | **Done 2026-10-30.** README with generated numbers + diagram, all ADRs accepted, recorded demo on GitHub Pages (ADR 0013), drift check run, demo script, resume lines (private notes), LLM-call cache released |
 
 ## Resume here
 
