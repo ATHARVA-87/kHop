@@ -111,6 +111,7 @@ def answers() -> str:
     v, real = summary["minicheck"], summary["real_pairs_only"]
     swaps = summary["swapped_marked_unsupported_by_human"]
     first = verdicts(REPO_ROOT / "data" / "golden" / "judge_labels_first.csv")
+    sj, cj, bar = s["single_verdict_judge"], s["checklist_judge"], s["acceptance_bar"]
     return "\n".join(
         [
             "| Check | Result |",
@@ -121,9 +122,52 @@ def answers() -> str:
             f"| ...the same, adding {swaps} test sentences paired with a wrong passage on purpose | {_pct(v['tpr_catches_not_correct'])} {_wilson(v['tpr_ci'])} of {v['human_not_correct']} |",
             f"| Fact-checker passes sentences I marked as backed | {_pct(v['tnr_passes_correct'])} {_wilson(v['tnr_ci'])} of {v['n'] - v['human_not_correct']} |",
             f"| Fact-checker vs me, agreement (kappa): real sentences / with the swapped ones | {real['binary_kappa']:.2f} / {v['binary_kappa']:.2f} |",
-            f"| LLM judge accepted as a stand-in for me | {'yes' if s['accepted'] else 'no (below its pre-set bar)'} |",
+            f"| LLM judge (one verdict per answer) vs me: Cohen's kappa / catches answers I marked not correct | {sj['binary_kappa']:.2f} / {round(sj['tpr_catches_not_correct'] * sj['human_not_correct'])} of {sj['human_not_correct']} |",
+            f"| LLM judge (pre-registered checklist) vs me: Cohen's kappa / catches answers I marked not correct | {cj['binary_kappa']:.2f} / {round(cj['tpr_catches_not_correct'] * cj['human_not_correct'])} of {cj['human_not_correct']} |",
+            f"| LLM judge accepted as a stand-in for me (bar: catch {_pct(bar['tpr'])}, pass {_pct(bar['tnr'])}) | {'yes' if s['accepted'] else 'no (below its pre-set bar)'} |",
+            *ragas_rows(),
         ]
     )
+
+
+def ragas_rows() -> list[str]:
+    """RAGAS rows, if results/ragas_a6_router.json exists (`make ragas`; resumable daily runs)."""
+    path = RESULTS / "ragas_a6_router.json"
+    if not path.exists():
+        return []
+    r = json.loads(path.read_text())["summary"]
+    total = r["n"]
+    judge = r.get("judge") or ", ".join(r.get("models_used", {})) or "Gemini"
+    status = (
+        "complete"
+        if r.get("complete")
+        else f"in progress on the free tier: {r.get('answers_fully_scored', 0)} of {total} answers fully scored"
+    )
+    rows = [f"| RAGAS ({judge} judge; {status}) | answers scored per metric below |"]
+    labels = {
+        "faithfulness": "faithfulness: claims backed by the retrieved passages",
+        "answer_relevancy": "answer relevancy: the answer addresses the question",
+        "context_precision": "context precision: relevant passages ranked first",
+        "context_recall": "context recall: passages contain what the reference needs",
+    }
+    for key, label in labels.items():
+        m = r.get(key)
+        if m and m.get("n"):
+            rows.append(f"| RAGAS {label} | {m['mean']:.2f} ({m['n']} of {total}) |")
+    for key, label in (("factual_correctness", "F1"), ("factual_recall", "recall")):
+        h = r.get(f"vs_human_{key}")
+        if h:
+            agree = round(h["raw_agreement"] * h["n"])
+            au = h.get("auroc_correct_vs_not")
+            sep = (
+                ""
+                if au is None
+                else f"; separates my correct from not-correct answers: AUROC {au:.2f}, 0.50 = chance"
+            )
+            rows.append(
+                f"| RAGAS factual correctness ({label}) agrees with my labels | {agree} of {h['n']} answers (mean score {r[key]['mean']:.2f}{sep}) |"
+            )
+    return rows
 
 
 def guardrails() -> str:

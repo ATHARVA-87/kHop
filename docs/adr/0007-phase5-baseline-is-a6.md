@@ -13,4 +13,4 @@ Compare A9 against **A6** (rule router + per-type retrieval + writer), the best 
 
 ## Consequences
 - The brief's A7 rung is recorded as "not built, measured unnecessary"; it can be added later if new failure data appears.
-- A9 adds no LLM calls over A6 (the verifier is a 770M local model), so the cost comparison is latency, not money.
+- A9 adds no LLM calls over A6 (the verifier is a small local model: MiniCheck-RoBERTa-Large, 355M, ADR 0010), so the cost comparison is latency, not money.

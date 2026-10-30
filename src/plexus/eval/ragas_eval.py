@@ -4,9 +4,17 @@
 
 Why a separate env: ragas 0.4.3 pulls ~35 packages (LangChain, LangGraph, datasets) and would
 upgrade huggingface_hub past what transformers in the main env allows (research 2026-10-28).
-Only two metrics, both claim-level (RAGAS paper, arXiv 2309.15217):
+Metrics (RAGAS paper, arXiv 2309.15217; the standard set interviewers expect):
 - Faithfulness: share of the answer's claims supported by the retrieved contexts;
-- FactualCorrectness (F1): claims in the answer vs claims in the reference answer.
+- FactualCorrectness (F1, and recall): claims in the answer vs claims in the reference answer;
+- AnswerRelevancy: does the answer address the question (questions generated from the answer,
+  compared by embedding similarity; embeddings from a small local Ollama model, cached);
+- ContextPrecision (with reference): are the relevant passages ranked at the top;
+- ContextRecall: do the passages contain what the reference answer needs.
+
+Free-tier runs: one judge model throughout. Every finished call is cached, so a run stopped by the
+daily quota resumes where it stopped: run `make ragas` again the next day. When the quota error
+appears the run stops cleanly and writes what it has (`complete: false`).
 Every LLM call goes through plexus.llm.LLMClient (project rule 4: cached, offline-capable):
 `PlexusRagasLLM` adapts it to RAGAS's InstructorBaseRagasLLM interface. RAGAS usage tracking
 is switched off before ragas is imported. Scores are compared with the 49 blind human labels
@@ -28,11 +36,14 @@ import asyncio
 import csv
 import json
 import math
+import re
 import sys
+import time
 from collections import Counter
 from pathlib import Path
 
 from plexus.llm import (
+    CacheMissError,
     LLMClient,
     LLMRequest,
     Message,
@@ -42,6 +53,52 @@ from plexus.llm import (
 from plexus.settings import REPO_ROOT, Settings
 
 THRESHOLDS = (0.75, 0.25)  # fixed in advance: correct / partially correct / incorrect
+METRICS = ("faithfulness", "factual_correctness", "factual_recall", "answer_relevancy",
+           "context_precision", "context_recall")  # fmt: skip
+EMBED_MODEL = "all-minilm"  # Ollama; only for AnswerRelevancy's question similarity
+
+
+class QuotaExhausted(RuntimeError):
+    """The provider's daily free quota is used up: stop, save, resume tomorrow."""
+
+
+PACE_S = 4.5  # pause after each live call: stays under a free-tier per-minute limit
+MINUTE_WAIT_S = 65  # a per-minute 429 clears after about a minute
+_DAILY = re.compile(r"per.?day|perday|daily", re.IGNORECASE)
+_QUOTA = re.compile(r"\b429\b|resource[_ ]exhausted|quota|rate.?limit", re.IGNORECASE)
+
+
+def is_quota_error(exc: Exception) -> bool:
+    """HTTP 429 / RESOURCE_EXHAUSTED / quota text, as whole words (a cache-key hash such as
+    '1429b4...' must not count)."""
+    return _QUOTA.search(str(exc)) is not None
+
+
+def make_embeddings(cache_path: Path, base_url: str):
+    """RAGAS embeddings via a local Ollama model, with a disk cache (offline reruns free)."""
+    import hashlib
+
+    import httpx
+    from ragas.embeddings import BaseRagasEmbedding
+
+    cache: dict = json.loads(cache_path.read_text()) if cache_path.exists() else {}
+
+    class OllamaEmbedding(BaseRagasEmbedding):
+        def embed_text(self, text: str, **kwargs) -> list[float]:
+            key = hashlib.sha256(f"{EMBED_MODEL}\n{text}".encode()).hexdigest()
+            if key not in cache:
+                r = httpx.post(f"{base_url}/api/embed", json={"model": EMBED_MODEL, "input": text},
+                               timeout=60)  # fmt: skip
+                r.raise_for_status()
+                cache[key] = r.json()["embeddings"][0]
+                cache_path.parent.mkdir(parents=True, exist_ok=True)
+                cache_path.write_text(json.dumps(cache))
+            return cache[key]
+
+        async def aembed_text(self, text: str, **kwargs) -> list[float]:
+            return await asyncio.to_thread(self.embed_text, text)
+
+    return OllamaEmbedding()
 
 
 def verdict_of(score: float) -> str:
@@ -67,14 +124,27 @@ def make_llm(client: LLMClient, provider: str, models: list[str]):
                 req = LLMRequest(provider=provider, model=m,
                                  messages=(Message(role="user", content=prompt),),
                                  temperature=0.0, max_tokens=4096, seed=0)  # fmt: skip
-                try:
-                    out = client.complete_json(req, response_model)
-                    self.failures[m] = 0
-                    self.used[m] += 1
-                    return out
-                except (ProviderError, StructuredOutputError) as exc:
-                    self.failures[m] += 1
-                    last = exc
+                for attempt in range(4):
+                    live_before = client.stats.calls - client.stats.cache_hits
+                    try:
+                        out = client.complete_json(req, response_model)
+                        if client.stats.calls - client.stats.cache_hits > live_before:
+                            time.sleep(PACE_S)  # a real API call, not a cache hit
+                        self.failures[m] = 0
+                        self.used[m] += 1
+                        return out
+                    # a cache miss in offline mode falls through to the next model, like a
+                    # provider error: the cached run used the fallback model
+                    except (ProviderError, StructuredOutputError, CacheMissError) as exc:
+                        if is_quota_error(exc):
+                            # per-minute limit: wait and retry; per-day (or still failing): stop
+                            if _DAILY.search(str(exc)) or attempt == 3:
+                                raise QuotaExhausted(str(exc)[:1500]) from exc
+                            time.sleep(MINUTE_WAIT_S)
+                            continue
+                        self.failures[m] += 1
+                        last = exc
+                        break
             raise last  # type: ignore[misc]
 
         async def agenerate(self, prompt: str, response_model):
@@ -111,10 +181,17 @@ def main(argv: list[str] | None = None) -> int:
         "--all", action="store_true", help="score every answer, not only the labelled ones"
     )
     ap.add_argument("--provider", default="gemini")
-    ap.add_argument("--models", default="gemini-3.6-flash,gemini-3.5-flash-lite")
+    # one judge for every answer: the pilot was scored by flash-lite (3.6-flash was overloaded)
+    ap.add_argument("--models", default="gemini-3.5-flash-lite")
     a = ap.parse_args(argv)
 
-    from ragas.metrics.collections import FactualCorrectness, Faithfulness
+    from ragas.metrics.collections import (
+        AnswerRelevancy,
+        ContextPrecisionWithReference,
+        ContextRecall,
+        FactualCorrectness,
+        Faithfulness,
+    )
 
     res = json.loads(a.results.read_text())
     rows = [r for r in res["per_query"] if r.get("answer") and r.get("contexts")]
@@ -123,16 +200,22 @@ def main(argv: list[str] | None = None) -> int:
                  for r in csv.DictReader(fh) if r["human_verdict"].strip()}  # fmt: skip
     if not a.all:
         rows = [r for r in rows if r["qid"] in human]
-    client = LLMClient.from_settings(Settings.load())
+    settings = Settings.load()
+    client = LLMClient.from_settings(settings)
     llm = make_llm(client, a.provider, a.models.split(","))
+    emb = make_embeddings(settings.data_dir / "cache" / "ragas_embeddings.json",
+                          settings.ollama_api_base)  # fmt: skip
     # F1 (RAGAS default, planned first) also penalises EXTRA correct claims; the human rubric
     # says extra correct detail is fine, which matches recall mode. Recall was added after
     # seeing 14 rows, so both are reported, clearly labelled (2026-10-28).
     faith = Faithfulness(llm=llm)
     fact = FactualCorrectness(llm=llm)
     fact_recall = FactualCorrectness(llm=llm, mode="recall")
+    relevancy = AnswerRelevancy(llm=llm, embeddings=emb)
+    precision = ContextPrecisionWithReference(llm=llm)
+    recall = ContextRecall(llm=llm)
 
-    per = []
+    per, stopped = [], None
     for i, r in enumerate(rows, 1):
         out = {"qid": r["qid"], "qtype": r["qtype"]}
         for name, fn in (
@@ -140,20 +223,45 @@ def main(argv: list[str] | None = None) -> int:
                                                      retrieved_contexts=r["contexts"])),
             ("factual_correctness", lambda r=r: fact.score(response=r["answer"], reference=r["reference"])),
             ("factual_recall", lambda r=r: fact_recall.score(response=r["answer"], reference=r["reference"])),
+            ("answer_relevancy", lambda r=r: relevancy.score(user_input=r["question"], response=r["answer"])),
+            ("context_precision", lambda r=r: precision.score(user_input=r["question"], reference=r["reference"],
+                                                              retrieved_contexts=r["contexts"])),
+            ("context_recall", lambda r=r: recall.score(user_input=r["question"], retrieved_contexts=r["contexts"],
+                                                        reference=r["reference"])),
         ):  # fmt: skip
             try:
                 v = fn().value
                 out[name] = (
                     None if v is None or (isinstance(v, float) and math.isnan(v)) else float(v)
                 )
+            except QuotaExhausted as exc:
+                # daily quota used up: switch to cache-only and keep going, so every answer
+                # already scored on an earlier day is still restored; the rest waits for tomorrow
+                stopped = str(exc)
+                client.offline = True
+                out[name], out[f"{name}_error"] = None, "not scored yet: daily quota used up"
             except Exception as exc:
-                out[name], out[f"{name}_error"] = None, f"{type(exc).__name__}: {str(exc)[:160]}"
+                pending = stopped and isinstance(exc, CacheMissError | QuotaExhausted)
+                out[name], out[f"{name}_error"] = (
+                    None,
+                    (
+                        "not scored yet: daily quota used up"
+                        if pending
+                        else f"{type(exc).__name__}: {str(exc)[:160]}"
+                    ),
+                )
         per.append(out)
-        if i % 10 == 0:
-            print(f"{i}/{len(rows)}", file=sys.stderr)
+        if i % 5 == 0 or stopped:
+            print(
+                f"{i}/{len(rows)}" + (" (stopped: daily quota)" if stopped else ""), file=sys.stderr
+            )
 
-    summary: dict = {"n": len(per), "thresholds": THRESHOLDS, "models_used": dict(llm.used)}
-    for name in ("faithfulness", "factual_correctness", "factual_recall"):
+    scored = sum(all(p.get(m) is not None for m in METRICS) for p in per)
+    summary: dict = {"n": len(per), "thresholds": THRESHOLDS, "judge": a.models.split(",")[0],
+                     "embeddings": EMBED_MODEL, "models_used": dict(llm.used),
+                     "answers_fully_scored": scored, "complete": scored == len(per),
+                     "stopped_reason": stopped}  # fmt: skip
+    for name in METRICS:
         vals = [p[name] for p in per if p[name] is not None]
         summary[name] = {"mean": round(sum(vals) / len(vals), 4) if vals else None,
                          "n": len(vals), "failed": len(per) - len(vals)}  # fmt: skip
