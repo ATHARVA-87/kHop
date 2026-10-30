@@ -196,7 +196,7 @@ Re-run one experiment: `make eval CONFIG=configs/a5_diverse.yaml`. Run the drift
 ## Reproducibility
 
 - **Dependencies** are locked in `uv.lock`. Local installs use `constraints.txt`, so the torch env never changes.
-- **Every LLM call** goes through one client with a disk cache keyed by provider, model, prompt and parameters. CI runs cache-only (`PLEXUS_LLM_OFFLINE=1`), so reruns cost nothing.
+- **Every LLM call** goes through one client with a disk cache keyed by provider, model, prompt and parameters. CI runs cache-only (`PLEXUS_LLM_OFFLINE=1`), so reruns cost nothing. The full cache is published as a release ([llm-cache-2026-10-30](https://github.com/ATHARVA-87/kHop/releases/tag/llm-cache-2026-10-30)): unzip it to `data/cache/llm.sqlite` to reproduce every result without calling a model.
 - **The corpus snapshot is frozen:** `data/snapshots/*.manifest.jsonl` holds a sha256 per filing and a corpus checksum.
 - **Fixed seeds and a fixed question set.** Both sets were drafted by an LLM and pre-reviewed by AI reviewer agents.
   - The dev set (for building) was checked by me question by question.
