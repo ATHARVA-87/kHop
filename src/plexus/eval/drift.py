@@ -9,7 +9,7 @@
 2. Search on the carried-over questions that name companies (sector-wide ones are scored by
    company coverage, not quotes): recall@10 with the same settings on the old index and the new
    one, cluster bootstrap as in the main scorer, per-question rows saved. No graph: a graph
-   needs a 4.5 h LLM extraction per snapshot.
+   needs a 1.5 h LLM extraction per snapshot.
 3. Corpus: filings and companies in each snapshot, and section-detection quality of the parser.
 
 The golden set is never edited: carried-over questions point at the 2026 filing in memory only.

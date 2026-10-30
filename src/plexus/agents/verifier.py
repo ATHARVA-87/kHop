@@ -2,8 +2,9 @@
 
 Two parts, no LLM call (research report 2026-10-29: an LLM verifier would use free-tier quota,
 and our LLM judges caught only 3 of 5 wrong answers):
-1. MiniCheck-Flan-T5-Large (Tang et al. 2024, MIT licence): a 770M fact-checking model, best
-   under 1B parameters on LLM-AggreFact. Scoring copied from the authors' code
+1. MiniCheck (Tang et al. 2024, MIT licence): the app uses MiniCheck-RoBERTa-Large (355M,
+   default since 2026-10-29: it fits the GPU); the Flan-T5-Large variant (770M) is still
+   supported. Scoring copied from the authors' code
    (github.com/Liyan06/MiniCheck, minicheck/inference.py): input "predict: " + passage + </s>
    + claim; support probability = softmax over the first decoder token's logits for ids
    3 (not supported) and 209 (supported); passages split into ~400-word chunks, max over chunks.

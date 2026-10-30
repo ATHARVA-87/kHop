@@ -2,11 +2,11 @@
 
 **Ask a question about what chip companies told the SEC, and get a short answer where every sentence cites the exact filing passage it came from.**
 
-kHop answers questions over the 2025 SEC filings (10-K annual and 10-Q quarterly reports) of 39 US semiconductor companies. It is a **multi-agent system**: five specialised agents run together in a LangGraph workflow, each with one narrow job:
+kHop answers questions over the 2025 SEC filings (10-K annual and 10-Q quarterly reports) of 39 US semiconductor companies. It is a **multi-agent system**: five specialised agents run in a fixed LangGraph workflow, each with one narrow job:
 - a **guard** that declines unsafe requests;
 - a **router** that picks how to search;
 - a **retriever** that combines keyword search, embeddings, a reranker and a knowledge graph;
-- a **writer** that drafts the cited answer (the only agent that calls an LLM);
+- a **writer** that drafts the cited answer (the only agent that calls an LLM; the others are rules or small models);
 - a **fact-checker** that marks any sentence its source does not back.
 
 The page streams every step live, so you can see how each answer was made.
@@ -202,12 +202,14 @@ Copy `.env.example` to `.env`. It is git-ignored, so keys stay on your machine.
 
 | Variable | Needed for | Example / default |
 | --- | --- | --- |
-| `SEC_USER_AGENT` | Only `make ingest` (downloading filings from SEC). SEC asks for your name and email. | `"Jane Doe jane@example.com"` |
+| `SEC_USER_AGENT` | Only `make ingest` and `make refresh` (downloading filings from SEC). SEC asks for your name and email. | `"Jane Doe jane@example.com"` |
 | `OLLAMA_API_BASE` | The writer | `http://localhost:11434` |
 | `GEMINI_API_KEY` / `GROQ_API_KEY` | Only to regenerate the question set or the LLM judges (free tiers). Not needed to run the app or reproduce results. | empty |
 | `PLEXUS_LLM_OFFLINE` | `1` = answer only from the LLM cache and never call a model (CI uses this) | `0` |
 | `PLEXUS_LLM_CACHE` | Where the LLM cache lives | `data/cache/llm.sqlite` |
 | `PLEXUS_ENABLE_CLAUDE_SDK` | Personal comparison runs only; leave off | `0` |
+
+Advanced, optional (read by the app, sensible defaults): `PLEXUS_CONFIG` (app config, default `configs/app.yaml`), `PLEXUS_RATE_PER_MIN` (questions per minute per user, default 10), `PLEXUS_SEMANTIC_CACHE` and `PLEXUS_TRACE_LOG` (file locations), `PLEXUS_OLLAMA_KEEP_ALIVE` (how long the writer stays loaded), `PLEXUS_ANSWER_ERROR` (the message shown when the writer is down), `PLEXUS_DEV_CORS` (only for the live-reload page in development).
 
 ### Setup
 
@@ -230,13 +232,17 @@ make stop PY=python            # afterwards: free the GPU
 
 `make fetch` skips the two slow steps. If you prefer to build everything from the source:
 - `make ingest process` downloads and parses the filings from SEC; this needs `SEC_USER_AGENT`.
-- `make extract` re-runs the graph extraction with the local LLM, which takes about 4.5 hours.
+- `make extract` re-runs the graph extraction with the local LLM, which took about 1.5 hours on the RTX 4050.
 
-### Reproduce the numbers without running any model
+### Reproduce the numbers without calling an LLM
 Every LLM call made while building kHop is published as a release: [llm-cache-2026-10-30](https://github.com/ATHARVA-87/kHop/releases/tag/llm-cache-2026-10-30).
-1. Unzip it to `data/cache/llm.sqlite`.
-2. Set `PLEXUS_LLM_OFFLINE=1`.
-3. Run an experiment, e.g. `make eval CONFIG=configs/a6_router.yaml`. It writes `results/a6_router.json`.
+
+Search scores need no LLM at all, only the small embedding and reranking models. Answer-level runs read the cache.
+1. Do the setup above up to `make graph` (you can skip Ollama and the web page).
+2. Build the index for the setup you want, e.g. `make index CONFIG=configs/a6_router.yaml PY=python`.
+3. Restore the cache: `gunzip khop-llm-cache-2026-10-30.sqlite.gz`, move it to `data/cache/llm.sqlite`, and set `PLEXUS_LLM_OFFLINE=1`.
+4. Score the dev set: `make eval CONFIG=configs/a6_router.yaml PY=python` writes `results/a6_router.json`.
+5. Score the held-out test set (the README's tables): `python -m plexus.eval.run --config configs/a6_router.yaml --golden data/golden/golden_test.jsonl --results-dir results/test`.
 
 Other useful commands:
 - `make test`: the fast test suite (what CI runs).
@@ -249,7 +255,7 @@ Other useful commands:
 | --- | --- |
 | `src/plexus/` | The Python package (the project's earlier name): `ingest/`, `index/`, `retrieve/`, `extract/` (graph), `agents/` (LangGraph flow, fact-checker), `guardrails/`, `serve/` (FastAPI app), `eval/` (metrics and experiments), `llm/` (cached LLM client) |
 | `web/` | The Next.js page |
-| `configs/` | One YAML file per experiment (A0–A9) and for the app |
+| `configs/` | One YAML file per experiment (A0–A6, A8, A9; A7 was not built, see ADR 0007) and for the app |
 | `data/golden/` | The hand-checked question sets and labels |
 | `data/snapshots/` | Frozen corpus manifests with checksums |
 | `results/` | One JSON file per experiment; README numbers come from here |
@@ -283,7 +289,7 @@ Other useful commands:
 | CI | Continuous Integration (GitHub Actions); in result tables, CI also means Confidence Interval |
 | recall@10 / nDCG / MRR | share of needed evidence in the top 10 / normalized Discounted Cumulative Gain / Mean Reciprocal Rank |
 | p50 / p95 | typical (median) / 95th-percentile time |
-| A0–A9 | The ablation ladder: each step adds one idea to the step before |
+| A0–A9 | The ablation ladder: each step adds one idea to the step before (A0–A6 search, A8 cache, A9 guardrails; A7 not built) |
 | dev / test | development set (used for decisions) / held-out test set (scored once) |
 
 ## Design decisions
@@ -302,3 +308,7 @@ What I kept for myself:
 - review of every PR touching agents, metrics or the router.
 
 Mistakes in AI-written code that tests or evals caught are logged in [docs/ai_review_log.md](docs/ai_review_log.md). Runtime models never use the developer's Claude login: the app runs on local models and free tiers only.
+
+## License
+
+Code: MIT ([LICENSE](LICENSE)). The filings are public SEC documents. The models keep their own licences: Qwen 3.5 via Ollama, BGE (MIT), MiniCheck (MIT).

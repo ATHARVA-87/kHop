@@ -15,7 +15,7 @@
 
 ## Resume here
 
-**State 2026-10-29 night (owner away; PC shut down after this commit).**
+**State 2026-10-30: project complete** (all phases merged; see the phase table). History of the last sessions below.
 - Phases 0–6 are merged. PR #9 was merged before its last 13 commits (session history, intro dialog, reframe layer) were pushed. They are now in **PR #10** (`phase6-app` → `main`), which is open for your review.
 - Phase 7 work is on branch `phase7-ship` (pushed). It is based on `phase6-app`, so **merge PR #10 first**, then open the Phase 7 PR.
 
@@ -42,7 +42,7 @@
   - on the 68 of them that name companies, recall@10 is 0.80 on both indexes (2 questions up, 2 down, same linking-company groups).
 - **An independent verifier agent checked the approach after sign-off.** Verdict: sound, no bug in the drift result. Six overclaims or gaps were fixed, including the cache now checking the input gate first (docs/ai_review_log.md).
 
-**Left:** a short video of the live app (owner), resume bullets (local notes), and the final definition-of-done tick.
+**Left (optional, owner):** a short video of the live app. Resume bullets are in the private notes; the definition of done is met (phase table).
 
 **Then (Claude):** build the chosen demo option; draft resume bullets (local file, measured numbers only); tick the definition of done; run the final reviewer; write the context-mode savings report.
 
@@ -247,7 +247,7 @@ Research first (2026-10-29): well-tuned single pipelines with a reranker match m
 | 3 datamarking | ^ between words of retrieved text + one prompt rule | 10 attack templates: A6 4/30 -> A9 0/30 (p = 0.125, consistent with, not proof); cited-sentence support 0.820 -> 0.833 (n.s.); fewer uncited sentences | yes |
 | 4 verifier | MiniCheck-RoBERTa-Large (fits the GPU; Flan-T5 ran out of memory), 60 blind human pairs: 15/15 caught, 41/45 passed, kappa 0.84 (real sentences only: 5/5, 41/45, kappa 0.67) | marks each sentence; replacing answers rejected (would blank a human-correct answer) | marks only |
 
-**Gate: A9 vs A6** (A7 not built; ADR 0007 proposed, owner sign-off pending). Cold latency, 30 dev questions, empty LLM cache (`results/latency_a6_router.json`, `latency_a9_agents.json`): p50 7.8 s -> 8.8 s, p95 17.1 s -> 14.4 s; verify step 95 ms; 1 LLM call per question in both; prompt tokens 1,502 -> 2,475 (+65%, datamarking); cost $0. Guardrail metrics as above. Memory: Flan-T5 verifier ran out of GPU memory next to the writer (switched to RoBERTa); once the kernel OOM-killed Ollama when one process held two configs (14 GB RAM): run configs in separate processes; noted for Phase 6.
+**Gate: A9 vs A6** (A7 not built; ADR 0007, accepted by the owner). Cold latency, 30 dev questions, empty LLM cache (`results/latency_a6_router.json`, `latency_a9_agents.json`): p50 7.8 s -> 8.8 s, p95 17.1 s -> 14.4 s; verify step 95 ms; 1 LLM call per question in both; prompt tokens 1,502 -> 2,475 (+65%, datamarking); cost $0. Guardrail metrics as above. Memory: Flan-T5 verifier ran out of GPU memory next to the writer (switched to RoBERTa); once the kernel OOM-killed Ollama when one process held two configs (14 GB RAM): run configs in separate processes; noted for Phase 6.
 
 Not built (research + measurements): LLM planner / sub-question split, LLM researcher, retry loop, grade-and-rewrite.
 

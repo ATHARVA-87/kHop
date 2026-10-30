@@ -82,22 +82,6 @@ def check_tool(binary: str, fix: str, min_version: tuple[int, ...] = ()) -> Call
     return _check
 
 
-def check_docker_daemon() -> Result:
-    if not shutil.which("docker"):
-        return Result(
-            False, "docker not found", "Install Docker: https://docs.docker.com/engine/install/"
-        )
-    code, out = _run(["docker", "info", "--format", "{{.ServerVersion}}"])
-    if code != 0:
-        return Result(
-            False,
-            "daemon not reachable",
-            "Start Docker (`sudo systemctl start docker`) and make sure your user is "
-            "in the docker group (`sudo usermod -aG docker $USER`, then log out/in)",
-        )
-    return Result(True, f"server {out}")
-
-
 def check_imports(modules: list[str], fix: str) -> Callable[[], Result]:
     def _check() -> Result:
         missing = [m for m in modules if importlib.util.find_spec(m) is None]
@@ -231,7 +215,6 @@ CHECKS: list[Check] = [
     Check("ANTHROPIC_API_KEY unset", 0, check_anthropic_key_unset),
     Check("git", 0, check_tool("git", "sudo apt install git")),
     Check("Node.js >= 20", 0, check_tool("node", "Install Node LTS: https://nodejs.org", (20,))),
-    Check("Docker daemon", 0, check_docker_daemon),
     Check(
         "core Python deps",
         0,

@@ -1,5 +1,5 @@
-# kHop — one command per step. Run inside the `torch` conda env:
-#   conda activate torch
+# kHop — one command per step. Run inside a Python 3.11 environment.
+# PY defaults to the owner's conda env `torch` if present; otherwise pass PY=python (see README).
 PY ?= $(shell test -x $(HOME)/miniconda3/envs/torch/bin/python && echo $(HOME)/miniconda3/envs/torch/bin/python || echo python)
 CONFIG ?= configs/a0_naive.yaml
 
@@ -18,7 +18,7 @@ install: ## Install core + dev deps (editable)
 install-ml: ## Install everything the app and experiments need (torch pinned by constraints.txt)
 	$(PY) -m pip install -c constraints.txt -e '.[ml,graph,agents,serve,dev]'
 
-fetch: ## Download the processed 2025 filings + graph extractions (release assets, checksum-verified): no SEC download or 4.5 h extraction needed
+fetch: ## Download the processed 2025 filings + graph extractions (release assets, checksum-verified): no SEC download or graph extraction needed
 	$(PY) -m plexus.ingest.ci_data
 	$(PY) -m plexus.ingest.ci_data --graph
 
@@ -62,7 +62,7 @@ candidates: ## Generate ~200 golden-set candidates into data/golden/review.csv (
 golden: ## Build data/golden/golden.jsonl from your reviewed review.csv (+ noise rate)
 	$(PY) -m plexus.eval.golden build
 
-extract: ## Graph extraction over 10-K passages with local qwen3.5:4b (~4.5 h, resumable)
+extract: ## Graph extraction over 10-K passages with local qwen3.5:4b (about 1.5 h measured, resumable)
 	$(PY) -m plexus.extract.extract
 
 graph: ## Re-validate stored extractions (no LLM), resolve entities, build the LadybugDB graph

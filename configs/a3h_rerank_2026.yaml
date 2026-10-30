@@ -1,7 +1,7 @@
 name: a3h_rerank_2026
 description: >
   Drift check (Phase 7): a3h_rerank unchanged, on the 2026 snapshot. Hybrid search + chunk
-  headers + reranker, the app's settings without the graph (a graph needs a 4.5 h LLM
+  headers + reranker, the app's settings without the graph (a graph needs a 1.5 h LLM
   extraction per snapshot).
 snapshot: semis-2026
 seed: 0
