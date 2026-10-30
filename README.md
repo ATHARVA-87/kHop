@@ -30,18 +30,39 @@ Answers are research output over public filings, **not investment advice**.
   - session history kept in the browser tab only.
 
 ```mermaid
-flowchart LR
-    Q[Question] --> S[Spelling check<br/>user confirms]
-    S --> C{Semantic cache}
-    C -- hit --> A[Answer + citations]
-    C -- miss --> G[Guard: advice / scope / jailbreak]
-    G --> R{Router}
-    R -- one company --> L[Hybrid search<br/>+ reranker]
-    R -- 2+ companies --> M[Hybrid + graph links]
-    R -- none named --> W[Company-diverse search]
-    L & M & W --> Wr[Writer cites every claim]
-    Wr --> V[Fact-check each cited sentence]
-    V --> A
+flowchart TB
+    subgraph BUILD["Build once per data snapshot"]
+        direction LR
+        E["SEC EDGAR filings<br/>frozen, checksummed"] --> P["Parse into sections"]
+        P --> CH["Chunks + header<br/>company, form, section"]
+        CH --> IX["BM25 index<br/>+ bge-small vectors in Qdrant"]
+        CH --> KG["Knowledge graph<br/>LLM-extracted links, each with its quote"]
+    end
+    subgraph EVAL["Measure every idea"]
+        direction LR
+        GS["Golden set<br/>hand-checked questions + exact quotes<br/>dev set / held-out test set"] --> EX["Experiments A0 to A6"]
+        EX --> K{"Beats the simpler<br/>version?"}
+        K -- "yes" --> KEEP["Keep; CI gate guards it"]
+        K -- "no" --> DROP["Delete; write up in docs/failures.md"]
+    end
+    subgraph ASK["Answer a question"]
+        direction LR
+        Q["Question"] --> S["Spelling check<br/>user confirms"]
+        S --> G["Guard<br/>advice / off-topic / attack"]
+        G -- "declined" --> REF["Plain refusal"]
+        G -- "ok" --> C{"Semantic cache"}
+        C -- "hit" --> A["Answer + citations<br/>+ live step trace"]
+        C -- "miss" --> R{"Router"}
+        R -- "one company" --> L["Hybrid search<br/>+ reranker"]
+        R -- "2+ companies" --> M["Hybrid + graph links"]
+        R -- "none named" --> W["Company-diverse search"]
+        L & M & W --> Wr["Writer LLM cites every claim"]
+        Wr --> V["Fact-check each cited sentence"]
+        V --> A
+    end
+    BUILD --> ASK
+    BUILD --> EVAL
+    EVAL -.->|"decides every design choice"| ASK
 ```
 
 ## Results
@@ -190,9 +211,33 @@ Re-run one experiment: `make eval CONFIG=configs/a5_diverse.yaml`. Run the drift
 | Gemini / Groq free tier | Question drafting, judges (public SEC text only) | on (key in `.env`) |
 | `claude_sdk` | Personal local comparison runs only | **off**, never serves other users |
 
+## Terms used (full forms)
+
+| Short form | Full form |
+| --- | --- |
+| RAG / GraphRAG | Retrieval-Augmented Generation / RAG that also follows a knowledge graph |
+| LLM | Large Language Model |
+| ADR | Architecture Decision Record (one page per design choice, in `docs/adr/`) |
+| SEC / EDGAR | U.S. Securities and Exchange Commission / Electronic Data Gathering, Analysis, and Retrieval |
+| 10-K / 10-Q / MD&A | annual report / quarterly report / Management's Discussion and Analysis |
+| BM25 | Best Matching 25 (Okapi BM25 keyword ranking) |
+| RRF | Reciprocal Rank Fusion |
+| BGE / BAAI | BAAI General Embedding / Beijing Academy of Artificial Intelligence |
+| KG | Knowledge Graph |
+| NLI | Natural Language Inference (the fact-checker's task) |
+| RoBERTa | Robustly optimized BERT approach (BERT = Bidirectional Encoder Representations from Transformers) |
+| SSE | Server-Sent Events (live streaming to the page) |
+| API / CSP | Application Programming Interface / Content Security Policy |
+| CI | Continuous Integration (GitHub Actions); in tables, CI also means Confidence Interval |
+| nDCG / MRR | normalized Discounted Cumulative Gain / Mean Reciprocal Rank |
+| TTL | Time To Live (cache expiry) |
+| OSA | Optimal String Alignment (edit distance used by the spelling check) |
+| A0–A9 | the ablation ladder: each step adds one idea to the step before |
+| dev / test | development set (used for decisions) / held-out test set (scored once) |
+
 ## Design decisions
 
-Each major choice is recorded in [docs/adr/](docs/adr/) with the alternatives that were considered.
+Each major choice is recorded as an Architecture Decision Record (ADR) in [docs/adr/](docs/adr/), with the alternatives that were considered. The index is in [docs/adr/README.md](docs/adr/README.md).
 
 ## AI-assisted development
 
