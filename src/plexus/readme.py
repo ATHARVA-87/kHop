@@ -116,8 +116,8 @@ def answers() -> str:
         [
             "| Check | Result |",
             "| --- | --- |",
-            f"| Dev-set answers I judged correct (A6 writer, blind labels) after I re-labelled borderline ones blind, see docs/failures.md | {h['correct']}/{h['n']} = {_pct(h['rate'])} {_wilson(h['wilson_95'])} |",
-            f"| ...the same answers, my first labels | {first.count('correct')}/{len(first)} = {_pct(first.count('correct') / len(first))} |",
+            f"| Answers I judged fully correct by hand, on {h['n']} practice (dev) questions. I labelled them twice, both times without knowing which version of kHop wrote them; this is the second check (docs/failures.md) | {h['correct']}/{h['n']} = {_pct(h['rate'])} {_wilson(h['wilson_95'])} |",
+            f"| The same answers on my first check ({h['correct'] - first.count('correct')} borderline answers I first called partly correct were fully correct on the second check; both results are shown) | {first.count('correct')}/{len(first)} = {_pct(first.count('correct') / len(first))} |",
             f"| Fact-checker flags real sentences I marked as not backed by their passage | {real['human_not_correct']}/{real['human_not_correct']} caught {_wilson(real['tpr_ci'])} |",
             f"| ...the same, adding {swaps} test sentences paired with a wrong passage on purpose | {_pct(v['tpr_catches_not_correct'])} {_wilson(v['tpr_ci'])} of {v['human_not_correct']} |",
             f"| Fact-checker passes sentences I marked as backed | {_pct(v['tnr_passes_correct'])} {_wilson(v['tnr_ci'])} of {v['n'] - v['human_not_correct']} |",

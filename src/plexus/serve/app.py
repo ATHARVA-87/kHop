@@ -179,10 +179,18 @@ def about_figures() -> list[dict]:
         from plexus.readme import verdicts
 
         now, before = verdicts(labels), verdicts(first)
+        src = "data/golden/judge_labels.csv, judge_labels_first.csv"
         add(
-            "Answers fully correct, checked by hand (after I re-checked borderline ones blind; first check in brackets)",
-            f"{now.count('correct')} of {len(now)} ({before.count('correct')} of {len(before)})",
-            "data/golden/judge_labels.csv, judge_labels_first.csv",
+            f"Answers judged fully correct by hand, on {len(now)} practice questions. I checked them twice, "
+            "both times without knowing which version of kHop wrote them; this is the second check",
+            f"{now.count('correct')} of {len(now)}",
+            src,
+        )
+        add(
+            f"The same {len(before)} answers on my first check ({now.count('correct') - before.count('correct')} "
+            "borderline answers I first called partly correct were fully correct on the second check)",
+            f"{before.count('correct')} of {len(before)}",
+            src,
         )
     d = _json("results/verifier_validation_cpu.json")
     if d:

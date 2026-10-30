@@ -94,8 +94,8 @@ Held-out test set, 91 questions (60 name companies; the rest are sector-wide and
 <!-- table:answers -->
 | Check | Result |
 | --- | --- |
-| Dev-set answers I judged correct (A6 writer, blind labels) after I re-labelled borderline ones blind, see docs/failures.md | 44/49 = 90% [78%, 96%] |
-| ...the same answers, my first labels | 38/49 = 78% |
+| Answers I judged fully correct by hand, on 49 practice (dev) questions. I labelled them twice, both times without knowing which version of kHop wrote them; this is the second check (docs/failures.md) | 44/49 = 90% [78%, 96%] |
+| The same answers on my first check (6 borderline answers I first called partly correct were fully correct on the second check; both results are shown) | 38/49 = 78% |
 | Fact-checker flags real sentences I marked as not backed by their passage | 5/5 caught [57%, 100%] |
 | ...the same, adding 10 test sentences paired with a wrong passage on purpose | 100% [80%, 100%] of 15 |
 | Fact-checker passes sentences I marked as backed | 91% [79%, 96%] of 45 |
