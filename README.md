@@ -15,14 +15,12 @@ It is also a measurement project. Every component was compared with a simpler ve
 
 > **[Try the recorded demo →](https://atharva-87.github.io/kHop/)** Real answers recorded from the app, replayed at the speed they ran. To ask your own questions, run kHop on your computer ([setup below](#run-it-yourself)).
 
-![kHop answering a two-company question: cited answer, sources from the filings, and the numbered steps it took](docs/images/khop-demo.png)
-
 Answers are research output over public filings, **not investment advice**.
 
 ## How it works
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#FFF8D6", "primaryBorderColor": "#D4A800", "primaryTextColor": "#1C1E21", "lineColor": "#5B6068", "clusterBkg": "#FFFDF2", "clusterBorder": "#D4A800", "edgeLabelBackground": "#FFFFFF"}}}%%
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#000000", "mainBkg": "#000000", "primaryTextColor": "#FFFFFF", "nodeTextColor": "#FFFFFF", "textColor": "#FFFFFF", "primaryBorderColor": "#FFD400", "nodeBorder": "#FFD400", "secondaryColor": "#000000", "tertiaryColor": "#000000", "lineColor": "#FFD400", "clusterBkg": "#000000", "clusterBorder": "#FFD400", "titleColor": "#FFFFFF", "edgeLabelBackground": "#000000", "actorBkg": "#000000", "actorBorder": "#FFD400", "actorTextColor": "#FFFFFF", "actorLineColor": "#FFD400", "signalColor": "#FFD400", "signalTextColor": "#FFFFFF", "noteBkgColor": "#000000", "noteTextColor": "#FFFFFF", "noteBorderColor": "#FFD400", "labelBoxBkgColor": "#000000", "labelBoxBorderColor": "#FFD400", "labelTextColor": "#FFFFFF", "loopTextColor": "#FFFFFF"}}}%%
 flowchart TB
     subgraph BUILD["Build once per data snapshot"]
         direction LR
