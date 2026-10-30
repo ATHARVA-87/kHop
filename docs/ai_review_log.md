@@ -47,3 +47,24 @@ Caught by the reviewer agent before push.
 - **Spelling layer:** keep bars used while building were shown under "never used for tuning".
 
 **Fixes:** every row now names its set, and the generator (`plexus.readme`) carries those labels. The demo script also pre-warmed the cache for a question whose live trace it then showed; a cache hit shows only a cache step.
+
+## 2026-10-30: independent verifier after the owner approved all ADRs
+**Verdict:** the approach is sound. There was no bug in the drift result: different indexes and texts were used, and the old side reproduces the stored scores exactly.
+
+**Six overclaims or gaps, now fixed:**
+- **Headline search number:** "all recall@10" averaged quote recall over sector-wide questions, which are scored by company coverage. They make up a much larger share of the test set than of the dev set, so most of the apparent dev → test drop was the question mix. The headline is now named-company questions only, both in the README and on the About page.
+- **Answer accuracy:** the README showed only the re-labelled figure. The first labels are now shown too, from `judge_labels_first.csv`, a copy of the committed first version.
+- **About page (shipped in the public demo):**
+  - the fact-checker figure counted deliberate swaps as real catches;
+  - the attack set that chose the defence was not named;
+  - "fresh" advice set: it was re-labelled after scoring.
+- **Drift check:**
+  - it included sector-wide questions that score 0 by construction;
+  - it saved no per-question rows;
+  - its bootstrap was unclustered;
+  - the README did not say which search settings it used.
+- **Cache:** it was checked before the input gate, so a question the gate declines could be answered from the cache. The gate now runs first, with a test. The cache's thin margins are written into ADR 0011.
+- **Smaller fixes:**
+  - ADR 0004 now says the sensitivity check was dropped;
+  - ADR 0009 now describes the router rule exactly;
+  - the deploy workflow publishes only from `main`.

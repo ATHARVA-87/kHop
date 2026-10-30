@@ -37,10 +37,10 @@
 - PR #11 is merged.
 - **The recorded demo is live** at https://atharva-87.github.io/kHop/. The first deploy failed because Pages was not yet switched on; it was re-run and browser-checked live.
 - **All ADRs accepted** (owner, 2026-10-30).
-- **Drift check run by the owner** (`results/drift.json`):
+- **Drift check run by the owner,** re-run after the verifier's fixes (`results/drift.json`):
   - 74 of 225 golden questions carry over word for word to the 2026 filings;
-  - on those 74, recall@10 is the same on both indexes (+0.00 [-0.03, +0.03]).
-- An independent verifier agent checked the approach after sign-off (see Log).
+  - on the 68 of them that name companies, recall@10 is 0.80 on both indexes (2 questions up, 2 down, same linking-company groups).
+- **An independent verifier agent checked the approach after sign-off.** Verdict: sound, no bug in the drift result. Six overclaims or gaps were fixed, including the cache now checking the input gate first (docs/ai_review_log.md).
 
 **Left:** a short video of the live app (owner), resume bullets (local notes), and the final definition-of-done tick.
 

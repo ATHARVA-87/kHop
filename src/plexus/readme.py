@@ -47,26 +47,59 @@ def _wilson(w: list[float]) -> str:
     return f"[{_pct(max(0.0, w[0]))}, {_pct(w[1])}]"
 
 
+NAMED = ("local", "multi_hop")  # questions naming companies; global ones are scored by coverage
+
+
+def named_recall(result: dict, metric: str = "recall@10") -> dict:
+    """Mean [95% CI] of `metric` over the questions that name companies (local + multi-hop),
+    from a results file's per-question rows; same cluster bootstrap and seed as the scorer.
+    Global questions are left out: they are scored by company coverage, not by passages."""
+    from plexus.eval.bootstrap import bootstrap_ci
+
+    rows = [r for r in result["per_query"] if r["qtype"] in NAMED]
+    ci = bootstrap_ci(
+        [r[metric] for r in rows],
+        seed=result["config"].get("seed", 0),
+        clusters=[r["cluster"] for r in rows],
+    )
+    return ci.to_dict()
+
+
+def verdicts(path: Path) -> list[str]:
+    """Human verdicts in a judge-labels CSV (blank rows skipped)."""
+    import csv
+
+    with open(path, newline="", encoding="utf-8-sig") as fh:
+        rows = list(csv.DictReader(fh))
+    key = "human_verdict" if rows and "human_verdict" in rows[0] else "verdict"
+    return [r[key].strip().lower() for r in rows if r[key].strip()]
+
+
 def ladder() -> str:
     rows = [
-        "| Step | What it adds | All recall@10 [95% CI] | Local | Multi-hop | Multi-hop, both facts | Global: companies covered |",
+        "| Step | What it adds | Named-company questions, recall@10 [95% CI] | Local | Multi-hop | Multi-hop, both facts | Global: companies covered |",
         "| --- | --- | --- | --- | --- | --- | --- |",
     ]
-    n = None
+    n = n_named = None
     for name, label, what in LADDER:
-        r = _load(f"test/{name}")["retrieval"]
+        d = _load(f"test/{name}")
+        r = d["retrieval"]
         n = r["all"]["recall@10"]["n"]
+        named = named_recall(d)
+        n_named = named["n"]
         rows.append(
-            f"| {label} | {what} | {_ci(r['all']['recall@10'])} "
+            f"| {label} | {what} | {_ci(named)} "
             f"| {r['local']['recall@10']['mean']:.2f} | {r['multi_hop']['recall@10']['mean']:.2f} "
             f"| {r['multi_hop']['complete@10']['mean']:.2f} "
             f"| {r['global']['company_coverage@10']['mean']:.2f} |"
         )
     rows.append("")
     rows.append(
-        f"Held-out test set, {n} questions, scored once at the end. One fix was made after seeing "
+        f"Held-out test set, {n} questions ({n_named} name companies; the rest are sector-wide and "
+        "scored by company coverage), scored once at the end. One fix was made after seeing "
         "it (the ticker 'TI' was not linked to Texas Instruments); these numbers are from before "
-        "that fix. Intervals: bootstrap over questions."
+        "that fix. Intervals: bootstrap over groups of related questions (shared linking company "
+        "or theme)."
     )
     return "\n".join(rows)
 
@@ -77,11 +110,13 @@ def answers() -> str:
     summary = _load("verifier_validation_cpu")["summary"]
     v, real = summary["minicheck"], summary["real_pairs_only"]
     swaps = summary["swapped_marked_unsupported_by_human"]
+    first = verdicts(REPO_ROOT / "data" / "golden" / "judge_labels_first.csv")
     return "\n".join(
         [
             "| Check | Result |",
             "| --- | --- |",
-            f"| Dev-set answers I judged correct (A6 writer; blind labels, after a blind re-label of borderline cases, see docs/failures.md) | {h['correct']}/{h['n']} = {_pct(h['rate'])} {_wilson(h['wilson_95'])} |",
+            f"| Dev-set answers I judged correct (A6 writer, blind labels) after I re-labelled borderline ones blind, see docs/failures.md | {h['correct']}/{h['n']} = {_pct(h['rate'])} {_wilson(h['wilson_95'])} |",
+            f"| ...the same answers, my first labels | {first.count('correct')}/{len(first)} = {_pct(first.count('correct') / len(first))} |",
             f"| Fact-checker flags real sentences I marked as not backed by their passage | {real['human_not_correct']}/{real['human_not_correct']} caught {_wilson(real['tpr_ci'])} |",
             f"| ...the same, adding {swaps} test sentences paired with a wrong passage on purpose | {_pct(v['tpr_catches_not_correct'])} {_wilson(v['tpr_ci'])} of {v['human_not_correct']} |",
             f"| Fact-checker passes sentences I marked as backed | {_pct(v['tnr_passes_correct'])} {_wilson(v['tnr_ci'])} of {v['n'] - v['human_not_correct']} |",
@@ -130,7 +165,7 @@ def serving() -> str:
         f"| Search p50 | {s['retrieve']['p50'] / 1000:.2f} s |",
         f"| Answer from the cache p50 | {st['total_ms_cached']['p50']:.0f} ms |",
         f"| Reworded questions reused from the cache (held-out pairs) | {c['reused_rewordings']} |",
-        f"| Wrong answers reused from the cache | {c['wrong_reuses']} |",
+        f"| Wrong answers reused from the cache (upper 95% bound) | {c['wrong_reuses']} ({_pct(c['wrong_reuse_upper_95'])}) |",
         f"| GPU memory, peak | {load['gpu_mib']['peak']:,} of {load['gpu_mib']['total']:,} MiB |",
         f"| Cost per question | ${load['cost_usd']:.2f} |",
         "",
@@ -193,9 +228,15 @@ def drift() -> str:
         f"{c.get('gone', 0)} not at all; {c.get('no_filings', 0)} have no newer filing. "
         "Only carried-over questions can be scored on the new index, so the comparison below "
         "measures how search copes with a new corpus, not whether changed facts are found. "
-        "All question types are scored by quote recall here, including global ones.",
+        f"Search settings: `{d['configs']['old']}` (hybrid + headers + reranker; no router, "
+        "company filter or graph, because a graph needs a long LLM extraction per snapshot). "
+        "Sector-wide questions are left out of the comparison: they are scored by company "
+        "coverage, not by quotes.",
     ]
     s = d["search_on_carried_questions"].get("recall@10")
+    moved = d.get("per_question_search", [])
+    up = sum(r["recall@10_new"] > r["recall@10_old"] for r in moved)
+    down = sum(r["recall@10_new"] < r["recall@10_old"] for r in moved)
     if s:
         rows += [
             "",
@@ -204,6 +245,10 @@ def drift() -> str:
             f"| recall@10 ({s['questions']} questions) | {_ci(s['old'])} | {_ci(s['new'])} "
             f"| {s['new_minus_old']['diff']['mean']:+.2f} [{s['new_minus_old']['diff']['low']:+.2f}, "
             f"{s['new_minus_old']['diff']['high']:+.2f}] |",
+            "",
+            f"Per question: {up} up, {down} down, the rest unchanged. Intervals resample whole "
+            "groups of questions that share a linking company, as in the main scorer; when the "
+            "ups and downs fall in the same groups and cancel, the interval has zero width.",
         ]
     return "\n".join(rows)
 

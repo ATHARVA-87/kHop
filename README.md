@@ -51,17 +51,17 @@ All numbers below are generated from `results/*.json` by `python -m plexus.readm
 ### Search: what each step adds
 
 <!-- table:ladder -->
-| Step | What it adds | All recall@10 [95% CI] | Local | Multi-hop | Multi-hop, both facts | Global: companies covered |
+| Step | What it adds | Named-company questions, recall@10 [95% CI] | Local | Multi-hop | Multi-hop, both facts | Global: companies covered |
 | --- | --- | --- | --- | --- | --- | --- |
-| A0 | Naive RAG: fixed 300-word windows, dense search | 0.18 [0.11, 0.26] | 0.32 | 0.13 | 0.00 | 0.44 |
-| A1–A2 | Section-aware chunks with headers, hybrid BM25 + dense (RRF) | 0.52 [0.41, 0.65] | 0.95 | 0.50 | 0.13 | 0.39 |
-| A2-RR | No-graph baseline: alternate between the companies named | 0.54 [0.42, 0.68] | 0.95 | 0.59 | 0.35 | 0.39 |
-| A3 | Cross-encoder reranker (bge-reranker-base) | 0.53 [0.42, 0.66] | 1.00 | 0.46 | 0.22 | 0.40 |
-| A4 | Knowledge-graph hits fused in | 0.56 [0.43, 0.69] | 0.95 | 0.67 | 0.43 | 0.39 |
-| A5 | Company-diverse ranking for sector-wide questions | 0.56 [0.43, 0.69] | 0.95 | 0.67 | 0.43 | 0.67 |
-| A6 | Rule router picks the route per question (the app's base) | 0.58 [0.45, 0.72] | 1.00 | 0.67 | 0.43 | 0.67 |
+| A0 | Naive RAG: fixed 300-word windows, dense search | 0.25 [0.16, 0.37] | 0.32 | 0.13 | 0.00 | 0.44 |
+| A1–A2 | Section-aware chunks with headers, hybrid BM25 + dense (RRF) | 0.78 [0.66, 0.91] | 0.95 | 0.50 | 0.13 | 0.39 |
+| A2-RR | No-graph baseline: alternate between the companies named | 0.81 [0.68, 0.94] | 0.95 | 0.59 | 0.35 | 0.39 |
+| A3 | Cross-encoder reranker (bge-reranker-base) | 0.79 [0.68, 0.93] | 1.00 | 0.46 | 0.22 | 0.40 |
+| A4 | Knowledge-graph hits fused in | 0.84 [0.76, 0.93] | 0.95 | 0.67 | 0.43 | 0.39 |
+| A5 | Company-diverse ranking for sector-wide questions | 0.84 [0.76, 0.93] | 0.95 | 0.67 | 0.43 | 0.67 |
+| A6 | Rule router picks the route per question (the app's base) | 0.88 [0.80, 0.96] | 1.00 | 0.67 | 0.43 | 0.67 |
 
-Held-out test set, 91 questions, scored once at the end. One fix was made after seeing it (the ticker 'TI' was not linked to Texas Instruments); these numbers are from before that fix. Intervals: bootstrap over questions.
+Held-out test set, 91 questions (60 name companies; the rest are sector-wide and scored by company coverage), scored once at the end. One fix was made after seeing it (the ticker 'TI' was not linked to Texas Instruments); these numbers are from before that fix. Intervals: bootstrap over groups of related questions (shared linking company or theme).
 <!-- /table -->
 
 "Multi-hop, both facts" counts a question only when the passages for both of its facts are in the top 10. Global questions span the whole sector, so they are scored by how many relevant companies the top 10 covers, not by single quotes.
@@ -71,7 +71,8 @@ Held-out test set, 91 questions, scored once at the end. One fix was made after 
 <!-- table:answers -->
 | Check | Result |
 | --- | --- |
-| Dev-set answers I judged correct (A6 writer; blind labels, after a blind re-label of borderline cases, see docs/failures.md) | 44/49 = 90% [78%, 96%] |
+| Dev-set answers I judged correct (A6 writer, blind labels) after I re-labelled borderline ones blind, see docs/failures.md | 44/49 = 90% [78%, 96%] |
+| ...the same answers, my first labels | 38/49 = 78% |
 | Fact-checker flags real sentences I marked as not backed by their passage | 5/5 caught [57%, 100%] |
 | ...the same, adding 10 test sentences paired with a wrong passage on purpose | 100% [80%, 100%] of 15 |
 | Fact-checker passes sentences I marked as backed | 91% [79%, 96%] of 45 |
@@ -108,7 +109,7 @@ Held-out test set, 91 questions, scored once at the end. One fix was made after 
 | Search p50 | 0.55 s |
 | Answer from the cache p50 | 59 ms |
 | Reworded questions reused from the cache (held-out pairs) | 10/20 |
-| Wrong answers reused from the cache | 0/20 |
+| Wrong answers reused from the cache (upper 95% bound) | 0/20 (15%) |
 | GPU memory, peak | 5,547 of 6,141 MiB |
 | Cost per question | $0.00 |
 
@@ -135,11 +136,13 @@ One RTX 4050 laptop GPU (6 GB). Small samples: the slowest time is the maximum, 
 | semis-2025 | 156 | 39 10-K, 117 10-Q | 39 |
 | semis-2026 | 121 | 33 10-K, 88 10-Q | 39 |
 
-Of 225 golden questions, 74 have every evidence quote repeated word for word in the same company's newer filings; 68 partly; 83 not at all; 0 have no newer filing. Only carried-over questions can be scored on the new index, so the comparison below measures how search copes with a new corpus, not whether changed facts are found. All question types are scored by quote recall here, including global ones.
+Of 225 golden questions, 74 have every evidence quote repeated word for word in the same company's newer filings; 68 partly; 83 not at all; 0 have no newer filing. Only carried-over questions can be scored on the new index, so the comparison below measures how search copes with a new corpus, not whether changed facts are found. Search settings: `a3h_rerank` (hybrid + headers + reranker; no router, company filter or graph, because a graph needs a long LLM extraction per snapshot). Sector-wide questions are left out of the comparison: they are scored by company coverage, not by quotes.
 
 | Carried-over questions | Old index | New index | New minus old [95% CI] |
 | --- | --- | --- | --- |
-| recall@10 (74 questions) | 0.74 [0.64, 0.82] | 0.74 [0.65, 0.82] | +0.00 [-0.03, +0.03] |
+| recall@10 (68 questions) | 0.80 [0.72, 0.90] | 0.80 [0.72, 0.90] | +0.00 [+0.00, +0.00] |
+
+Per question: 2 up, 2 down, the rest unchanged. Intervals resample whole groups of questions that share a linking company, as in the main scorer; when the ups and downs fall in the same groups and cancel, the interval has zero width.
 <!-- /table -->
 
 ## What did not work

@@ -6,8 +6,10 @@
 1. Carry-over: each golden question's evidence quotes are searched word for word (same
    normalisation as scoring, ADR 0004) in the SAME company's 2026 filings. A question carries
    over only if every quote is found; otherwise the fact was reworded, updated or removed.
-2. Search on the carried-over questions: recall@10 with the same settings on the old index and
-   the new one, paired bootstrap. No graph: a graph needs a 4.5 h LLM extraction per snapshot.
+2. Search on the carried-over questions that name companies (sector-wide ones are scored by
+   company coverage, not quotes): recall@10 with the same settings on the old index and the new
+   one, cluster bootstrap as in the main scorer, per-question rows saved. No graph: a graph
+   needs a 4.5 h LLM extraction per snapshot.
 3. Corpus: filings and companies in each snapshot, and section-detection quality of the parser.
 
 The golden set is never edited: carried-over questions point at the 2026 filing in memory only.
@@ -27,6 +29,7 @@ from plexus.eval.metrics import locate_quote_all
 from plexus.settings import REPO_ROOT, Settings
 
 OLD_CONFIG = REPO_ROOT / "configs" / "a3h_rerank.yaml"
+NAMED = ("local", "multi_hop")
 NEW_CONFIG = REPO_ROOT / "configs" / "a3h_rerank_2026.yaml"
 
 
@@ -130,6 +133,8 @@ def main(argv: list[str] | None = None) -> int:
         for name, cfg in (("old", old_cfg), ("new", new_cfg))
     }
     kept_new, status = carry_over(queries, texts["new"])
+    # sector-wide (global) questions are scored by company coverage, not quotes: left out here
+    kept_new = [q for q in kept_new if q.qtype in NAMED]
     carried = {q.qid for q in kept_new}
     kept_old = [q for q in queries if q.qid in carried]
 
@@ -145,15 +150,17 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{name}: {len(errors)} evidence quotes not located", file=sys.stderr)
 
     search: dict = {}
+    cluster = {r["qid"]: r["cluster"] for r in rows["old"]}
     for metric in ("recall@10", "ndcg@10"):
         qids, a, b = recall_pairs(rows["old"], rows["new"], metric)
         if not qids:
             continue
+        cl = [cluster[q] for q in qids]  # same cluster bootstrap as the main scorer
         search[metric] = {
             "questions": len(qids),
-            "old": bootstrap_ci(a, seed=old_cfg.seed).to_dict(),
-            "new": bootstrap_ci(b, seed=old_cfg.seed).to_dict(),
-            "new_minus_old": paired_bootstrap(a, b, seed=old_cfg.seed).to_dict(),
+            "old": bootstrap_ci(a, seed=old_cfg.seed, clusters=cl).to_dict(),
+            "new": bootstrap_ci(b, seed=old_cfg.seed, clusters=cl).to_dict(),
+            "new_minus_old": paired_bootstrap(a, b, seed=old_cfg.seed, clusters=cl).to_dict(),
         }
     by_type = {}
     for qtype in sorted({q.qtype for q in kept_new}):
@@ -167,6 +174,18 @@ def main(argv: list[str] | None = None) -> int:
                 "old_recall@10": round(sum(a) / len(a), 4),
                 "new_recall@10": round(sum(b) / len(b), 4),
             }
+    old_by, new_by = {r["qid"]: r for r in rows["old"]}, {r["qid"]: r for r in rows["new"]}
+    per_question = [
+        {
+            "qid": qid,
+            "qtype": old_by[qid]["qtype"],
+            "recall@10_old": old_by[qid]["recall@10"],
+            "recall@10_new": new_by[qid]["recall@10"],
+            "ndcg@10_old": old_by[qid]["ndcg@10"],
+            "ndcg@10_new": new_by[qid]["ndcg@10"],
+        }
+        for qid in sorted(set(old_by) & set(new_by))
+    ]
     out = {
         "what": "golden set on semis-2025 vs semis-2026, same settings, no retuning",
         "git_commit": _git_commit(),
@@ -180,10 +199,11 @@ def main(argv: list[str] | None = None) -> int:
         "search_on_carried_questions": search,
         "search_by_type": by_type,
         "per_question_status": status,
+        "per_question_search": per_question,
     }
     path = REPO_ROOT / "results" / "drift.json"
     path.write_text(json.dumps(out, indent=2) + "\n")
-    print(json.dumps({k: v for k, v in out.items() if k != "per_question_status"}, indent=2))
+    print(json.dumps({k: v for k, v in out.items() if not k.startswith("per_question")}, indent=2))
     return 0
 
 

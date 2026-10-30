@@ -8,9 +8,9 @@ Three kinds of question need different search: one company (local), two or more 
 
 ## Decision
 Route by counting the corpus companies the entity linker finds in the question:
-- 0 companies: global (company-diverse ranking, A5);
+- 0 corpus companies, and either no company at all or a sector cue ("which companies", "all semiconductor companies"): global (company-diverse ranking, A5);
 - 2 or more: multi-hop (hybrid + graph links, A4);
-- otherwise: local (hybrid + reranker).
+- otherwise, including a question that names only a non-filer such as TSMC with no sector cue: local (hybrid + reranker).
 
 The app adds one more step on the local route: search only that company's filings (`configs/app.yaml`, measured in `results/a6_filter.json`).
 

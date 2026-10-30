@@ -149,6 +149,24 @@ def test_refusals_are_not_cached():
     )
 
 
+def test_input_gate_runs_before_the_cache(monkeypatch):
+    """A question the gate declines is never answered from the cache (verifier 2026-10-30)."""
+    import plexus.agents.flow as flow_mod
+
+    monkeypatch.setattr(flow_mod, "ask_events", fake_events)
+    monkeypatch.setattr(
+        srv, "TRACE_LOG", __import__("pathlib").Path(__import__("tempfile").mkdtemp()) / "t.jsonl"
+    )
+    cache = FakeCache()
+    cache.store(
+        "should i buy nvidia stock", {"answer": "A [1].", "sources": [], "checks": [], "trace": []}
+    )
+    state = {"flow": FakeFlow(), "config": "test", "cache": cache, **srv.load_meta()}
+    with TestClient(srv.create_app(lambda: state)) as c:
+        ev = _events(c.get("/api/ask", params={"q": "Should I buy NVIDIA stock?"}).text)
+        assert ev[-1][0] == "done" and not ev[-1][1].get("from_cache")
+
+
 def test_cache_hit_needs_no_queue_place(monkeypatch):
     import plexus.agents.flow as flow_mod
 

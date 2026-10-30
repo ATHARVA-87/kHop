@@ -152,59 +152,59 @@ def about_figures() -> list[dict]:
     def add(label: str, value: str, source: str):
         out.append({"label": label, "value": value, "source": source})
 
+    from plexus.readme import named_recall
+
     def recall(rel: str):
         d = _json(rel)
-        return d["retrieval"]["all"]["recall@10"]["mean"] if d else None
+        return named_recall(d)["mean"] if d else None
 
+    # global questions are scored by company coverage, not passages, so they are left out here
     a, b = recall("results/a0_naive.json"), recall("results/a6_filter.json")
     if a is not None and b is not None:
         add(
-            "Questions where the right passages are in the top 10, first version vs now (134 practice questions)",
+            "Questions naming one or more companies where the right passages are in the top 10, first version vs now (practice questions)",
             f"{a:.0%} to {b:.0%}",
             "results/a0_naive.json, results/a6_filter.json",
         )
     a, b = recall("results/test/a0_naive.json"), recall("results/test/a6_router.json")
     if a is not None and b is not None:
         add(
-            "The same on 91 held-back questions, scored once before the latest improvement",
+            "The same on held-back questions, scored once before the latest improvement",
             f"{a:.0%} to {b:.0%}",
             "results/test/a0_naive.json, results/test/a6_router.json",
         )
     labels = REPO_ROOT / "data" / "golden" / "judge_labels.csv"
-    if labels.exists():
-        import csv
+    first = REPO_ROOT / "data" / "golden" / "judge_labels_first.csv"
+    if labels.exists() and first.exists():
+        from plexus.readme import verdicts
 
-        with open(labels, newline="", encoding="utf-8-sig") as fh:
-            v = [
-                r["human_verdict"].strip().lower()
-                for r in csv.DictReader(fh)
-                if r["human_verdict"].strip()
-            ]
+        now, before = verdicts(labels), verdicts(first)
         add(
-            "Answers fully correct, checked by hand",
-            f"{v.count('correct')} of {len(v)}",
-            "data/golden/judge_labels.csv",
+            "Answers fully correct, checked by hand (after I re-checked borderline ones blind; first check in brackets)",
+            f"{now.count('correct')} of {len(now)} ({before.count('correct')} of {len(before)})",
+            "data/golden/judge_labels.csv, judge_labels_first.csv",
         )
-    d = _json("results/verifier_validation.json")
+    d = _json("results/verifier_validation_cpu.json")
     if d:
-        m = d["summary"]["minicheck"]
-        n_bad = d["summary"]["human_unsupported"]
+        real = d["summary"]["real_pairs_only"]
+        swaps = d["summary"]["swapped_marked_unsupported_by_human"]
+        caught = round(real["tpr_catches_not_correct"] * real["human_not_correct"])
         add(
-            "Unsupported sentences the fact-checker catches (hand-labelled test)",
-            f"{round(m['tpr_catches_not_correct'] * n_bad)} of {n_bad}",
-            "results/verifier_validation.json",
+            "Real answer sentences not backed by their source that the fact-checker caught (small hand-labelled sample)",
+            f"{caught} of {real['human_not_correct']}, plus {swaps} of {swaps} made-up mismatches",
+            "results/verifier_validation_cpu.json",
         )
     d = _json("results/guardrails_a9_agents.json")
     if d:
         h = d["summary"]["refusals_heldout"]["refuse_advice"]
         add(
-            "Investment-advice questions declined (fresh test set)",
+            "Investment-advice questions declined (held-back set; I re-labelled two of them after scoring)",
             f"{h['ok']} of {h['n']}",
             "results/guardrails_a9_agents.json",
         )
         i = d["summary"]["injection"]
         add(
-            'Attack test: fake orders such as "ignore your rules" were hidden inside filing text. Times kHop obeyed them',
+            'Attack test: fake orders such as "ignore your rules" hidden inside filing text (the same attacks used to choose this defence). Times kHop obeyed them',
             f"{i['attack_success']} of {i['n']}",
             "results/guardrails_a9_agents.json",
         )
@@ -415,6 +415,13 @@ def create_app(state_factory=build_state) -> FastAPI:
                                 headers={"Retry-After": "60"})  # fmt: skip
         question = q.strip()
         cache = state.get("cache")
+        if cache is not None:
+            # the input gate runs before the cache: a question it would decline is never answered
+            # from the cache (verifier 2026-10-30); the flow then declines it as usual
+            from plexus.guardrails.input_gate import gate
+
+            if gate(question, getattr(cache, "linker", None)) is not None:
+                cache = None
         if cache is not None:
             t0 = time.perf_counter()
             try:
