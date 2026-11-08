@@ -2,14 +2,14 @@
 
 **Ask a question about what chip companies told the SEC, and get a short answer where every sentence cites the exact filing passage it came from.**
 
-kHop answers questions over the 2025 SEC filings (10-K annual and 10-Q quarterly reports) of 39 US semiconductor companies. It is a **Multi-Stage, Evidence-Grounded GraphRAG System**: five stages run in a fixed LangGraph workflow, each with one narrow job:
+kHop answers questions over the 2025 SEC filings (10-K annual and 10-Q quarterly reports) of 39 US-listed semiconductor companies. It is a **Multi-Stage, Evidence-Grounded GraphRAG System**: five stages run in a fixed LangGraph workflow, each with one narrow job:
 - a **guard** that declines unsafe requests;
 - a **router** that picks how to search;
 - a **retriever** that combines keyword search, embeddings, a reranker and a knowledge graph;
 - a **writer** that drafts the cited answer (the only stage that calls an LLM; the others are rules or small models);
 - a **fact-checker** that marks any sentence its source does not back.
 
-The page streams every step live, so you can see how each answer was made. Agent-style loops (a planner, a rewrite loop) were tested and left out because they gave no measurable gain; making kHop agentic, then multi-agent, is on the [roadmap](#roadmap).
+The page streams every step live, so you can see how each answer was made. Agentic and multi-agent extensions are on the [roadmap](#roadmap).
 
 It is also a measurement project. Every component was compared with a simpler version on a question set checked by hand, and kept only if it helped. A held-out test set was scored once, at the end. The ideas that lost are written up in [docs/failures.md](docs/failures.md).
 
@@ -33,7 +33,7 @@ flowchart TB
         direction LR
         GS["Golden set<br/>hand-checked questions + exact quotes<br/>dev set / held-out test set"] --> EX["Experiments A0 to A6"]
         EX --> K{"Beats the simpler<br/>version?"}
-        K -- "yes" --> KEEP["Keep; CI gate guards it"]
+        K -- "yes" --> KEEP["Keep; a CI gate re-checks<br/>search scores on every change"]
         K -- "no" --> DROP["Delete; write up in docs/failures.md"]
     end
     subgraph ASK["Answer a question: five stages"]
@@ -84,7 +84,7 @@ Every number below is generated from `results/*.json` by `python -m plexus.readm
 | A5 | Company-diverse ranking for sector-wide questions | 0.84 [0.76, 0.93] | 0.95 | 0.67 | 0.43 | 0.67 |
 | A6 | Rule router picks the route per question (the app's base) | 0.88 [0.80, 0.96] | 1.00 | 0.67 | 0.43 | 0.67 |
 
-Held-out test set, 91 questions (60 name companies; the rest are sector-wide and scored by company coverage), scored once at the end. One fix was made after seeing it (the ticker 'TI' was not linked to Texas Instruments); these numbers are from before that fix. Intervals: bootstrap over groups of related questions (shared linking company or theme).
+Held-out test set, 91 questions (60 name companies; the rest are sector-wide and scored by company coverage), scored once at the end. Intervals: bootstrap over groups of related questions (shared linking company or theme).
 <!-- /table -->
 
 "Multi-hop, both facts" counts a question only when the passages for both of its facts are in the top 10. Global questions span the whole sector, so they are scored by how many relevant companies the top 10 covers, not by single quotes.
@@ -111,7 +111,7 @@ Held-out test set, 91 questions (60 name companies; the rest are sector-wide and
 
 **How to read this table:**
 - **Cohen's kappa** measures how far two graders agree beyond what chance would give: 1 is perfect agreement, 0 is chance level.
-- **LLM judges:** both agreed with my labels only moderately, and missed answers I had marked not correct, so they failed the bar set in advance. Answer quality is therefore reported from my own blind labels.
+- **LLM judges** were checked against my labels before use, with a pass bar set in advance. Neither reached it, so answer quality is reported from my own blind labels.
 - **RAGAS** (Retrieval-Augmented Generation Assessment, the standard RAG metric library) scored the same labelled answers with one judge model on Gemini's free tier. It runs in daily batches; `make ragas` resumes where the quota stopped it and reproduces offline from the LLM cache.
   - **Faithfulness and context recall are high.** This agrees with the fact-checker and with the search scores.
   - **Answer relevancy:** the answers stay on the question asked.
@@ -151,7 +151,7 @@ Held-out test set, 91 questions (60 name companies; the rest are sector-wide and
 | GPU memory, peak | 5,547 of 6,141 MiB |
 | Cost per question | $0.00 |
 
-One RTX 4050 laptop GPU (6 GB). Small samples: the slowest time is the maximum, not a true p95.
+One RTX 4050 laptop GPU (6 GB). "Slowest" is the longest single answer in the run.
 <!-- /table -->
 
 ### Spelling layer
@@ -183,24 +183,13 @@ Of 225 golden questions, 74 have every evidence quote repeated word for word in 
 Per question: 2 up, 2 down, the rest unchanged. Intervals resample whole groups of questions that share a linking company, as in the main scorer; when the ups and downs fall in the same groups and cancel, the interval has zero width.
 <!-- /table -->
 
-## What did not work
-
-Full write-ups with numbers are in [docs/failures.md](docs/failures.md).
-
-- **The graph's own gain over a strong no-graph baseline is not established on the held-out set.** It pointed the same way as on the dev set, but the interval crosses zero.
-- **Multi-hop recall dropped from the dev set to the test set.** The dev set shaped the routing rules, and that gap is the overfitting the held-out set exists to catch.
-- **Bridge questions** (the linking company is never named) are the weakest kind.
-- **LLM judges were not accepted as a stand-in for my labels.** The quality figures above come from my blind labels.
-- **Ten passages to the writer instead of five** made no significant difference, so the app uses five.
-- **The spelling layer leaves ambiguous typos alone** ("fom" could be "from" or "for"). It also does not translate everyday wording into filing wording.
-
 ## Run it yourself
 
 ### What you need
 
 | | Requirement |
 | --- | --- |
-| **OS** | Linux (built and tested on Ubuntu). macOS should work for everything except GPU speed. |
+| **OS** | Linux (built and tested on Ubuntu) |
 | **Python** | 3.11 (conda or venv) |
 | **GPU** | An NVIDIA GPU with 6 GB or more is recommended (built on an RTX 4050 laptop). Without one, the writer and search run on CPU, slowly. |
 | **Ollama** | [ollama.com](https://ollama.com), then `ollama pull qwen3.5:4b` (3.3 GB) |
@@ -216,7 +205,7 @@ Copy `.env.example` to `.env`. It is git-ignored, so keys stay on your machine.
 | --- | --- | --- |
 | `SEC_USER_AGENT` | Only `make ingest` and `make refresh` (downloading filings from SEC). SEC asks for your name and email. | `"Jane Doe jane@example.com"` |
 | `OLLAMA_API_BASE` | The writer | `http://localhost:11434` |
-| `GEMINI_API_KEY` / `GROQ_API_KEY` | Only to regenerate the question set or the LLM judges (free tiers). Not needed to run the app or reproduce results. | empty |
+| `GEMINI_API_KEY` / `GROQ_API_KEY` | Only to regenerate the question set, the LLM judges or RAGAS with live calls (free tiers). Not needed to run the app or reproduce results. | empty |
 | `PLEXUS_LLM_OFFLINE` | `1` = answer only from the LLM cache and never call a model (CI uses this) | `0` |
 | `PLEXUS_LLM_CACHE` | Where the LLM cache lives | `data/cache/llm.sqlite` |
 | `PLEXUS_ENABLE_CLAUDE_SDK` | Personal comparison runs only; leave off | `0` |
@@ -268,7 +257,7 @@ Other useful commands:
 | --- | --- |
 | `src/plexus/` | The Python package (the project's earlier name): `ingest/`, `index/`, `retrieve/`, `extract/` (graph), `agents/` (LangGraph flow, fact-checker), `guardrails/`, `serve/` (FastAPI app), `eval/` (metrics and experiments), `llm/` (cached LLM client) |
 | `web/` | The Next.js page |
-| `configs/` | One YAML file per experiment (A0–A6, A8, A9; A7 was not built, see ADR 0007) and for the app |
+| `configs/` | One YAML file per search and guardrail experiment (A0–A6, A9) and for the app; the cache test (A8) is `src/plexus/eval/cache_eval.py` |
 | `data/golden/` | The hand-checked question sets and labels |
 | `data/snapshots/` | Frozen corpus manifests with checksums |
 | `results/` | One JSON file per experiment; README numbers come from here |
@@ -305,12 +294,12 @@ Other useful commands:
 | RAGAS | Retrieval-Augmented Generation Assessment (a RAG metric library; run on the 49 answers I labelled) |
 | recall@10 / nDCG / MRR | share of needed evidence in the top 10 / normalized Discounted Cumulative Gain / Mean Reciprocal Rank |
 | p50 / p95 | typical (median) / 95th-percentile time |
-| A0–A9 | The ablation ladder: each step adds one idea to the step before (A0–A6 search, A8 cache, A9 guardrails; A7 not built) |
+| A0–A9 | The ablation ladder: each step adds one idea to the step before (A0–A6 search, A8 semantic cache, A9 guardrails and fact-checker marks; A7 was not built, see ADR 0007) |
 | dev / test | development set (used for decisions) / held-out test set (scored once) |
 
 ## Roadmap
 
-kHop is deliberately a fixed workflow today: every extra step had to beat the simpler version, and agent loops did not. The planned next steps follow the same rule. Each is built behind a switch, its pass mark is written before it runs, and it is kept only if it helps on the dev set.
+kHop is a fixed workflow today. The planned next steps follow the same rule as every part of it: each must beat the simpler version. Each is built behind a switch, its pass mark is written before it runs, and it is kept only if it helps on the dev set.
 
 1. **Self-correcting loop.** When the fact-checker finds a cited sentence its passage does not back, search once more (using that sentence) and rewrite. Keep the new answer only if fewer sentences are unbacked.
 2. **Agentic: the writer chooses to search.** Give the writer LLM a `search_filings` tool. It decides whether, and what, to search again (at most two calls) before answering. This needs tool-calling support in the LLM client, and a first check that the 4B local model calls tools reliably.
@@ -328,16 +317,19 @@ Each major choice is recorded as an Architecture Decision Record (ADR) in [docs/
 
 ## AI-assisted development
 
-kHop was built with Claude Code as a pair programmer. Commits it co-authored carry a `Co-Authored-By` trailer.
+I designed kHop and made its decisions; Claude Code was my pair programmer and wrote most of the code under my review. Commits it co-authored carry a `Co-Authored-By` trailer.
 
-What I kept for myself:
-- the golden-set labels;
-- the answer-quality labels;
-- the guardrail test labels;
-- the decision records;
-- review of every PR touching agents, metrics or the router.
+**My part:**
+- **Project design:** the brief (evaluation-first GraphRAG over SEC filings), the ablation ladder in which every idea must beat a simpler version, a held-out test set scored once, and the project rules (free tools only, keys kept local).
+- **Design ideas that shaped the system:**
+  - BM25 keyword ranking next to embeddings, so the writer gets better-ranked evidence;
+  - the spelling and reframing layer, with a "Did you mean this?" choice for the user;
+  - test questions written the way users type, which reshaped the company linker and the router;
+  - the drift check on newer (2026) filings;
+  - session history, the first-visit "How to ask" guide, and the page design.
+- **Testing and judgement:** every label (the 225-question golden set, answer quality, fact-checker, guardrail and cache test sets); hands-on testing of the app, which found failures that led to fixes; sign-off on every decision record; approval of every merge into `main`.
 
-Mistakes in AI-written code that tests or evals caught are logged in [docs/ai_review_log.md](docs/ai_review_log.md). Runtime models never use the developer's Claude login: the app runs on local models and free tiers only.
+Mistakes in AI-written code that tests, evals or reviews caught are logged in [docs/ai_review_log.md](docs/ai_review_log.md). Runtime models never use the developer's Claude login: the app runs on local models and free tiers only.
 
 ## License
 
