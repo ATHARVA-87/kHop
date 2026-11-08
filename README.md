@@ -9,7 +9,7 @@ kHop answers questions over the 2025 SEC filings (10-K annual and 10-Q quarterly
 - a **writer** that drafts the cited answer (the only stage that calls an LLM; the others are rules or small models);
 - a **fact-checker** that marks any sentence its source does not back.
 
-The page streams every step live, so you can see how each answer was made. Agentic and multi-agent extensions are on the [roadmap](#roadmap).
+The page streams every step live, so you can see how each answer was made. Agentic and multi-agent-style extensions are on the [roadmap](#roadmap).
 
 It is also a measurement project. Every component was compared with a simpler version on a question set checked by hand, and kept only if it helped. A held-out test set was scored once, at the end. The ideas that lost are written up in [docs/failures.md](docs/failures.md).
 
@@ -270,7 +270,7 @@ Other useful commands:
 | RAG / GraphRAG | Retrieval-Augmented Generation / RAG that also follows a knowledge graph |
 | LLM | Large Language Model |
 | Stage | One step with one narrow job in the workflow (here: guard, router, retriever, writer, fact-checker) |
-| Agentic / multi-agent | An LLM that decides its own next action (e.g. whether to search again) / several such agents working together. kHop is neither yet; see the roadmap |
+| Agentic / multi-agent-style | An LLM that decides its own next action (e.g. whether to search again) / several specialised LLM roles handing work to each other in an order set by code. kHop is neither yet; see the roadmap |
 | LangGraph | A library that runs the stages as a fixed workflow over shared state |
 | ADR | Architecture Decision Record (one page per design choice, in `docs/adr/`) |
 | SEC / EDGAR | U.S. Securities and Exchange Commission / Electronic Data Gathering, Analysis, and Retrieval |
@@ -303,13 +303,13 @@ kHop is a fixed workflow today. The planned next steps follow the same rule as e
 
 1. **Self-correcting loop.** When the fact-checker finds a cited sentence its passage does not back, search once more (using that sentence) and rewrite. Keep the new answer only if fewer sentences are unbacked.
 2. **Agentic: the writer chooses to search.** Give the writer LLM a `search_filings` tool. It decides whether, and what, to search again (at most two calls) before answering. This needs tool-calling support in the LLM client, and a first check that the 4B local model calls tools reliably.
-3. **Multi-agent.** Split the work between LLM agents that hand off to each other in LangGraph:
+3. **Multi-agent-style workflow.** Split the work between specialised LLM roles on a fixed LangGraph graph. The code sets the order of the roles; each role decides only its own step:
    - a **planner** that breaks two-company questions into sub-questions;
-   - a **researcher** per company that searches with tools;
+   - a **researcher** per company that chooses which searches to run;
    - a **writer**;
-   - a **verifier** that can send the work back for another round.
+   - a **verifier** that can send the work back for one more round.
 
-   Each agent is added only if it beats the version before it.
+   Each role is added only if it beats the version before it.
 
 ## Design decisions
 
