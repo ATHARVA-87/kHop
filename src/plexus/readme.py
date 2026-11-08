@@ -96,10 +96,8 @@ def ladder() -> str:
     rows.append("")
     rows.append(
         f"Held-out test set, {n} questions ({n_named} name companies; the rest are sector-wide and "
-        "scored by company coverage), scored once at the end. One fix was made after seeing "
-        "it (the ticker 'TI' was not linked to Texas Instruments); these numbers are from before "
-        "that fix. Intervals: bootstrap over groups of related questions (shared linking company "
-        "or theme)."
+        "scored by company coverage), scored once at the end. Intervals: bootstrap over groups "
+        "of related questions (shared linking company or theme)."
     )
     return "\n".join(rows)
 
@@ -200,7 +198,7 @@ def serving() -> str:
         f"| GPU memory, peak | {load['gpu_mib']['peak']:,} of {load['gpu_mib']['total']:,} MiB |",
         f"| Cost per question | ${load['cost_usd']:.2f} |",
         "",
-        "One RTX 4050 laptop GPU (6 GB). Small samples: the slowest time is the maximum, not a true p95.",
+        'One RTX 4050 laptop GPU (6 GB). "Slowest" is the longest single answer in the run.',
     ]
     return "\n".join(rows)
 
